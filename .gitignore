@@ -8,8 +8,7 @@ out/
 # VSCode extension package
 *.vsix
 
-# IDE files
-.vscode/
+# IDE files (keep .vscode for development configs)
 .idea/
 
 # OS files
@@ -26,3 +25,6 @@ npm-debug.log*
 # Temporary files
 tmp/
 .tmp/
+
+# VSCode test folder
+.vscode-test/

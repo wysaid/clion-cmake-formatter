@@ -231,13 +231,16 @@ export class CMakeFormatter {
     private shouldHaveSpaceBeforeParen(commandName: string): boolean {
         const lowerName = commandName.toLowerCase();
         
-        if (lowerName === 'if' || lowerName === 'elseif') {
+        // if/elseif/else/endif all follow the same rule
+        if (lowerName === 'if' || lowerName === 'elseif' || lowerName === 'else' || lowerName === 'endif') {
             return this.options.spaceBeforeIfParentheses;
         }
-        if (lowerName === 'foreach') {
+        // foreach/endforeach follow the same rule
+        if (lowerName === 'foreach' || lowerName === 'endforeach') {
             return this.options.spaceBeforeForeachParentheses;
         }
-        if (lowerName === 'while') {
+        // while/endwhile follow the same rule
+        if (lowerName === 'while' || lowerName === 'endwhile') {
             return this.options.spaceBeforeWhileParentheses;
         }
         if (COMMAND_DEFINITION_COMMANDS.includes(lowerName)) {
@@ -252,13 +255,16 @@ export class CMakeFormatter {
     private shouldHaveSpaceInsideParen(commandName: string): boolean {
         const lowerName = commandName.toLowerCase();
         
-        if (lowerName === 'if' || lowerName === 'elseif') {
+        // if/elseif/else/endif all follow the same rule
+        if (lowerName === 'if' || lowerName === 'elseif' || lowerName === 'else' || lowerName === 'endif') {
             return this.options.spaceInsideIfParentheses;
         }
-        if (lowerName === 'foreach') {
+        // foreach/endforeach follow the same rule
+        if (lowerName === 'foreach' || lowerName === 'endforeach') {
             return this.options.spaceInsideForeachParentheses;
         }
-        if (lowerName === 'while') {
+        // while/endwhile follow the same rule
+        if (lowerName === 'while' || lowerName === 'endwhile') {
             return this.options.spaceInsideWhileParentheses;
         }
         if (COMMAND_DEFINITION_COMMANDS.includes(lowerName)) {

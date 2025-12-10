@@ -1,0 +1,32 @@
+# Source files (only dist is needed)
+src/**
+test/**
+resources/**
+
+# Exclude test dist files
+dist/test/**
+
+# Build files
+.eslintrc.json
+tsconfig.json
+
+# Git files
+.git/**
+.gitignore
+
+# Dependencies
+node_modules/**
+package-lock.json
+
+# IDE files
+.vscode/**
+.idea/**
+
+# Test artifacts
+coverage/**
+
+# Other
+*.vsix
+*.log
+.DS_Store
+Thumbs.db

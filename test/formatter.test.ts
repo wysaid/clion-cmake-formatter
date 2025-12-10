@@ -98,6 +98,19 @@ endif()`;
             assert.ok(messageLine);
             assert.ok(messageLine.startsWith('  message'));
         });
+
+        it('should use tabs when configured', () => {
+            const input = `if(TRUE)
+message("hello")
+endif()`;
+            const output = formatCMake(input, { useSpaces: false });
+            
+            // Should have a tab instead of 4 spaces
+            const lines = output.split('\n');
+            const messageLine = lines.find(l => l.includes('message'));
+            assert.ok(messageLine);
+            assert.ok(messageLine.startsWith('\tmessage'));
+        });
     });
 
     describe('Multi-line Formatting', () => {

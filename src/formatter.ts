@@ -150,7 +150,10 @@ export class CMakeFormatter {
         trailingComment?: string
     ): string {
         const lines: string[] = [];
-        const continuationIndent = indent + ' '.repeat(this.options.indentSize);
+        // Use the same character for continuation indent as the main indent
+        const indentChar = this.options.useSpaces ? ' ' : '\t';
+        const indentUnit = this.options.useSpaces ? this.options.indentSize : 1;
+        const continuationIndent = indent + indentChar.repeat(indentUnit);
         
         // Start with command name and opening paren
         let currentLine = `${indent}${name}(`;

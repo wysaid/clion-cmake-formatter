@@ -22,7 +22,7 @@
   "activationEvents": [
     "onLanguage:cmake"
   ],
-  "main": "./dist/extension.js",
+  "main": "./dist/src/extension.js",
   "contributes": {
     "languages": [
       {

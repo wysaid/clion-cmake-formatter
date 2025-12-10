@@ -13,6 +13,10 @@ tsconfig.json
 # Git files
 .git/**
 .gitignore
+.gitattributes
+
+# GitHub workflows (not needed in extension)
+.github/**
 
 # Dependencies
 node_modules/**

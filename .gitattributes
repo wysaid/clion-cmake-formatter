@@ -1,0 +1,15 @@
+# Line ending normalization
+* text=auto
+
+# TypeScript and JavaScript files should use LF
+*.ts   text eol=lf
+*.js   text eol=lf
+*.json text eol=lf
+*.md   text eol=lf
+
+# Shell scripts should use LF
+*.sh   text eol=lf
+
+# Batch files should use CRLF
+*.bat  text eol=crlf
+*.cmd  text eol=crlf

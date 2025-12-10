@@ -124,10 +124,19 @@ npm run package
 
 ```
 clion-cmake-formatter/
+├── .vscode/               # VSCode development configuration
+│   ├── launch.json        # Debug launch configurations
+│   ├── tasks.json         # Build tasks
+│   ├── settings.json      # Workspace settings
+│   └── extensions.json    # Recommended extensions
+├── .github/
+│   └── workflows/         # GitHub Actions CI/CD
+│       ├── ci.yml         # Continuous integration
+│       └── release.yml    # Release automation
 ├── src/
-│   ├── parser.ts      # CMake tokenizer and AST builder
-│   ├── formatter.ts   # Formatting logic
-│   └── extension.ts   # VSCode integration
+│   ├── parser.ts          # CMake tokenizer and AST builder
+│   ├── formatter.ts       # Formatting logic
+│   └── extension.ts       # VSCode integration
 ├── test/
 │   ├── parser.test.ts
 │   └── formatter.test.ts
@@ -137,6 +146,16 @@ clion-cmake-formatter/
 ├── tsconfig.json
 └── README.md
 ```
+
+### Debugging the Extension
+
+1. Open this project in VSCode
+2. Press `F5` or go to "Run and Debug" (Ctrl+Shift+D)
+3. Select "Launch Extension" from the dropdown
+4. A new VSCode window will open with the extension loaded
+5. Open a `CMakeLists.txt` file and test the formatter
+
+For continuous development, use "Launch Extension (Watch Mode)" after running `npm run watch` in a terminal.
 
 ## Formatting Rules
 
@@ -161,3 +180,15 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for version history.
+
+## Acknowledgments
+
+This project's VSCode extension structure and development configuration is inspired by [ege-vscode-plugin](https://github.com/x-ege/ege-vscode-plugin). We thank the ege-vscode-plugin authors for their excellent example of VSCode extension development practices, including:
+
+- Debug launch configurations
+- GitHub Actions CI/CD workflows
+- Project structure and build setup
+
+## Related Projects
+
+- [ege-vscode-plugin](https://github.com/x-ege/ege-vscode-plugin) - Auto configuration for EGE graphics library

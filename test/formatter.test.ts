@@ -86,8 +86,8 @@ endif()`;
             const lines = output.split('\n');
             const ifLine = lines.find(l => l.includes('if') && l.includes('WIN32'));
             const elseifLine = lines.find(l => l.includes('elseif'));
-            const elseLine = lines.find(l => l.includes('else()'));
-            const endifLine = lines.find(l => l.includes('endif()'));
+            const elseLine = lines.find(l => l.includes('else'));
+            const endifLine = lines.find(l => l.includes('endif'));
             
             // All control statements should be at the same indentation (no leading spaces)
             assert.ok(ifLine && !ifLine.startsWith(' '));
@@ -247,9 +247,10 @@ message("\${item}")
 endforeach()`;
             const output = formatCMake(input);
             
-            assert.ok(output.includes('foreach('));
+            // Default has space before parentheses for foreach
+            assert.ok(output.includes('foreach ('));
             assert.ok(output.includes('    message'));
-            assert.ok(output.includes('endforeach()'));
+            assert.ok(output.includes('endforeach ()'));
         });
 
         it('should format while blocks', () => {
@@ -258,9 +259,10 @@ do_something()
 endwhile()`;
             const output = formatCMake(input);
             
-            assert.ok(output.includes('while('));
+            // Default has space before parentheses for while
+            assert.ok(output.includes('while ('));
             assert.ok(output.includes('    do_something'));
-            assert.ok(output.includes('endwhile()'));
+            assert.ok(output.includes('endwhile ()'));
         });
     });
 
@@ -326,5 +328,91 @@ ENDIF()`;
         
         // Comments should be preserved
         assert.ok(output.includes('# Source files'));
+    });
+});
+
+describe('Spacing Consistency Tests', () => {
+    it('should have consistent spacing between if and endif', () => {
+        const input = `if(WIN32)
+    message("test")
+endif()`;
+        const output = formatCMake(input);
+        
+        // Both if and endif should have space before parentheses by default
+        assert.ok(output.includes('if ('));
+        assert.ok(output.includes('endif ()'));
+    });
+
+    it('should have consistent spacing between foreach and endforeach', () => {
+        const input = `foreach(item a b c)
+    message(\${item})
+endforeach()`;
+        const output = formatCMake(input);
+        
+        // Both foreach and endforeach should have space before parentheses by default
+        assert.ok(output.includes('foreach ('));
+        assert.ok(output.includes('endforeach ()'));
+    });
+
+    it('should have consistent spacing between while and endwhile', () => {
+        const input = `while(cond)
+    do_something()
+endwhile()`;
+        const output = formatCMake(input);
+        
+        // Both while and endwhile should have space before parentheses by default
+        assert.ok(output.includes('while ('));
+        assert.ok(output.includes('endwhile ()'));
+    });
+
+    it('should not add space when spaceBeforeIfParentheses is false', () => {
+        const input = `if(WIN32)
+    message("test")
+endif()`;
+        const output = formatCMake(input, { spaceBeforeIfParentheses: false });
+        
+        // Both if and endif should NOT have space
+        assert.ok(output.includes('if('));
+        assert.ok(output.includes('endif()'));
+    });
+});
+
+describe('Line Length Tests', () => {
+    it('should not wrap single-line command when lineLength is very large', () => {
+        const input = 'set(SOURCES a b c d e f g h i j k l m n o p q r s t u v w x y z)';
+        const output = formatCMake(input, { lineLength: 1000 });
+        
+        // Should remain single line (only trailing newline)
+        const lines = output.split('\n').filter(l => l.length > 0);
+        assert.strictEqual(lines.length, 1);
+    });
+
+    it('should keep single-line command on single line when within lineLength', () => {
+        const input = 'set(MY_VAR value1 value2 value3)';
+        const output = formatCMake(input, { lineLength: 120 });
+        
+        // Should remain single line
+        const lines = output.split('\n').filter(l => l.length > 0);
+        assert.strictEqual(lines.length, 1);
+    });
+
+    it('should preserve multi-line format even when lineLength is very large', () => {
+        const input = `set(MY_VAR 
+    value1 
+    value2)`;
+        const output = formatCMake(input, { lineLength: 1000 });
+        
+        // Should remain multi-line
+        const lines = output.split('\n').filter(l => l.length > 0);
+        assert.ok(lines.length > 1, 'Multi-line input should produce multi-line output');
+    });
+
+    it('should preserve single-line format when input is single line', () => {
+        const input = 'target_link_libraries(myapp lib1 lib2 lib3)';
+        const output = formatCMake(input, { lineLength: 200 });
+        
+        // Should remain single line
+        const lines = output.split('\n').filter(l => l.length > 0);
+        assert.strictEqual(lines.length, 1);
     });
 });

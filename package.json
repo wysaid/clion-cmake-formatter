@@ -1,0 +1,90 @@
+{
+  "name": "clion-cmake-formatter",
+  "displayName": "CLion CMake Formatter",
+  "description": "Format CMakeLists.txt files with CLion's indentation and spacing style",
+  "version": "0.1.0",
+  "publisher": "wysaid",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.50.0"
+  },
+  "categories": [
+    "Formatters",
+    "Programming Languages"
+  ],
+  "keywords": [
+    "cmake",
+    "clion",
+    "format",
+    "jetbrains",
+    "formatter"
+  ],
+  "activationEvents": [
+    "onLanguage:cmake"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "cmake",
+        "extensions": [
+          ".cmake"
+        ],
+        "filenames": [
+          "CMakeLists.txt"
+        ]
+      }
+    ],
+    "configuration": {
+      "title": "CLion CMake Formatter",
+      "properties": {
+        "clionCMakeFormatter.lineLength": {
+          "type": "number",
+          "default": 120,
+          "description": "Maximum line length for formatted CMake files"
+        },
+        "clionCMakeFormatter.indentSize": {
+          "type": "number",
+          "default": 4,
+          "description": "Number of spaces for indentation"
+        },
+        "clionCMakeFormatter.useSpaces": {
+          "type": "boolean",
+          "default": true,
+          "description": "Use spaces for indentation (true) or tabs (false)"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts",
+    "pretest": "npm run compile && npm run lint",
+    "test": "node ./dist/test/runTest.js",
+    "test:unit": "mocha --require ts-node/register 'test/**/*.test.ts'",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.50.0",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0",
+    "@vscode/test-electron": "^2.3.8",
+    "@vscode/vsce": "^2.22.0",
+    "eslint": "^8.56.0",
+    "mocha": "^10.2.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wysaid/clion-cmake-formatter"
+  },
+  "bugs": {
+    "url": "https://github.com/wysaid/clion-cmake-formatter/issues"
+  },
+  "homepage": "https://github.com/wysaid/clion-cmake-formatter#readme"
+}

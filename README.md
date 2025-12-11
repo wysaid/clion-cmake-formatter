@@ -1,19 +1,21 @@
 # CLion CMake Formatter
 
-A VSCode extension that formats CMakeLists.txt files with JetBrains CLion's indentation, spacing, and alignment style. **Zero external dependencies** - no Python, cmake-format, or gersemi required.
+A professional VSCode extension that formats CMake files (CMakeLists.txt and .cmake) using JetBrains CLion's formatting conventions. **Zero external dependencies** - no Python, cmake-format, or gersemi required.
 
 English | [简体中文](README.zh-CN.md)
 
 ## Features
 
-- **CLion-compatible formatting**: Matches JetBrains CLion's formatting rules
-- **Lowercase commands**: Automatically converts command names to lowercase (`PROJECT` → `project`)
-- **Smart indentation**: 4 spaces per level (configurable)
-- **Multi-line support**: Intelligently breaks long argument lists
-- **Block formatting**: Proper indentation for `if/endif`, `function/endfunction`, `macro/endmacro`, `foreach/endforeach`, `while/endwhile`
-- **Comment preservation**: Keeps your comments in place
-- **Format on save**: Works with VSCode's built-in format-on-save feature
-- **No external dependencies**: Pure TypeScript implementation
+- **CLion-compatible formatting**: Precisely replicates JetBrains CLion's CMake formatting behavior
+- **Configurable command case**: Support for lowercase, uppercase, or unchanged command names
+- **Smart indentation**: Configurable indentation with proper nesting for control structures
+- **Intelligent line breaking**: Automatically wraps long argument lists with proper continuation indentation
+- **Block structure support**: Correct indentation for `if/endif`, `function/endfunction`, `macro/endmacro`, `foreach/endforeach`, `while/endwhile` blocks
+- **Comment preservation**: Maintains inline and trailing comments in their original positions
+- **Flexible spacing**: Extensive options for spacing before and inside parentheses
+- **Multi-line alignment**: Optional alignment for multi-line command arguments
+- **Format on save**: Seamless integration with VSCode's format-on-save feature
+- **Pure TypeScript**: No external dependencies, fast and reliable
 
 ## Installation
 
@@ -54,55 +56,63 @@ Add to your VSCode settings (`settings.json`):
 
 ## Configuration
 
-### Basic Settings
+This extension supports all major CLion CMake formatting options. Configure via VSCode settings (File → Preferences → Settings or `settings.json`).
 
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `clionCMakeFormatter.useTabs` | `false` | Use tabs for indentation instead of spaces |
-| `clionCMakeFormatter.tabSize` | `4` | Number of spaces equivalent to one tab |
-| `clionCMakeFormatter.indentSize` | `4` | Number of spaces for indentation |
-| `clionCMakeFormatter.continuationIndentSize` | `4` | Number of spaces for continuation indent |
-| `clionCMakeFormatter.keepIndentOnEmptyLines` | `false` | Keep indent on empty lines |
-| `clionCMakeFormatter.lineLength` | `120` | Maximum line length |
-| `clionCMakeFormatter.commandCase` | `"unchanged"` | Force command case: `"unchanged"`, `"lowercase"`, or `"uppercase"` |
-| `clionCMakeFormatter.maxBlankLines` | `2` | Maximum consecutive blank lines |
+### Tab and Indentation
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `clionCMakeFormatter.useTabs` | boolean | `false` | Use tabs instead of spaces for indentation |
+| `clionCMakeFormatter.tabSize` | number | `4` | Number of spaces per tab character |
+| `clionCMakeFormatter.indentSize` | number | `4` | Number of spaces per indentation level |
+| `clionCMakeFormatter.continuationIndentSize` | number | `4` | Additional indentation for continued lines in multi-line commands |
+| `clionCMakeFormatter.keepIndentOnEmptyLines` | boolean | `false` | Preserve indentation on empty lines |
 
 ### Spacing Before Parentheses
 
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `clionCMakeFormatter.spaceBeforeCommandDefinitionParentheses` | `false` | Space before `function`/`macro` parentheses |
-| `clionCMakeFormatter.spaceBeforeCommandCallParentheses` | `false` | Space before command call parentheses |
-| `clionCMakeFormatter.spaceBeforeIfParentheses` | `true` | Space before `if` parentheses |
-| `clionCMakeFormatter.spaceBeforeForeachParentheses` | `true` | Space before `foreach` parentheses |
-| `clionCMakeFormatter.spaceBeforeWhileParentheses` | `true` | Space before `while` parentheses |
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `clionCMakeFormatter.spaceBeforeCommandDefinitionParentheses` | boolean | `false` | Add space before parentheses in `function` and `macro` definitions |
+| `clionCMakeFormatter.spaceBeforeCommandCallParentheses` | boolean | `false` | Add space before parentheses in regular command calls |
+| `clionCMakeFormatter.spaceBeforeIfParentheses` | boolean | `true` | Add space before parentheses in `if` statements |
+| `clionCMakeFormatter.spaceBeforeForeachParentheses` | boolean | `true` | Add space before parentheses in `foreach` loops |
+| `clionCMakeFormatter.spaceBeforeWhileParentheses` | boolean | `true` | Add space before parentheses in `while` loops |
 
 ### Spacing Inside Parentheses
 
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `clionCMakeFormatter.spaceInsideCommandDefinitionParentheses` | `false` | Space inside `function`/`macro` parentheses |
-| `clionCMakeFormatter.spaceInsideCommandCallParentheses` | `false` | Space inside command call parentheses |
-| `clionCMakeFormatter.spaceInsideIfParentheses` | `false` | Space inside `if` parentheses |
-| `clionCMakeFormatter.spaceInsideForeachParentheses` | `false` | Space inside `foreach` parentheses |
-| `clionCMakeFormatter.spaceInsideWhileParentheses` | `false` | Space inside `while` parentheses |
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `clionCMakeFormatter.spaceInsideCommandDefinitionParentheses` | boolean | `false` | Add space inside parentheses in `function` and `macro` definitions |
+| `clionCMakeFormatter.spaceInsideCommandCallParentheses` | boolean | `false` | Add space inside parentheses in regular command calls |
+| `clionCMakeFormatter.spaceInsideIfParentheses` | boolean | `false` | Add space inside parentheses in `if` statements |
+| `clionCMakeFormatter.spaceInsideForeachParentheses` | boolean | `false` | Add space inside parentheses in `foreach` loops |
+| `clionCMakeFormatter.spaceInsideWhileParentheses` | boolean | `false` | Add space inside parentheses in `while` loops |
 
-### Alignment (Multi-line)
+### Line Wrapping and Alignment
 
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `clionCMakeFormatter.alignMultiLineArguments` | `false` | Align arguments when multi-line |
-| `clionCMakeFormatter.alignMultiLineParentheses` | `false` | Align parentheses when multi-line |
-| `clionCMakeFormatter.alignControlFlowParentheses` | `false` | Align control flow parentheses when multi-line |
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `clionCMakeFormatter.lineLength` | number | `120` | Maximum line length before wrapping |
+| `clionCMakeFormatter.alignMultiLineArguments` | boolean | `false` | Align arguments vertically in multi-line commands |
+| `clionCMakeFormatter.alignMultiLineParentheses` | boolean | `false` | Align closing parenthesis with opening line in multi-line commands |
+| `clionCMakeFormatter.alignControlFlowParentheses` | boolean | `false` | Align control flow statement parentheses in multi-line format |
 
-Example `settings.json`:
+### Other Options
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `clionCMakeFormatter.commandCase` | string | `"unchanged"` | Command name case transformation: `"unchanged"`, `"lowercase"`, or `"uppercase"` |
+| `clionCMakeFormatter.maxBlankLines` | number | `2` | Maximum number of consecutive blank lines to preserve |
+
+### Configuration Example
 
 ```json
 {
   "clionCMakeFormatter.commandCase": "lowercase",
   "clionCMakeFormatter.indentSize": 4,
-  "clionCMakeFormatter.spaceBeforeIfParentheses": false,
-  "clionCMakeFormatter.lineLength": 100
+  "clionCMakeFormatter.spaceBeforeIfParentheses": true,
+  "clionCMakeFormatter.lineLength": 100,
+  "clionCMakeFormatter.alignMultiLineArguments": false
 }
 ```
 
@@ -200,16 +210,17 @@ For continuous development, use "Launch Extension (Watch Mode)" after running `n
 
 ## Formatting Rules
 
-This extension implements the following CLion-compatible formatting rules:
+This extension implements CLion's CMake formatting rules:
 
-1. **Command case**: Configurable (unchanged/lowercase/uppercase, default: unchanged)
-2. **Indentation**: 4 spaces per block level (configurable)
-3. **Line length**: 120 characters max (configurable), with intelligent line breaking
-4. **Block indentation**: Contents of `if`, `function`, `macro`, `foreach`, `while` blocks are indented
-5. **Multi-line preservation**: Already multi-line commands stay multi-line with one argument per line
-6. **Argument formatting**: Single space between arguments, no trailing spaces
-7. **Comment preservation**: Inline comments and trailing comments are preserved
-8. **Blank lines**: Preserved between logical sections (limited by maxBlankLines setting)
+1. **Command case transformation**: Configurable case conversion (unchanged/lowercase/uppercase)
+2. **Consistent indentation**: Configurable spaces or tabs per indentation level
+3. **Smart line wrapping**: Automatically breaks lines exceeding the maximum length
+4. **Block structure**: Proper indentation for control flow and function definition blocks
+5. **Multi-line preservation**: Commands already split across multiple lines maintain their structure
+6. **Argument spacing**: Single space between arguments, no trailing whitespace
+7. **Comment handling**: Preserves standalone, inline, and trailing comments
+8. **Blank line management**: Limits consecutive blank lines while preserving logical grouping
+9. **Parenthesis spacing**: Configurable spacing before and inside parentheses for different command types
 
 ## License
 

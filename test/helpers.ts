@@ -116,14 +116,14 @@ export function listDatasets(category: string, subcategory: string | null = null
 }
 
 /**
- * Get the path to the well-formated directory
+ * Get the path to the well-formatted directory (well-formated)
  */
 export function getWellFormatedPath(): string {
     return path.join(__dirname, 'datasets', 'well-formated');
 }
 
 /**
- * List all subdirectories in the well-formated category
+ * List all subdirectories in the well-formatted category (well-formated)
  * Each subdirectory represents a different format style
  */
 export function listWellFormatedStyles(): string[] {
@@ -140,7 +140,7 @@ export function listWellFormatedStyles(): string[] {
 }
 
 /**
- * List all cmake files in a well-formated style directory
+ * List all cmake files in a well-formatted style directory
  * @param style - The style directory name (e.g., 'default')
  */
 export function listWellFormatedFiles(style: string): string[] {
@@ -155,7 +155,7 @@ export function listWellFormatedFiles(style: string): string[] {
 }
 
 /**
- * Load a well-formated cmake file
+ * Load a well-formatted cmake file
  * @param style - The style directory name (e.g., 'default')
  * @param filename - The cmake filename
  */
@@ -167,12 +167,12 @@ export function loadWellFormated(style: string, filename: string): string {
     try {
         return fs.readFileSync(filePath, 'utf-8');
     } catch (error) {
-        throw new Error(`Failed to load well-formated file: ${filePath}\n${error}`);
+        throw new Error(`Failed to load well-formatted file: ${filePath}\n${error}`);
     }
 }
 
 /**
- * Load the .cc-format.jsonc config file for a well-formated style
+ * Load the .cc-format.jsonc config file for a well-formatted style
  * @param style - The style directory name (e.g., 'default')
  */
 export function loadWellFormatedConfig(style: string): string {

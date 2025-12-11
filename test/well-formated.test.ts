@@ -1,5 +1,5 @@
 /**
- * Unit tests for well-formated CMake files
+ * Unit tests for well-formatted CMake files (well-formated directory)
  *
  * These tests verify that files which are already well-formatted
  * remain unchanged after formatting with their respective style configuration.
@@ -15,7 +15,7 @@ import {
     loadWellFormatedConfig
 } from './helpers';
 
-describe('Well-Formated CMake Files', () => {
+describe('Well-Formatted CMake Files', () => {
     const styles = listWellFormatedStyles();
 
     styles.forEach(style => {

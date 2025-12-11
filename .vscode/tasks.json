@@ -47,7 +47,7 @@
             "script": "test:unit",
             "problemMatcher": [],
             "group": {
-                "kind": "test",
+                "kind": "test"
             },
             "presentation": {
                 "reveal": "always",

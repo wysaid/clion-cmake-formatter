@@ -9,8 +9,7 @@
             "script": "compile",
             "problemMatcher": "$tsc",
             "group": {
-                "kind": "build",
-                "isDefault": true
+                "kind": "build"
             },
             "presentation": {
                 "reveal": "silent",
@@ -33,7 +32,9 @@
             "label": "npm: lint",
             "type": "npm",
             "script": "lint",
-            "problemMatcher": ["$eslint-stylish"],
+            "problemMatcher": [
+                "$eslint-stylish"
+            ],
             "group": "test",
             "presentation": {
                 "reveal": "silent",
@@ -46,8 +47,7 @@
             "script": "test:unit",
             "problemMatcher": [],
             "group": {
-                "kind": "test",
-                "isDefault": true
+                "kind": "test"
             },
             "presentation": {
                 "reveal": "always",

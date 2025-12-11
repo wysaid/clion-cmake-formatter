@@ -3,7 +3,7 @@
  */
 
 import * as assert from 'assert';
-import { formatCMake, CMakeFormatter } from '../src/formatter';
+import { formatCMake } from '../src/formatter';
 import {
     loadBasic,
     loadFormatting,

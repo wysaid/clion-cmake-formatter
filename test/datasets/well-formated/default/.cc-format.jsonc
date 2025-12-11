@@ -1,0 +1,30 @@
+// https://github.com/wysaid/clion-cmake-formatter
+{
+    // Tab and Indentation
+    "useTabs": false,
+    "tabSize": 4,
+    "indentSize": 4,
+    "continuationIndentSize": 4,
+    "keepIndentOnEmptyLines": false,
+    // Spacing Before Parentheses
+    "spaceBeforeCommandDefinitionParentheses": false,
+    "spaceBeforeCommandCallParentheses": false,
+    "spaceBeforeIfParentheses": true,
+    "spaceBeforeForeachParentheses": true,
+    "spaceBeforeWhileParentheses": true,
+    // Spacing Inside Parentheses
+    "spaceInsideCommandDefinitionParentheses": false,
+    "spaceInsideCommandCallParentheses": false,
+    "spaceInsideIfParentheses": false,
+    "spaceInsideForeachParentheses": false,
+    "spaceInsideWhileParentheses": false,
+    // Blank Lines
+    "maxBlankLines": 2,
+    // Command Case: "unchanged", "lowercase", or "uppercase"
+    "commandCase": "unchanged",
+    // Line Wrapping and Alignment
+    "lineLength": 0,
+    "alignMultiLineArguments": false,
+    "alignMultiLineParentheses": false,
+    "alignControlFlowParentheses": false
+}

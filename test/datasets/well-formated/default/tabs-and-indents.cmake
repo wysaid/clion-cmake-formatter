@@ -11,6 +11,12 @@ function(f1)
     endif ()
 endfunction()
 
-foo_function(
+
+foo_function0(
     "arg1"
     "arg2")
+
+foo_function1(
+    "arg1"
+    "arg2"
+)

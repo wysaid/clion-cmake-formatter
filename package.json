@@ -17,7 +17,8 @@
         "clion",
         "format",
         "jetbrains",
-        "formatter"
+        "formatter",
+        "cc-format"
     ],
     "activationEvents": [
         "onLanguage:cmake"
@@ -33,6 +34,15 @@
                 "filenames": [
                     "CMakeLists.txt"
                 ]
+            }
+        ],
+        "jsonValidation": [
+            {
+                "fileMatch": [
+                    ".cc-format.jsonc",
+                    ".cc-format"
+                ],
+                "url": "./resources/cc-format.schema.json"
             }
         ],
         "commands": [

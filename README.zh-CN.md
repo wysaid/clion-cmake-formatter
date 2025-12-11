@@ -1,6 +1,8 @@
-# CLion CMake 格式化工具
+# CLion CMake 格式化工具 (cc-format)
 
 一个专业的 VSCode 扩展，使用 JetBrains CLion 的格式化规范来格式化 CMake 文件（CMakeLists.txt 和 .cmake）。**零外部依赖** - 无需 Python、cmake-format 或 gersemi。
+
+> **项目代号**: `cc-format` (CLion CMake Format)
 
 [English](README.md) | 简体中文
 
@@ -15,6 +17,8 @@
 - **灵活的空格设置**: 提供丰富的括号前后空格选项
 - **多行对齐**: 可选的多行命令参数对齐功能
 - **保存时格式化**: 与 VSCode 的保存时格式化功能无缝集成
+- **项目级配置**: 支持 `.cc-format.jsonc` 配置文件
+- **配置文件缓存**: 通过自动文件监听优化性能
 - **纯 TypeScript 实现**: 无外部依赖，快速可靠
 
 ## 安装
@@ -56,7 +60,70 @@
 
 ## 配置选项
 
-本扩展支持所有主要的 CLion CMake 格式化选项。可通过 VSCode 设置进行配置（文件 → 首选项 → 设置 或 `settings.json`）。
+本扩展支持所有主要的 CLion CMake 格式化选项。配置可通过以下方式设置：
+
+1. **VSCode 设置**: 在 `settings.json` 中的全局或工作区设置
+2. **项目配置文件**: 项目中的 `.cc-format.jsonc` 或 `.cc-format` 文件
+
+### 项目配置文件 (`.cc-format.jsonc`)
+
+对于项目特定的设置，可在项目根目录创建 `.cc-format.jsonc` 文件。该文件：
+
+- 使用 JSONC 格式（支持注释的 JSON）
+- 第一行必须是项目 URL 注释
+- 会覆盖该目录及子目录中文件的 VSCode 设置
+- 支持与 VSCode 设置相同的所有选项
+- 自动监视文件变化（无需重启）
+
+**`.cc-format.jsonc` 示例：**
+
+```jsonc
+// https://github.com/wysaid/clion-cmake-formatter
+{
+    // 制表符和缩进
+    "useTabs": false,
+    "tabSize": 4,
+    "indentSize": 4,
+    "continuationIndentSize": 4,
+    "keepIndentOnEmptyLines": false,
+
+    // 括号前空格
+    "spaceBeforeCommandDefinitionParentheses": false,
+    "spaceBeforeCommandCallParentheses": false,
+    "spaceBeforeIfParentheses": true,
+    "spaceBeforeForeachParentheses": true,
+    "spaceBeforeWhileParentheses": true,
+
+    // 括号内空格
+    "spaceInsideCommandDefinitionParentheses": false,
+    "spaceInsideCommandCallParentheses": false,
+    "spaceInsideIfParentheses": false,
+    "spaceInsideForeachParentheses": false,
+    "spaceInsideWhileParentheses": false,
+
+    // 空行
+    "maxBlankLines": 2,
+
+    // 命令大小写: "unchanged"（不变）、"lowercase"（小写）或 "uppercase"（大写）
+    "commandCase": "lowercase",
+
+    // 换行和对齐
+    "lineLength": 120,
+    "alignMultiLineArguments": false,
+    "alignMultiLineParentheses": false,
+    "alignControlFlowParentheses": false
+}
+```
+
+扩展会自动从文档所在目录开始向上搜索配置文件，直到工作区根目录。找到的第一个匹配文件将被使用。
+
+**配置文件名（按优先级排序）：**
+1. `.cc-format.jsonc`
+2. `.cc-format`
+
+### VSCode 设置
+
+可通过 VSCode 设置进行配置（文件 → 首选项 → 设置 或 `settings.json`）。
 
 ### 制表符和缩进
 
@@ -184,12 +251,15 @@ clion-cmake-formatter/
 ├── src/
 │   ├── parser.ts          # CMake 分词器和 AST 构建器
 │   ├── formatter.ts       # 格式化逻辑
+│   ├── config.ts          # 配置文件支持
 │   └── extension.ts       # VSCode 集成
 ├── test/
-│   ├── parser.test.ts
-│   └── formatter.test.ts
+│   ├── parser.test.ts     # 解析器测试
+│   ├── formatter.test.ts  # 格式化测试
+│   └── config.test.ts     # 配置测试
 ├── resources/
-│   └── sample-input.cmake
+│   ├── sample-input.cmake
+│   └── cc-format.schema.json  # .cc-format.jsonc 的 JSON Schema
 ├── package.json
 ├── package.nls.json       # 英文语言包（默认）
 ├── package.nls.zh-cn.json # 中文语言包

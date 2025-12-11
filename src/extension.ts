@@ -1,11 +1,13 @@
 /**
- * VSCode Extension - CLion CMake Formatter
+ * VSCode Extension - CLion CMake Formatter (cc-format)
  *
  * Provides document formatting for CMake files using CLion's formatting style.
+ * Supports project-level configuration via .cc-format.jsonc files.
  */
 
 import * as vscode from 'vscode';
 import { formatCMake, FormatterOptions, CommandCase } from './formatter';
+import { getConfigForDocument, clearConfigCache } from './config';
 
 // Track which validation warnings have been shown to avoid repetition
 const shownWarnings = new Set<string>();
@@ -86,7 +88,7 @@ function validateLineLength(value: number): number {
 /**
  * Read formatter options from VSCode configuration
  */
-function getFormatterOptions(): Partial<FormatterOptions> {
+function getVSCodeOptions(): Partial<FormatterOptions> {
     const config = vscode.workspace.getConfiguration('clionCMakeFormatter');
 
     return {
@@ -126,6 +128,23 @@ function getFormatterOptions(): Partial<FormatterOptions> {
 }
 
 /**
+ * Get formatter options for a document, merging VS Code settings with project config
+ */
+function getFormatterOptions(document: vscode.TextDocument): Partial<FormatterOptions> {
+    const vscodeOptions = getVSCodeOptions();
+
+    // Get workspace root for the document
+    const workspaceFolder = vscode.workspace.getWorkspaceFolder(document.uri);
+    const workspaceRoot = workspaceFolder?.uri.fsPath;
+
+    // Get document file path
+    const documentPath = document.uri.fsPath;
+
+    // Merge VS Code settings with project configuration file
+    return getConfigForDocument(documentPath, workspaceRoot, vscodeOptions);
+}
+
+/**
  * Document Formatting Provider for CMake files
  */
 class CMakeFormattingProvider implements vscode.DocumentFormattingEditProvider {
@@ -136,7 +155,7 @@ class CMakeFormattingProvider implements vscode.DocumentFormattingEditProvider {
     ): vscode.ProviderResult<vscode.TextEdit[]> {
         try {
             const source = document.getText();
-            const options = getFormatterOptions();
+            const options = getFormatterOptions(document);
             const formatted = formatCMake(source, options);
 
             // Create a text edit that replaces the entire document
@@ -168,7 +187,7 @@ class CMakeRangeFormattingProvider implements vscode.DocumentRangeFormattingEdit
             // For range formatting, we still format the whole document
             // because CMake formatting needs context (indentation levels, etc.)
             const source = document.getText();
-            const options = getFormatterOptions();
+            const options = getFormatterOptions(document);
             const formatted = formatCMake(source, options);
 
             // Create a text edit that replaces the entire document
@@ -237,5 +256,6 @@ export function activate(context: vscode.ExtensionContext): void {
  * Deactivate the extension
  */
 export function deactivate(): void {
-    // Nothing to clean up
+    // Clear config cache and stop file watchers
+    clearConfigCache();
 }

@@ -1,6 +1,8 @@
-# CLion CMake Formatter
+# CLion CMake Formatter (cc-format)
 
 A professional VSCode extension that formats CMake files (CMakeLists.txt and .cmake) using JetBrains CLion's formatting conventions. **Zero external dependencies** - no Python, cmake-format, or gersemi required.
+
+> **Project Codename**: `cc-format` (CLion CMake Format)
 
 English | [简体中文](README.zh-CN.md)
 
@@ -15,6 +17,8 @@ English | [简体中文](README.zh-CN.md)
 - **Flexible spacing**: Extensive options for spacing before and inside parentheses
 - **Multi-line alignment**: Optional alignment for multi-line command arguments
 - **Format on save**: Seamless integration with VSCode's format-on-save feature
+- **Project-level configuration**: Support for `.cc-format.jsonc` configuration files
+- **Configuration file caching**: Optimized performance with automatic file watching
 - **Pure TypeScript**: No external dependencies, fast and reliable
 
 ## Installation
@@ -56,7 +60,70 @@ Add to your VSCode settings (`settings.json`):
 
 ## Configuration
 
-This extension supports all major CLion CMake formatting options. Configure via VSCode settings (File → Preferences → Settings or `settings.json`).
+This extension supports all major CLion CMake formatting options. Configuration can be set via:
+
+1. **VSCode Settings**: Global or workspace settings in `settings.json`
+2. **Project Configuration File**: `.cc-format.jsonc` or `.cc-format` file in your project
+
+### Project Configuration File (`.cc-format.jsonc`)
+
+For project-specific settings, create a `.cc-format.jsonc` file in your project root. This file:
+
+- Uses JSONC format (JSON with comments)
+- Must have the project URL as the first line comment
+- Overrides VSCode settings for files in that directory and subdirectories
+- Supports all the same options as VSCode settings
+- Is automatically watched for changes (no restart required)
+
+**Example `.cc-format.jsonc`:**
+
+```jsonc
+// https://github.com/wysaid/clion-cmake-formatter
+{
+    // Tab and Indentation
+    "useTabs": false,
+    "tabSize": 4,
+    "indentSize": 4,
+    "continuationIndentSize": 4,
+    "keepIndentOnEmptyLines": false,
+
+    // Spacing Before Parentheses
+    "spaceBeforeCommandDefinitionParentheses": false,
+    "spaceBeforeCommandCallParentheses": false,
+    "spaceBeforeIfParentheses": true,
+    "spaceBeforeForeachParentheses": true,
+    "spaceBeforeWhileParentheses": true,
+
+    // Spacing Inside Parentheses
+    "spaceInsideCommandDefinitionParentheses": false,
+    "spaceInsideCommandCallParentheses": false,
+    "spaceInsideIfParentheses": false,
+    "spaceInsideForeachParentheses": false,
+    "spaceInsideWhileParentheses": false,
+
+    // Blank Lines
+    "maxBlankLines": 2,
+
+    // Command Case: "unchanged", "lowercase", or "uppercase"
+    "commandCase": "lowercase",
+
+    // Line Wrapping and Alignment
+    "lineLength": 120,
+    "alignMultiLineArguments": false,
+    "alignMultiLineParentheses": false,
+    "alignControlFlowParentheses": false
+}
+```
+
+The extension will automatically search for configuration files starting from the document's directory up to the workspace root. The first matching file found will be used.
+
+**Configuration File Names (in order of priority):**
+1. `.cc-format.jsonc`
+2. `.cc-format`
+
+### VSCode Settings
+
+Configure via VSCode settings (File → Preferences → Settings or `settings.json`).
 
 ### Tab and Indentation
 
@@ -184,12 +251,15 @@ clion-cmake-formatter/
 ├── src/
 │   ├── parser.ts          # CMake tokenizer and AST builder
 │   ├── formatter.ts       # Formatting logic
+│   ├── config.ts          # Configuration file support
 │   └── extension.ts       # VSCode integration
 ├── test/
-│   ├── parser.test.ts
-│   └── formatter.test.ts
+│   ├── parser.test.ts     # Parser tests
+│   ├── formatter.test.ts  # Formatter tests
+│   └── config.test.ts     # Configuration tests
 ├── resources/
-│   └── sample-input.cmake
+│   ├── sample-input.cmake
+│   └── cc-format.schema.json  # JSON Schema for .cc-format.jsonc
 ├── package.json
 ├── package.nls.json       # English language pack (default)
 ├── package.nls.zh-cn.json # Chinese language pack

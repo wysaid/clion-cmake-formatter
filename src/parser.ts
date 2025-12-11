@@ -311,8 +311,8 @@ export class CMakeTokenizer {
         const closingBracket = ']' + '='.repeat(level) + ']';
         
         while (!this.isAtEnd()) {
-            const remaining = this.source.substring(this.pos);
-            if (remaining.startsWith(closingBracket)) {
+            // Use startsWith with position parameter to avoid creating substrings
+            if (this.source.startsWith(closingBracket, this.pos)) {
                 for (let i = 0; i < closingBracket.length; i++) {
                     value += this.advance();
                 }
@@ -351,8 +351,8 @@ export class CMakeTokenizer {
         const closingBracket = ']' + '='.repeat(level) + ']';
         
         while (!this.isAtEnd()) {
-            const remaining = this.source.substring(this.pos);
-            if (remaining.startsWith(closingBracket)) {
+            // Use startsWith with position parameter to avoid creating substrings
+            if (this.source.startsWith(closingBracket, this.pos)) {
                 for (let i = 0; i < closingBracket.length; i++) {
                     value += this.advance();
                 }

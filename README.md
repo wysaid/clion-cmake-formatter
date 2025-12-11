@@ -2,6 +2,8 @@
 
 A VSCode extension that formats CMakeLists.txt files with JetBrains CLion's indentation, spacing, and alignment style. **Zero external dependencies** - no Python, cmake-format, or gersemi required.
 
+English | [简体中文](README.zh-CN.md)
+
 ## Features
 
 - **CLion-compatible formatting**: Matches JetBrains CLion's formatting rules
@@ -179,8 +181,11 @@ clion-cmake-formatter/
 ├── resources/
 │   └── sample-input.cmake
 ├── package.json
+├── package.nls.json       # English language pack (default)
+├── package.nls.zh-cn.json # Chinese language pack
 ├── tsconfig.json
-└── README.md
+├── README.md
+└── README.zh-CN.md        # Chinese documentation
 ```
 
 ### Debugging the Extension

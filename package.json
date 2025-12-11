@@ -1,7 +1,7 @@
 {
   "name": "clion-cmake-formatter",
-  "displayName": "CLion CMake Formatter",
-  "description": "Format CMakeLists.txt files with CLion's indentation and spacing style",
+  "displayName": "%displayName%",
+  "description": "%description%",
   "version": "0.1.0",
   "publisher": "wysaid",
   "license": "MIT",
@@ -35,103 +35,109 @@
         ]
       }
     ],
+    "commands": [
+      {
+        "command": "clion-cmake-formatter.formatDocument",
+        "title": "%command.formatDocument%"
+      }
+    ],
     "configuration": {
-      "title": "CLion CMake Formatter",
+      "title": "%config.title%",
       "properties": {
         "clionCMakeFormatter.useTabs": {
           "type": "boolean",
           "default": false,
-          "description": "Use tabs for indentation instead of spaces",
+          "description": "%config.useTabs.description%",
           "order": 1
         },
         "clionCMakeFormatter.tabSize": {
           "type": "number",
           "default": 4,
-          "description": "Number of spaces equivalent to one tab",
+          "description": "%config.tabSize.description%",
           "order": 2
         },
         "clionCMakeFormatter.indentSize": {
           "type": "number",
           "default": 4,
-          "description": "Number of spaces for indentation",
+          "description": "%config.indentSize.description%",
           "order": 3
         },
         "clionCMakeFormatter.continuationIndentSize": {
           "type": "number",
           "default": 4,
-          "description": "Number of spaces for continuation indent",
+          "description": "%config.continuationIndentSize.description%",
           "order": 4
         },
         "clionCMakeFormatter.keepIndentOnEmptyLines": {
           "type": "boolean",
           "default": false,
-          "description": "Keep indent on empty lines",
+          "description": "%config.keepIndentOnEmptyLines.description%",
           "order": 5
         },
         "clionCMakeFormatter.spaceBeforeCommandDefinitionParentheses": {
           "type": "boolean",
           "default": false,
-          "description": "Space before command definition parentheses (function, macro)",
+          "description": "%config.spaceBeforeCommandDefinitionParentheses.description%",
           "order": 10
         },
         "clionCMakeFormatter.spaceBeforeCommandCallParentheses": {
           "type": "boolean",
           "default": false,
-          "description": "Space before command call parentheses",
+          "description": "%config.spaceBeforeCommandCallParentheses.description%",
           "order": 11
         },
         "clionCMakeFormatter.spaceBeforeIfParentheses": {
           "type": "boolean",
           "default": true,
-          "description": "Space before 'if' parentheses",
+          "description": "%config.spaceBeforeIfParentheses.description%",
           "order": 12
         },
         "clionCMakeFormatter.spaceBeforeForeachParentheses": {
           "type": "boolean",
           "default": true,
-          "description": "Space before 'foreach' parentheses",
+          "description": "%config.spaceBeforeForeachParentheses.description%",
           "order": 13
         },
         "clionCMakeFormatter.spaceBeforeWhileParentheses": {
           "type": "boolean",
           "default": true,
-          "description": "Space before 'while' parentheses",
+          "description": "%config.spaceBeforeWhileParentheses.description%",
           "order": 14
         },
         "clionCMakeFormatter.spaceInsideCommandDefinitionParentheses": {
           "type": "boolean",
           "default": false,
-          "description": "Space inside command definition parentheses",
+          "description": "%config.spaceInsideCommandDefinitionParentheses.description%",
           "order": 20
         },
         "clionCMakeFormatter.spaceInsideCommandCallParentheses": {
           "type": "boolean",
           "default": false,
-          "description": "Space inside command call parentheses",
+          "description": "%config.spaceInsideCommandCallParentheses.description%",
           "order": 21
         },
         "clionCMakeFormatter.spaceInsideIfParentheses": {
           "type": "boolean",
           "default": false,
-          "description": "Space inside 'if' parentheses",
+          "description": "%config.spaceInsideIfParentheses.description%",
           "order": 22
         },
         "clionCMakeFormatter.spaceInsideForeachParentheses": {
           "type": "boolean",
           "default": false,
-          "description": "Space inside 'foreach' parentheses",
+          "description": "%config.spaceInsideForeachParentheses.description%",
           "order": 23
         },
         "clionCMakeFormatter.spaceInsideWhileParentheses": {
           "type": "boolean",
           "default": false,
-          "description": "Space inside 'while' parentheses",
+          "description": "%config.spaceInsideWhileParentheses.description%",
           "order": 24
         },
         "clionCMakeFormatter.maxBlankLines": {
           "type": "number",
           "default": 2,
-          "description": "Maximum consecutive blank lines",
+          "description": "%config.maxBlankLines.description%",
           "order": 30
         },
         "clionCMakeFormatter.commandCase": {
@@ -139,35 +145,35 @@
           "default": "unchanged",
           "enum": ["unchanged", "lowercase", "uppercase"],
           "enumDescriptions": [
-            "Keep command case unchanged",
-            "Convert commands to lowercase",
-            "Convert commands to uppercase"
+            "%config.commandCase.unchanged%",
+            "%config.commandCase.lowercase%",
+            "%config.commandCase.uppercase%"
           ],
-          "description": "Force command case",
+          "description": "%config.commandCase.description%",
           "order": 31
         },
         "clionCMakeFormatter.lineLength": {
           "type": "number",
           "default": 120,
-          "description": "Maximum line length for formatted CMake files",
+          "description": "%config.lineLength.description%",
           "order": 40
         },
         "clionCMakeFormatter.alignMultiLineArguments": {
           "type": "boolean",
           "default": false,
-          "description": "Align arguments when multi-line",
+          "description": "%config.alignMultiLineArguments.description%",
           "order": 41
         },
         "clionCMakeFormatter.alignMultiLineParentheses": {
           "type": "boolean",
           "default": false,
-          "description": "Align parentheses when multi-line",
+          "description": "%config.alignMultiLineParentheses.description%",
           "order": 42
         },
         "clionCMakeFormatter.alignControlFlowParentheses": {
           "type": "boolean",
           "default": false,
-          "description": "Align control flow parentheses when multi-line",
+          "description": "%config.alignControlFlowParentheses.description%",
           "order": 43
         }
       }

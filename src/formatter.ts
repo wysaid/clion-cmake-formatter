@@ -11,6 +11,7 @@ import {
     CommandNode,
     BlockNode,
     CommentNode,
+    BlankLineNode,
     NodeType,
     ArgumentInfo,
     parseCMake
@@ -166,29 +167,58 @@ export class CMakeFormatter {
     private formatFile(node: FileNode): string {
         const lines: string[] = [];
         let consecutiveBlankLines = 0;
+        let trailingBlankLines = 0;
+        let hasContent = false;
 
         for (let i = 0; i < node.children.length; i++) {
             const child = node.children[i];
 
             if (child.type === NodeType.BlankLine) {
-                consecutiveBlankLines++;
-                if (consecutiveBlankLines <= this.options.maxBlankLines) {
-                    lines.push(this.options.keepIndentOnEmptyLines ? this.getIndent() : '');
+                const blankNode = child as BlankLineNode;
+                const isLastChild = i === node.children.length - 1;
+                
+                // Add up to maxBlankLines from the count in this node
+                const linesToAdd = Math.min(blankNode.count, this.options.maxBlankLines - consecutiveBlankLines);
+                
+                if (isLastChild) {
+                    // Track trailing blank lines separately - don't add to lines array
+                    trailingBlankLines = linesToAdd;
+                } else {
+                    for (let j = 0; j < linesToAdd; j++) {
+                        lines.push(this.options.keepIndentOnEmptyLines ? this.getIndent() : '');
+                    }
                 }
+                consecutiveBlankLines += linesToAdd;
                 continue;
             }
 
             consecutiveBlankLines = 0;
+            trailingBlankLines = 0;
+            hasContent = true;
             const formatted = this.formatNode(child);
             if (formatted !== null) {
                 lines.push(formatted);
             }
         }
 
-        // Join lines and ensure single trailing newline
-        let result = lines.join('\n');
-        result = result.trimEnd() + '\n';
+        // If no content, return single newline
+        if (!hasContent) {
+            return '\n';
+        }
 
+        // Join lines
+        let result = lines.join('\n');
+        
+        // Ensure exactly one trailing newline after content
+        if (!result.endsWith('\n')) {
+            result += '\n';
+        }
+        
+        // Add trailing blank lines (each blank line = one extra newline)
+        for (let i = 0; i < trailingBlankLines; i++) {
+            result += '\n';
+        }
+        
         return result;
     }
 
@@ -291,9 +321,18 @@ export class CMakeFormatter {
         // Check if any argument has an inline comment - if so, must be multi-line
         const hasInlineComments = node.arguments.some(arg => arg.inlineComment);
 
-        // If the original command was multi-line, preserve multi-line format with one arg per line
+        // If the original command was multi-line, preserve multi-line format
         if (node.isMultiLine || hasInlineComments) {
-            return this.formatCommandPreserveMultiLine(commandName, node.arguments, indent, spaceBeforeParen, innerPadding, node.trailingComment);
+            return this.formatCommandPreserveMultiLine(
+                commandName, 
+                node.arguments, 
+                indent, 
+                spaceBeforeParen, 
+                innerPadding, 
+                node.trailingComment,
+                node.hasFirstArgOnSameLine,
+                node.hasClosingParenOnSameLine
+            );
         }
 
         // Try to format on a single line first
@@ -321,8 +360,9 @@ export class CMakeFormatter {
     }
 
     /**
-     * Format a command preserving multi-line style (one argument per line)
+     * Format a command preserving multi-line style
      * Used when original input was already multi-line
+     * Preserves the original grouping of arguments on lines
      */
     private formatCommandPreserveMultiLine(
         name: string,
@@ -330,30 +370,86 @@ export class CMakeFormatter {
         indent: string,
         spaceBeforeParen: string,
         _innerPadding: string,
-        trailingComment?: string
+        trailingComment?: string,
+        hasFirstArgOnSameLine?: boolean,
+        hasClosingParenOnSameLine?: boolean
     ): string {
         const lines: string[] = [];
         const continuationIndent = indent + this.getContinuationIndent();
 
-        // Start with command name and opening paren
-        lines.push(`${indent}${name}${spaceBeforeParen}(`);
+        if (args.length === 0) {
+            lines.push(`${indent}${name}${spaceBeforeParen}(`);
+            lines.push(`${indent})`);
+            if (trailingComment) {
+                lines[lines.length - 1] += ' ' + trailingComment;
+            }
+            return lines.join('\n');
+        }
 
-        // Format each argument on its own line
-        for (let i = 0; i < args.length; i++) {
-            const arg = args[i];
-            const formattedArg = this.formatArgument(arg);
-            let line = continuationIndent + formattedArg;
+        // Group arguments by their original line numbers
+        // This preserves the original multi-line structure
+        const lineGroups: ArgumentInfo[][] = [];
+        let currentGroup: ArgumentInfo[] = [];
+        let currentLine = args[0].line ?? 1;
+
+        for (const arg of args) {
+            const argLine = arg.line ?? currentLine;
+            if (argLine === currentLine) {
+                currentGroup.push(arg);
+            } else {
+                if (currentGroup.length > 0) {
+                    lineGroups.push(currentGroup);
+                }
+                currentGroup = [arg];
+                currentLine = argLine;
+            }
+        }
+        if (currentGroup.length > 0) {
+            lineGroups.push(currentGroup);
+        }
+
+        // Format each group
+        for (let groupIndex = 0; groupIndex < lineGroups.length; groupIndex++) {
+            const group = lineGroups[groupIndex];
+            const isFirstGroup = groupIndex === 0;
+            const isLastGroup = groupIndex === lineGroups.length - 1;
+
+            // Format arguments in this group
+            const formattedArgs = group.map(arg => this.formatArgument(arg)).join(' ');
+            
+            // Get the inline comment from the last arg in the group
+            const lastArgInGroup = group[group.length - 1];
+            const inlineComment = lastArgInGroup.inlineComment;
+
+            let line: string;
+            if (isFirstGroup && hasFirstArgOnSameLine) {
+                // First group goes on same line as command name
+                line = `${indent}${name}${spaceBeforeParen}(${formattedArgs}`;
+            } else if (isFirstGroup) {
+                // Opening paren on its own, first group is continuation
+                lines.push(`${indent}${name}${spaceBeforeParen}(`);
+                line = `${continuationIndent}${formattedArgs}`;
+            } else {
+                line = `${continuationIndent}${formattedArgs}`;
+            }
 
             // Add inline comment if present
-            if (arg.inlineComment) {
-                line += ' ' + arg.inlineComment;
+            if (inlineComment) {
+                line += ' ' + inlineComment;
+            }
+
+            // Add closing paren if this is the last group and it should be on same line
+            if (isLastGroup && hasClosingParenOnSameLine) {
+                line += ')';
             }
 
             lines.push(line);
         }
 
-        // Add closing paren at the correct indentation level
-        lines.push(`${indent})`);
+        // Add closing paren on separate line if needed
+        if (!hasClosingParenOnSameLine) {
+            lines.push(`${indent})`);
+        }
 
         // Add trailing comment to the last line
         if (trailingComment) {

@@ -62,6 +62,10 @@ export interface CommandNode extends ASTNode {
     trailingComment?: string;
     /** Whether the original command spans multiple lines */
     isMultiLine: boolean;
+    /** Whether the first argument is on the same line as the opening paren */
+    hasFirstArgOnSameLine?: boolean;
+    /** Whether the closing paren is on the same line as the last argument */
+    hasClosingParenOnSameLine?: boolean;
 }
 
 /**
@@ -74,6 +78,8 @@ export interface ArgumentInfo {
     bracketLevel?: number;
     /** Comment attached to this argument (inline comment after the argument) */
     inlineComment?: string;
+    /** Line number of this argument */
+    line?: number;
 }
 
 /**
@@ -101,6 +107,8 @@ export interface CommentNode extends ASTNode {
  */
 export interface BlankLineNode extends ASTNode {
     type: NodeType.BlankLine;
+    /** Number of consecutive blank lines */
+    count: number;
 }
 
 /**
@@ -488,14 +496,17 @@ export class CMakeParser {
             
             // Check if it's a blank line (consecutive newlines)
             if (!this.isAtEnd() && this.peek().type === TokenType.Newline) {
+                let count = 0;
                 while (!this.isAtEnd() && this.peek().type === TokenType.Newline) {
+                    count++;
                     this.advance();
                 }
                 return {
                     type: NodeType.BlankLine,
                     startLine,
-                    endLine: startLine
-                };
+                    endLine: startLine,
+                    count
+                } as BlankLineNode;
             }
             
             return null; // Single newline, skip
@@ -543,6 +554,7 @@ export class CMakeParser {
             };
         }
         
+        const leftParenLine = this.peek().line;
         this.advance(); // consume (
         
         // Parse arguments
@@ -550,8 +562,10 @@ export class CMakeParser {
         
         // Expect right paren
         let endLine = startLine;
+        let rightParenLine = startLine;
         if (!this.isAtEnd() && this.peek().type === TokenType.RightParen) {
             endLine = this.peek().line;
+            rightParenLine = this.peek().line;
             this.advance();
         }
         
@@ -565,6 +579,12 @@ export class CMakeParser {
         // Determine if command spans multiple lines
         const isMultiLine = endLine > startLine;
         
+        // Determine if first arg is on same line as opening paren
+        const hasFirstArgOnSameLine = args.length > 0 && args[0].line === leftParenLine;
+        
+        // Determine if closing paren is on same line as last arg
+        const hasClosingParenOnSameLine = args.length > 0 && args[args.length - 1].line === rightParenLine;
+        
         const command: CommandNode = {
             type: NodeType.Command,
             name: commandName,
@@ -572,7 +592,9 @@ export class CMakeParser {
             startLine,
             endLine,
             trailingComment,
-            isMultiLine
+            isMultiLine,
+            hasFirstArgOnSameLine,
+            hasClosingParenOnSameLine
         };
         
         // Check if this is a block-starting command (case-insensitive)
@@ -610,21 +632,24 @@ export class CMakeParser {
                 arg = {
                     value: token.value,
                     quoted: false,
-                    bracket: false
+                    bracket: false,
+                    line: token.line
                 };
             } else if (token.type === TokenType.QuotedArgument) {
                 this.advance();
                 arg = {
                     value: token.value,
                     quoted: true,
-                    bracket: false
+                    bracket: false,
+                    line: token.line
                 };
             } else if (token.type === TokenType.BracketArgument) {
                 this.advance();
                 arg = {
                     value: token.value,
                     quoted: false,
-                    bracket: true
+                    bracket: true,
+                    line: token.line
                 };
             } else {
                 break;

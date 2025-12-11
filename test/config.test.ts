@@ -60,6 +60,21 @@ describe('Configuration File Support', () => {
             assert.strictEqual(parsed.key, 'value // not a comment');
         });
 
+        it('should handle escaped quotes in strings', () => {
+            const input = '{"key": "value with \\"escaped\\" quotes"}';
+            const result = stripJsonComments(input);
+            const parsed = JSON.parse(result);
+            assert.strictEqual(parsed.key, 'value with "escaped" quotes');
+        });
+
+        it('should handle escaped backslashes before quotes', () => {
+            // String ending with backslash: "path\\" followed by // comment
+            const input = '{"path": "C:\\\\temp\\\\"} // comment';
+            const result = stripJsonComments(input);
+            const parsed = JSON.parse(result);
+            assert.strictEqual(parsed.path, 'C:\\temp\\');
+        });
+
         it('should handle mixed comments', () => {
             const input = `{
                 // Line comment

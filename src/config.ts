@@ -63,8 +63,18 @@ export function stripJsonComments(content: string): string {
 
         // Handle string state
         if (!inLineComment && !inBlockComment) {
-            if (char === '"' && (i === 0 || content[i - 1] !== '\\')) {
-                inString = !inString;
+            if (char === '"') {
+                // Count preceding backslashes to check if quote is escaped
+                let backslashCount = 0;
+                let j = i - 1;
+                while (j >= 0 && content[j] === '\\') {
+                    backslashCount++;
+                    j--;
+                }
+                // Quote is escaped only if preceded by odd number of backslashes
+                if (backslashCount % 2 === 0) {
+                    inString = !inString;
+                }
                 result += char;
                 i++;
                 continue;
@@ -170,8 +180,8 @@ export function parseConfigContent(content: string): Partial<FormatterOptions> |
         const jsonContent = stripJsonComments(remainingContent);
         const parsed = JSON.parse(jsonContent);
         return validateConfigOptions(parsed);
-    } catch (error) {
-        console.error('Failed to parse configuration file:', error);
+    } catch {
+        // Failed to parse configuration file - return null to use default options
         return null;
     }
 }
@@ -343,9 +353,15 @@ function watchConfigFile(filePath: string): void {
 
     try {
         const watcher = fs.watch(filePath, (eventType) => {
-            if (eventType === 'change' || eventType === 'rename') {
-                // Remove from cache and stop watching
+            if (eventType === 'change') {
+                // File was modified - invalidate cache
                 invalidateConfigCache(filePath);
+            } else if (eventType === 'rename') {
+                // File may have been deleted or renamed
+                // Check if file still exists before invalidating
+                if (!fs.existsSync(filePath)) {
+                    invalidateConfigCache(filePath);
+                }
             }
         });
 
@@ -355,9 +371,9 @@ function watchConfigFile(filePath: string): void {
 
         watchers.set(filePath, watcher);
         watchedFiles.add(filePath);
-    } catch (error) {
-        // File watching not available, just use cache without watching
-        console.warn(`Failed to watch config file: ${filePath}`);
+    } catch {
+        // File watching not available - cache will still work but won't update
+        // automatically when file changes. This is an acceptable fallback.
     }
 }
 

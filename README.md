@@ -63,9 +63,9 @@ This extension supports all major CLion CMake formatting options. Configure via 
 | Setting | Type | Default | Description |
 |---------|------|---------|-------------|
 | `clionCMakeFormatter.useTabs` | boolean | `false` | Use tabs instead of spaces for indentation |
-| `clionCMakeFormatter.tabSize` | number | `4` | Number of spaces per tab character |
-| `clionCMakeFormatter.indentSize` | number | `4` | Number of spaces per indentation level |
-| `clionCMakeFormatter.continuationIndentSize` | number | `4` | Additional indentation for continued lines in multi-line commands |
+| `clionCMakeFormatter.tabSize` | number | `4` | Number of spaces per tab character (range: 1-16) |
+| `clionCMakeFormatter.indentSize` | number | `4` | Number of spaces per indentation level (range: 1-16) |
+| `clionCMakeFormatter.continuationIndentSize` | number | `4` | Additional indentation for continued lines in multi-line commands (range: 1-16) |
 | `clionCMakeFormatter.keepIndentOnEmptyLines` | boolean | `false` | Preserve indentation on empty lines |
 
 ### Spacing Before Parentheses
@@ -92,7 +92,7 @@ This extension supports all major CLion CMake formatting options. Configure via 
 
 | Setting | Type | Default | Description |
 |---------|------|---------|-------------|
-| `clionCMakeFormatter.lineLength` | number | `120` | Maximum line length before wrapping |
+| `clionCMakeFormatter.lineLength` | number | `0` | Maximum line length before wrapping (0 = unlimited, minimum 40 for non-zero values) |
 | `clionCMakeFormatter.alignMultiLineArguments` | boolean | `false` | Align arguments vertically in multi-line commands |
 | `clionCMakeFormatter.alignMultiLineParentheses` | boolean | `false` | Align closing parenthesis with opening line in multi-line commands |
 | `clionCMakeFormatter.alignControlFlowParentheses` | boolean | `false` | Align control flow statement parentheses in multi-line format |
@@ -102,7 +102,7 @@ This extension supports all major CLion CMake formatting options. Configure via 
 | Setting | Type | Default | Description |
 |---------|------|---------|-------------|
 | `clionCMakeFormatter.commandCase` | string | `"unchanged"` | Command name case transformation: `"unchanged"`, `"lowercase"`, or `"uppercase"` |
-| `clionCMakeFormatter.maxBlankLines` | number | `2` | Maximum number of consecutive blank lines to preserve |
+| `clionCMakeFormatter.maxBlankLines` | number | `2` | Maximum number of consecutive blank lines to preserve (range: 0-10) |
 
 ### Configuration Example
 
@@ -111,7 +111,7 @@ This extension supports all major CLion CMake formatting options. Configure via 
   "clionCMakeFormatter.commandCase": "lowercase",
   "clionCMakeFormatter.indentSize": 4,
   "clionCMakeFormatter.spaceBeforeIfParentheses": true,
-  "clionCMakeFormatter.lineLength": 100,
+  "clionCMakeFormatter.lineLength": 0,
   "clionCMakeFormatter.alignMultiLineArguments": false
 }
 ```

@@ -1,39 +1,30 @@
 {
     "displayName": "CLion CMake Formatter",
     "description": "Format CMakeLists.txt files with CLion's indentation and spacing style",
-    
     "config.title": "CLion CMake Formatter",
-    
     "config.useTabs.description": "Use tabs for indentation instead of spaces",
-    "config.tabSize.description": "Number of spaces equivalent to one tab",
-    "config.indentSize.description": "Number of spaces for indentation",
-    "config.continuationIndentSize.description": "Number of spaces for continuation indent",
+    "config.tabSize.description": "Number of spaces equivalent to one tab (1-16)",
+    "config.indentSize.description": "Number of spaces for indentation (1-16)",
+    "config.continuationIndentSize.description": "Number of spaces for continuation indent (1-16)",
     "config.keepIndentOnEmptyLines.description": "Keep indent on empty lines",
-    
     "config.spaceBeforeCommandDefinitionParentheses.description": "Space before command definition parentheses (function, macro)",
     "config.spaceBeforeCommandCallParentheses.description": "Space before command call parentheses",
     "config.spaceBeforeIfParentheses.description": "Space before 'if' parentheses",
     "config.spaceBeforeForeachParentheses.description": "Space before 'foreach' parentheses",
     "config.spaceBeforeWhileParentheses.description": "Space before 'while' parentheses",
-    
     "config.spaceInsideCommandDefinitionParentheses.description": "Space inside command definition parentheses",
     "config.spaceInsideCommandCallParentheses.description": "Space inside command call parentheses",
     "config.spaceInsideIfParentheses.description": "Space inside 'if' parentheses",
     "config.spaceInsideForeachParentheses.description": "Space inside 'foreach' parentheses",
     "config.spaceInsideWhileParentheses.description": "Space inside 'while' parentheses",
-    
-    "config.maxBlankLines.description": "Maximum consecutive blank lines",
-    
+    "config.maxBlankLines.description": "Maximum consecutive blank lines (0-20)",
     "config.commandCase.description": "Force command case",
     "config.commandCase.unchanged": "Keep command case unchanged",
     "config.commandCase.lowercase": "Convert commands to lowercase",
     "config.commandCase.uppercase": "Convert commands to uppercase",
-    
-    "config.lineLength.description": "Maximum line length for formatted CMake files",
-    
+    "config.lineLength.description": "Maximum line length for formatted CMake files (0 = unlimited, minimum 30 for non-zero values)",
     "config.alignMultiLineArguments.description": "Align arguments when multi-line",
     "config.alignMultiLineParentheses.description": "Align parentheses when multi-line",
     "config.alignControlFlowParentheses.description": "Align control flow parentheses when multi-line",
-    
     "command.formatDocument": "CLion CMake Formatter: Format Document"
 }

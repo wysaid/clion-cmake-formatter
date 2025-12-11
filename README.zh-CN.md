@@ -63,9 +63,9 @@
 | 设置 | 类型 | 默认值 | 描述 |
 |------|------|--------|------|
 | `clionCMakeFormatter.useTabs` | boolean | `false` | 使用制表符而非空格进行缩进 |
-| `clionCMakeFormatter.tabSize` | number | `4` | 每个制表符对应的空格数 |
-| `clionCMakeFormatter.indentSize` | number | `4` | 每个缩进层级的空格数 |
-| `clionCMakeFormatter.continuationIndentSize` | number | `4` | 多行命令的连续行额外缩进空格数 |
+| `clionCMakeFormatter.tabSize` | number | `4` | 每个制表符对应的空格数（范围: 1-16） |
+| `clionCMakeFormatter.indentSize` | number | `4` | 每个缩进层级的空格数（范围: 1-16） |
+| `clionCMakeFormatter.continuationIndentSize` | number | `4` | 多行命令的连续行额外缩进空格数（范围: 1-16） |
 | `clionCMakeFormatter.keepIndentOnEmptyLines` | boolean | `false` | 在空行保留缩进 |
 
 ### 括号前空格
@@ -92,7 +92,7 @@
 
 | 设置 | 类型 | 默认值 | 描述 |
 |------|------|--------|------|
-| `clionCMakeFormatter.lineLength` | number | `120` | 换行前的最大行长度 |
+| `clionCMakeFormatter.lineLength` | number | `0` | 换行前的最大行长度（0 = 不限制，非零值最小为 40） |
 | `clionCMakeFormatter.alignMultiLineArguments` | boolean | `false` | 在多行命令中垂直对齐参数 |
 | `clionCMakeFormatter.alignMultiLineParentheses` | boolean | `false` | 在多行命令中将右括号与开始行对齐 |
 | `clionCMakeFormatter.alignControlFlowParentheses` | boolean | `false` | 在多行格式中对齐控制流语句的括号 |
@@ -102,7 +102,7 @@
 | 设置 | 类型 | 默认值 | 描述 |
 |------|------|--------|------|
 | `clionCMakeFormatter.commandCase` | string | `"unchanged"` | 命令名称大小写转换: `"unchanged"`（不变）、`"lowercase"`（小写） 或 `"uppercase"`（大写） |
-| `clionCMakeFormatter.maxBlankLines` | number | `2` | 保留的最大连续空行数 |
+| `clionCMakeFormatter.maxBlankLines` | number | `2` | 保留的最大连续空行数（范围: 0-10） |
 
 ### 配置示例
 
@@ -111,7 +111,7 @@
   "clionCMakeFormatter.commandCase": "lowercase",
   "clionCMakeFormatter.indentSize": 4,
   "clionCMakeFormatter.spaceBeforeIfParentheses": true,
-  "clionCMakeFormatter.lineLength": 100,
+  "clionCMakeFormatter.lineLength": 0,
   "clionCMakeFormatter.alignMultiLineArguments": false
 }
 ```

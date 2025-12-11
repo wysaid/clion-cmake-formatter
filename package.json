@@ -53,18 +53,24 @@
                 "clionCMakeFormatter.tabSize": {
                     "type": "number",
                     "default": 4,
+                    "minimum": 1,
+                    "maximum": 16,
                     "description": "%config.tabSize.description%",
                     "order": 2
                 },
                 "clionCMakeFormatter.indentSize": {
                     "type": "number",
                     "default": 4,
+                    "minimum": 1,
+                    "maximum": 16,
                     "description": "%config.indentSize.description%",
                     "order": 3
                 },
                 "clionCMakeFormatter.continuationIndentSize": {
                     "type": "number",
                     "default": 4,
+                    "minimum": 1,
+                    "maximum": 16,
                     "description": "%config.continuationIndentSize.description%",
                     "order": 4
                 },
@@ -137,6 +143,8 @@
                 "clionCMakeFormatter.maxBlankLines": {
                     "type": "number",
                     "default": 2,
+                    "minimum": 0,
+                    "maximum": 20,
                     "description": "%config.maxBlankLines.description%",
                     "order": 30
                 },
@@ -158,7 +166,8 @@
                 },
                 "clionCMakeFormatter.lineLength": {
                     "type": "number",
-                    "default": 120,
+                    "default": 0,
+                    "minimum": 0,
                     "description": "%config.lineLength.description%",
                     "order": 40
                 },

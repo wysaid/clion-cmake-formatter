@@ -346,6 +346,15 @@ endwhile()`;
 });
 
 describe('Line Length Tests', () => {
+    it('should not wrap single-line command when lineLength is 0 (unlimited)', () => {
+        const input = 'set(SOURCES file1.cpp file2.cpp file3.cpp file4.cpp file5.cpp file6.cpp file7.cpp file8.cpp file9.cpp file10.cpp)';
+        const output = formatCMake(input, { lineLength: 0 });
+
+        // Should remain single line (only trailing newline)
+        const lines = output.split('\n').filter(l => l.length > 0);
+        assert.strictEqual(lines.length, 1);
+    });
+
     it('should not wrap single-line command when lineLength is very large', () => {
         const input = loadFormatting('line-length', 'long-args');
         const output = formatCMake(input, { lineLength: 1000 });
@@ -364,6 +373,15 @@ describe('Line Length Tests', () => {
         assert.strictEqual(lines.length, 1);
     });
 
+    it('should wrap lines when lineLength is at minimum threshold (30)', () => {
+        const input = 'set(LONG_VARIABLE_NAME value1 value2 value3)';
+        const output = formatCMake(input, { lineLength: 30 });
+
+        // Should wrap because line is longer than 30
+        const lines = output.split('\n').filter(l => l.length > 0);
+        assert.ok(lines.length > 1, 'Should wrap when exceeding minimum lineLength of 30');
+    });
+
     it('should preserve multi-line format even when lineLength is very large', () => {
         const input = loadFormatting('line-length', 'multiline-input');
         const output = formatCMake(input, { lineLength: 1000 });
@@ -380,5 +398,49 @@ describe('Line Length Tests', () => {
         // Should remain single line
         const lines = output.split('\n').filter(l => l.length > 0);
         assert.strictEqual(lines.length, 1);
+    });
+});
+
+describe('Numeric Configuration Validation Tests', () => {
+    it('should handle extreme tabSize values gracefully', () => {
+        const input = 'if(WIN32)\n    set(VAR value)\nendif()';
+        // tabSize=1 should work (minimum valid value)
+        const output1 = formatCMake(input, { tabSize: 1, indentSize: 1 });
+        assert.ok(output1.includes('set'), 'Should format with minimum tabSize');
+
+        // tabSize=16 should work (maximum valid value)
+        const output16 = formatCMake(input, { tabSize: 16, indentSize: 16 });
+        assert.ok(output16.includes('set'), 'Should format with maximum tabSize');
+    });
+
+    it('should handle extreme indentSize values gracefully', () => {
+        const input = 'if(WIN32)\nset(VAR value)\nendif()';
+        // indentSize=1 should work
+        const output1 = formatCMake(input, { indentSize: 1 });
+        assert.ok(output1.trim().split('\n').length === 3, 'Should format with minimum indentSize');
+
+        // indentSize=16 should work
+        const output16 = formatCMake(input, { indentSize: 16 });
+        assert.ok(output16.trim().split('\n').length === 3, 'Should format with maximum indentSize');
+    });
+
+    it('should handle maxBlankLines at boundaries', () => {
+        const input = 'set(VAR1 value)\n\n\n\n\n\n\nset(VAR2 value)';
+        // maxBlankLines=0 should remove all blank lines
+        const output0 = formatCMake(input, { maxBlankLines: 0 });
+        const lines0 = output0.trim().split('\n');
+        assert.strictEqual(lines0.length, 2, 'Should remove all blank lines when maxBlankLines=0');
+
+        // maxBlankLines=20 should preserve many blank lines
+        const output20 = formatCMake(input, { maxBlankLines: 20 });
+        const lines20 = output20.trim().split('\n');
+        assert.ok(lines20.length > 2, 'Should preserve blank lines when maxBlankLines=20');
+    });
+
+    it('should handle lineLength minimum boundary', () => {
+        const input = 'set(VAR value1 value2)';
+        // lineLength=30 should work (minimum for non-zero values)
+        const output30 = formatCMake(input, { lineLength: 30 });
+        assert.ok(output30.includes('set'), 'Should format with minimum lineLength');
     });
 });

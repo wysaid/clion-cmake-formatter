@@ -1,39 +1,30 @@
 {
     "displayName": "CLion CMake 格式化工具",
     "description": "使用 CLion 的缩进和空格风格格式化 CMakeLists.txt 文件",
-    
     "config.title": "CLion CMake 格式化工具",
-    
     "config.useTabs.description": "使用制表符缩进而不是空格",
-    "config.tabSize.description": "一个制表符等于几个空格",
-    "config.indentSize.description": "缩进的空格数",
-    "config.continuationIndentSize.description": "连续缩进的空格数",
+    "config.tabSize.description": "一个制表符等于几个空格 (1-16)",
+    "config.indentSize.description": "缩进的空格数 (1-16)",
+    "config.continuationIndentSize.description": "连续缩进的空格数 (1-16)",
     "config.keepIndentOnEmptyLines.description": "在空行时保持缩进",
-    
     "config.spaceBeforeCommandDefinitionParentheses.description": "命令定义圆括号前添加空格 (function, macro)",
     "config.spaceBeforeCommandCallParentheses.description": "命令调用圆括号前添加空格",
     "config.spaceBeforeIfParentheses.description": "'if' 圆括号前添加空格",
     "config.spaceBeforeForeachParentheses.description": "'foreach' 圆括号前添加空格",
     "config.spaceBeforeWhileParentheses.description": "'while' 圆括号前添加空格",
-    
     "config.spaceInsideCommandDefinitionParentheses.description": "命令定义圆括号内添加空格",
     "config.spaceInsideCommandCallParentheses.description": "命令调用圆括号内添加空格",
     "config.spaceInsideIfParentheses.description": "'if' 圆括号内添加空格",
     "config.spaceInsideForeachParentheses.description": "'foreach' 圆括号内添加空格",
     "config.spaceInsideWhileParentheses.description": "'while' 圆括号内添加空格",
-    
-    "config.maxBlankLines.description": "最大连续空行数",
-    
+    "config.maxBlankLines.description": "最大连续空行数 (0-20)",
     "config.commandCase.description": "强制命令大小写",
     "config.commandCase.unchanged": "保持命令大小写不变",
     "config.commandCase.lowercase": "将命令转换为小写",
     "config.commandCase.uppercase": "将命令转换为大写",
-    
-    "config.lineLength.description": "格式化 CMake 文件的最大行长度",
-    
+    "config.lineLength.description": "格式化 CMake 文件的最大行长度（0 = 不限制，非零值最小为 30）",
     "config.alignMultiLineArguments.description": "多行时对齐参数",
     "config.alignMultiLineParentheses.description": "多行时对齐圆括号",
     "config.alignControlFlowParentheses.description": "多行时对齐控制流圆括号",
-    
     "command.formatDocument": "CLion CMake 格式化工具: 格式化文档"
 }

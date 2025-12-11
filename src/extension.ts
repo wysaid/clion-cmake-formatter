@@ -10,7 +10,7 @@ import { formatCMake, FormatterOptions, CommandCase } from './formatter';
 /**
  * Validate numeric value within a range
  */
-function validateRange(value: number, min: number, max: number, name: string, defaultValue: number): number {
+function validateRange(value: number, min: number, max: number, name: string): number {
     if (value < min || value > max) {
         vscode.window.showWarningMessage(
             `${name} value ${value} is out of range [${min}, ${max}]. Using ${value < min ? 'minimum' : 'maximum'} value ${value < min ? min : max}.`
@@ -24,28 +24,28 @@ function validateRange(value: number, min: number, max: number, name: string, de
  * Validate and normalize tabSize value (1-16)
  */
 function validateTabSize(value: number): number {
-    return validateRange(value, 1, 16, 'tabSize', 4);
+    return validateRange(value, 1, 16, 'tabSize');
 }
 
 /**
  * Validate and normalize indentSize value (1-16)
  */
 function validateIndentSize(value: number): number {
-    return validateRange(value, 1, 16, 'indentSize', 4);
+    return validateRange(value, 1, 16, 'indentSize');
 }
 
 /**
  * Validate and normalize continuationIndentSize value (1-16)
  */
 function validateContinuationIndentSize(value: number): number {
-    return validateRange(value, 1, 16, 'continuationIndentSize', 4);
+    return validateRange(value, 1, 16, 'continuationIndentSize');
 }
 
 /**
  * Validate and normalize maxBlankLines value (0-20)
  */
 function validateMaxBlankLines(value: number): number {
-    return validateRange(value, 0, 20, 'maxBlankLines', 2);
+    return validateRange(value, 0, 20, 'maxBlankLines');
 }
 
 /**

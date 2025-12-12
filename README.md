@@ -251,9 +251,26 @@ npm run compile
 # Run tests
 npm run test:unit
 
+# Test CMake official files (20 representative test cases)
+node scripts/test-cmake-official.js
+
 # Package for distribution
 npm run package
 ```
+
+### Test Coverage
+
+The project includes comprehensive test suites:
+
+- **Unit Tests**: 107 test cases covering parser, formatter, and config system
+- **Idempotency Tests**: 8 carefully selected well-formatted test files
+- **Official Tests**: 20 test cases selected from CMake official repository
+  - Selected from 8,899 files
+  - Complexity range: 4-2504
+  - Total 6,302 lines of code
+  - 100% pass idempotency tests ✅
+
+See [Extending Tests Guide](docs/EXTENDING_TESTS.md) for details.
 
 ### Project Structure
 
@@ -276,7 +293,10 @@ clion-cmake-formatter/
 ├── test/
 │   ├── parser.test.ts     # Parser tests
 │   ├── formatter.test.ts  # Formatter tests
-│   └── config.test.ts     # Configuration tests
+│   ├── config.test.ts     # Configuration tests
+│   └── datasets/          # Test datasets
+│       ├── well-formatted/  # 8 idempotency test files
+│       └── cmake-official/  # 20 CMake official test files
 ├── resources/
 │   ├── sample-input.cmake
 │   └── cc-format.schema.json  # JSON Schema for .cc-format.jsonc

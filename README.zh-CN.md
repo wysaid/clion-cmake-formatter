@@ -251,9 +251,26 @@ npm run compile
 # 运行测试
 npm run test:unit
 
+# 测试 CMake 官方文件 (20 个代表性测试用例)
+node scripts/test-cmake-official.js
+
 # 打包发布
 npm run package
 ```
+
+### 测试覆盖
+
+项目包含完整的测试套件：
+
+- **单元测试**: 107 个测试用例，覆盖解析器、格式化器和配置系统
+- **幂等性测试**: 8 个精心选择的 well-formatted 测试文件
+- **官方测试**: 20 个从 CMake 官方仓库精选的测试用例
+  - 从 8,899 个文件中选出
+  - 复杂度范围: 4-2504
+  - 总计 6,302 行代码
+  - 100% 通过幂等性测试 ✅
+
+详见 [扩展测试集指南](docs/EXTENDING_TESTS.md)。
 
 ### 项目结构
 
@@ -276,7 +293,10 @@ clion-cmake-formatter/
 ├── test/
 │   ├── parser.test.ts     # 解析器测试
 │   ├── formatter.test.ts  # 格式化测试
-│   └── config.test.ts     # 配置测试
+│   ├── config.test.ts     # 配置测试
+│   └── datasets/          # 测试数据集
+│       ├── well-formatted/  # 8 个幂等性测试文件
+│       └── cmake-official/  # 20 个 CMake 官方测试文件
 ├── resources/
 │   ├── sample-input.cmake
 │   └── cc-format.schema.json  # .cc-format.jsonc 的 JSON Schema

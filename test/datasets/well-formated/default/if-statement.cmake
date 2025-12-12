@@ -1,0 +1,5 @@
+if ((WIN32 OR MACOS) AND NOT USE_ANGLE)
+    set(USE_DESKTOP_GL_DEFAULT ON)
+else ()
+    set(USE_DESKTOP_GL_DEFAULT OFF)
+endif ()

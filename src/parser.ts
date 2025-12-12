@@ -671,6 +671,10 @@ export class CMakeParser {
                     line: token.line,
                     blankLinesBefore: consecutiveNewlines > 0 ? consecutiveNewlines - 1 : 0
                 };
+            } else if (token.type === TokenType.LeftParen) {
+                // Handle nested parentheses - collect everything until matching right paren
+                arg = this.parseNestedParentheses(consecutiveNewlines);
+                consecutiveNewlines = 0;  // Reset after parsing nested content
             } else {
                 break;
             }
@@ -682,6 +686,64 @@ export class CMakeParser {
         }
 
         return args;
+    }
+
+    /**
+     * Parse a nested parentheses expression as a single argument
+     * Used for control flow commands like if, while, etc.
+     */
+    private parseNestedParentheses(blankLinesBefore: number): ArgumentInfo {
+        const startLine = this.peek().line;
+        let value = '';
+        let parenDepth = 0;
+
+        // Collect all tokens until we reach the matching right paren
+        while (!this.isAtEnd() && (parenDepth > 0 || this.peek().type === TokenType.LeftParen)) {
+            const token = this.peek();
+
+            if (token.type === TokenType.LeftParen) {
+                parenDepth++;
+                value += '(';
+                this.advance();
+            } else if (token.type === TokenType.RightParen) {
+                parenDepth--;
+                value += ')';
+                this.advance();
+                if (parenDepth === 0) {
+                    // We've closed all nested parentheses
+                    break;
+                }
+            } else if (token.type === TokenType.Whitespace) {
+                value += token.value;
+                this.advance();
+            } else if (token.type === TokenType.Newline) {
+                value += '\n';
+                this.advance();
+            } else if (token.type === TokenType.Argument) {
+                value += token.value;
+                this.advance();
+            } else if (token.type === TokenType.QuotedArgument) {
+                value += '"' + token.value + '"';
+                this.advance();
+            } else if (token.type === TokenType.BracketArgument) {
+                value += token.value;
+                this.advance();
+            } else if (token.type === TokenType.Comment || token.type === TokenType.BracketComment) {
+                value += token.value;
+                this.advance();
+            } else {
+                // Unknown token, skip it
+                this.advance();
+            }
+        }
+
+        return {
+            value: value,
+            quoted: false,
+            bracket: false,
+            line: startLine,
+            blankLinesBefore: blankLinesBefore > 0 ? blankLinesBefore - 1 : 0
+        };
     }
 
     private parseBlock(startCommand: CommandNode): BlockNode {

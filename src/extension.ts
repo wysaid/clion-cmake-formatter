@@ -198,6 +198,64 @@ function findGitRoot(startPath: string): string | null {
 }
 
 /**
+ * Calculate the number of changed lines between original and formatted text
+ */
+function calculateChangedLines(original: string, formatted: string): number {
+    const originalLines = original.split('\n');
+    const formattedLines = formatted.split('\n');
+    const maxLines = Math.max(originalLines.length, formattedLines.length);
+    let changedLines = 0;
+
+    for (let i = 0; i < maxLines; i++) {
+        const origLine = i < originalLines.length ? originalLines[i] : undefined;
+        const formLine = i < formattedLines.length ? formattedLines[i] : undefined;
+
+        if (origLine !== formLine) {
+            changedLines++;
+        }
+    }
+
+    return changedLines;
+}
+
+/**
+ * Get the keybinding for the format document command
+ */
+async function getFormatKeybinding(): Promise<string | undefined> {
+    try {
+        const keybindings = await vscode.commands.executeCommand<any[]>(
+            'vscode.executeCommandKeybindings',
+            'editor.action.formatDocument'
+        );
+        if (keybindings && keybindings.length > 0 && keybindings[0].key) {
+            return keybindings[0].key;
+        }
+    } catch {
+        // Ignore errors
+    }
+    return undefined;
+}
+
+/**
+ * Show formatting result message
+ */
+async function showFormattingResult(changedLines: number): Promise<void> {
+    const keybinding = await getFormatKeybinding();
+    const keybindingText = keybinding ? ` (${keybinding})` : '';
+
+    if (changedLines === 0) {
+        // Use template literals for localization
+        const message = vscode.l10n.t('No changes: content is already well-formatted');
+        const fullMessage = vscode.l10n.t('Reformat Code{0}', keybindingText);
+        vscode.window.setStatusBarMessage(`${message} - ${fullMessage}`, 3000);
+    } else {
+        const message = vscode.l10n.t('Formatted {0} lines', changedLines.toString());
+        const fullMessage = vscode.l10n.t('Reformat Code{0}', keybindingText);
+        vscode.window.setStatusBarMessage(`${message} - ${fullMessage}`, 3000);
+    }
+}
+
+/**
  * Document Formatting Provider for CMake files
  */
 class CMakeFormattingProvider implements vscode.DocumentFormattingEditProvider {
@@ -210,6 +268,14 @@ class CMakeFormattingProvider implements vscode.DocumentFormattingEditProvider {
             const source = document.getText();
             const options = getFormatterOptions(document);
             const formatted = formatCMake(source, options);
+
+            // Calculate changed lines
+            const changedLines = calculateChangedLines(source, formatted);
+
+            // Show formatting result asynchronously (don't block the formatting)
+            showFormattingResult(changedLines).catch(() => {
+                // Ignore errors in notification
+            });
 
             // Create a text edit that replaces the entire document
             const fullRange = new vscode.Range(
@@ -242,6 +308,14 @@ class CMakeRangeFormattingProvider implements vscode.DocumentRangeFormattingEdit
             const source = document.getText();
             const options = getFormatterOptions(document);
             const formatted = formatCMake(source, options);
+
+            // Calculate changed lines
+            const changedLines = calculateChangedLines(source, formatted);
+
+            // Show formatting result asynchronously (don't block the formatting)
+            showFormattingResult(changedLines).catch(() => {
+                // Ignore errors in notification
+            });
 
             // Create a text edit that replaces the entire document
             const fullRange = new vscode.Range(

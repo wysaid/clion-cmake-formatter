@@ -28,5 +28,8 @@
     "config.alignControlFlowParentheses.description": "Align control flow parentheses when multi-line",
     "config.enableProjectConfig.description": "Enable reading project-level configuration from .cc-format.jsonc files. When disabled, only VS Code settings are used.",
     "command.formatDocument": "CLion CMake Format: Format Document",
-    "command.createConfig": "CLion CMake Format: Create Default Configuration File"
+    "command.createConfig": "CLion CMake Format: Create Default Config File",
+    "formatting.noChanges": "No changes: content is already well-formatted",
+    "formatting.formatted": "Formatted {0} lines",
+    "formatting.reformatCode": "Reformat Code{0}"
 }

@@ -30,6 +30,7 @@ export interface Token {
     value: string;
     line: number;
     column: number;
+    endLine?: number;  // End line for multi-line tokens (like quoted arguments)
 }
 
 /**
@@ -80,8 +81,10 @@ export interface ArgumentInfo {
     inlineComment?: string;
     /** Line number of the inline comment */
     inlineCommentLine?: number;
-    /** Line number of this argument */
+    /** Line number of this argument (start line for multi-line arguments) */
     line?: number;
+    /** End line number of this argument (for multi-line arguments like quoted strings) */
+    endLine?: number;
     /** Number of blank lines before this argument (within command arguments) */
     blankLinesBefore?: number;
 }
@@ -333,11 +336,14 @@ export class CMakeTokenizer {
             value += this.advance();
         }
 
+        const endLine = this.line;
+
         return {
             type: TokenType.BracketArgument,
             value,
             line: startLine,
-            column: startColumn
+            column: startColumn,
+            endLine
         };
     }
 
@@ -398,26 +404,41 @@ export class CMakeTokenizer {
             this.advance(); // closing "
         }
 
+        const endLine = this.line;
+
         return {
             type: TokenType.QuotedArgument,
             value,
             line: startLine,
-            column: startColumn
+            column: startColumn,
+            endLine
         };
     }
 
     private readUnquotedArgument(startLine: number, startColumn: number): Token {
         let value = '';
 
-        while (!this.isAtEnd() && this.isUnquotedArgumentChar(this.peek())) {
-            value += this.advance();
+        while (!this.isAtEnd()) {
+            if (this.peek() === '\\' && this.peek(1) !== '') {
+                // Handle escape sequences in unquoted arguments
+                // In CMake, backslash can escape special characters
+                value += this.advance(); // backslash
+                value += this.advance(); // escaped char
+            } else if (this.isUnquotedArgumentChar(this.peek())) {
+                value += this.advance();
+            } else {
+                break;
+            }
         }
+
+        const endLine = this.line;
 
         return {
             type: TokenType.Argument,
             value,
             line: startLine,
-            column: startColumn
+            column: startColumn,
+            endLine
         };
     }
 }
@@ -450,6 +471,24 @@ export class CMakeParser {
      */
     parse(): FileNode {
         const children: ASTNode[] = [];
+
+        // Handle leading blank lines at start of file
+        if (!this.isAtEnd() && this.peek().type === TokenType.Newline) {
+            const startLine = 1;
+            let count = 0;
+            while (!this.isAtEnd() && this.peek().type === TokenType.Newline) {
+                count++;
+                this.advance();
+            }
+            if (count > 0) {
+                children.push({
+                    type: NodeType.BlankLine,
+                    startLine,
+                    endLine: startLine + count - 1,
+                    count
+                } as BlankLineNode);
+            }
+        }
 
         while (!this.isAtEnd()) {
             const node = this.parseElement();
@@ -588,10 +627,12 @@ export class CMakeParser {
         const hasFirstArgOnSameLine = args.length > 0 && args[0].line === leftParenLine;
 
         // Determine if closing paren is on same line as last arg
+        const lastArg = args[args.length - 1];
+        const lastArgEndLine = lastArg ? (lastArg.endLine ?? lastArg.line) : undefined;
         const hasClosingParenOnSameLine =
             rightParenLine !== undefined &&
             args.length > 0 &&
-            args[args.length - 1].line === rightParenLine;
+            lastArgEndLine === rightParenLine;
 
         const command: CommandNode = {
             type: NodeType.Command,
@@ -655,6 +696,7 @@ export class CMakeParser {
                     quoted: false,
                     bracket: false,
                     line: token.line,
+                    endLine: token.endLine,
                     blankLinesBefore: consecutiveNewlines > 0 ? consecutiveNewlines - 1 : 0
                 };
             } else if (token.type === TokenType.QuotedArgument) {
@@ -664,6 +706,7 @@ export class CMakeParser {
                     quoted: true,
                     bracket: false,
                     line: token.line,
+                    endLine: token.endLine,
                     blankLinesBefore: consecutiveNewlines > 0 ? consecutiveNewlines - 1 : 0
                 };
             } else if (token.type === TokenType.BracketArgument) {
@@ -673,6 +716,7 @@ export class CMakeParser {
                     quoted: false,
                     bracket: true,
                     line: token.line,
+                    endLine: token.endLine,
                     blankLinesBefore: consecutiveNewlines > 0 ? consecutiveNewlines - 1 : 0
                 };
             } else if (token.type === TokenType.LeftParen) {
@@ -757,7 +801,26 @@ export class CMakeParser {
 
         // Skip newline after start command
         if (!this.isAtEnd() && this.peek().type === TokenType.Newline) {
+            const firstNewline = this.peek();
             this.advance();
+
+            // Check for blank lines immediately after start command
+            if (!this.isAtEnd() && this.peek().type === TokenType.Newline) {
+                const startLine = firstNewline.line + 1;
+                let count = 0;
+                while (!this.isAtEnd() && this.peek().type === TokenType.Newline) {
+                    count++;
+                    this.advance();
+                }
+                if (count > 0) {
+                    body.push({
+                        type: NodeType.BlankLine,
+                        startLine,
+                        endLine: startLine + count - 1,
+                        count
+                    } as BlankLineNode);
+                }
+            }
         }
 
         // Parse body until we hit the end command

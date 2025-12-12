@@ -332,6 +332,32 @@ This extension implements CLion's CMake formatting rules:
 8. **Blank line management**: Limits consecutive blank lines while preserving logical grouping
 9. **Parenthesis spacing**: Configurable spacing before and inside parentheses for different command types
 
+## Differences from CLion
+
+While this extension aims to replicate CLion's CMake formatting behavior, there are intentional differences in certain areas:
+
+### Loop Control Commands (`break` and `continue`)
+
+**CLion Behavior**: CLion ignores spacing rules for `break()` and `continue()` commands, treating both `break()` and `break ()` as acceptable.
+
+**This Extension**: `break` and `continue` follow the same spacing rules as their parent loop construct (`foreach`/`while`). This means:
+- If `spaceBeforeForeachParentheses` is `true`, the formatter will enforce `break ()` and `continue ()`
+- If `spaceBeforeWhileParentheses` is `true` (for `break`/`continue` inside `while` loops), the same spacing is applied
+
+**Rationale**: Loop control commands are semantically related to their loop constructs. Consistent spacing with loop keywords (`foreach`, `while`) improves visual coherence and code consistency.
+
+**Example**:
+```cmake
+# With spaceBeforeForeachParentheses: true
+foreach (item IN LISTS items)
+    if (condition)
+        break ()      # Consistent with foreach ()
+    endif ()
+endforeach ()
+```
+
+This design decision prioritizes consistency over exact CLion compatibility. If you prefer CLion's behavior, you may need to manually adjust `break` and `continue` spacing.
+
 ## License
 
 MIT License - see [LICENSE](LICENSE) for details.

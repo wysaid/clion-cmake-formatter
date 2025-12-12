@@ -332,6 +332,32 @@ clion-cmake-formatter/
 8. **空行管理**: 限制连续空行数量，同时保留逻辑分组
 9. **括号空格**: 针对不同命令类型可配置括号前后的空格
 
+## 与 CLion 的差异
+
+虽然本扩展旨在复刻 CLion 的 CMake 格式化行为，但在某些方面存在有意的差异：
+
+### 循环控制命令（`break` 和 `continue`）
+
+**CLion 行为**: CLion 忽略 `break()` 和 `continue()` 命令的空格规则，`break()` 和 `break ()` 都被视为可接受的。
+
+**本扩展**: `break` 和 `continue` 遵循其所在循环结构（`foreach`/`while`）相同的空格规则。这意味着：
+- 如果 `spaceBeforeForeachParentheses` 为 `true`，格式化器将强制使用 `break ()` 和 `continue ()`
+- 如果 `spaceBeforeWhileParentheses` 为 `true`（对于 `while` 循环中的 `break`/`continue`），应用相同的空格规则
+
+**设计理由**: 循环控制命令在语义上与其循环结构相关。与循环关键字（`foreach`、`while`）保持一致的空格规则可以提高视觉一致性和代码一致性。
+
+**示例**:
+```cmake
+# 当 spaceBeforeForeachParentheses: true 时
+foreach (item IN LISTS items)
+    if (condition)
+        break ()      # 与 foreach () 保持一致
+    endif ()
+endforeach ()
+```
+
+这个设计决策优先考虑一致性而非精确的 CLion 兼容性。如果您更喜欢 CLion 的行为，可能需要手动调整 `break` 和 `continue` 的空格。
+
 ## 许可证
 
 MIT 许可证 - 详见 [LICENSE](LICENSE)。

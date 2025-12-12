@@ -21,7 +21,7 @@ while (1)
         match "${content_post}")
     if (match STREQUAL "")
         # No more matches
-        break()
+        break ()
     endif ()
 
     # Shift content buffers and extract failing statement
@@ -44,7 +44,7 @@ while (1)
             message(STATUS "Not testing '${statement}'; "
                 "condition (${condition}) is FALSE")
             set(content_pre "${content_pre}// link error removed\n")
-            continue()
+            continue ()
         endif ()
     endif ()
 

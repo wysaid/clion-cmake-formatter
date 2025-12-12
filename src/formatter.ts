@@ -186,6 +186,7 @@ export class CMakeFormatter {
                     // Track trailing blank lines separately - don't add to lines array
                     trailingBlankLines = linesToAdd;
                 } else {
+                    // Add blank lines (even at start of file to preserve leading blank lines)
                     for (let j = 0; j < linesToAdd; j++) {
                         lines.push(this.options.keepIndentOnEmptyLines ? this.getIndent() : '');
                     }
@@ -203,8 +204,8 @@ export class CMakeFormatter {
             }
         }
 
-        // If no content, return single newline
-        if (!hasContent) {
+        // If no content (only blank lines or empty), return single newline
+        if (!hasContent && lines.length === 0) {
             return '\n';
         }
 
@@ -236,7 +237,22 @@ export class CMakeFormatter {
             case NodeType.Comment:
                 return this.formatComment(node as CommentNode);
             case NodeType.BlankLine:
-                return '';
+                // Generate blank lines for blocks
+                // When lines.join('\n') is used:
+                //   - For 1 blank line: return '' (join adds 1 newline)
+                //   - For 2 blank lines: return '\n' (join adds 1, we add 1 = 2 newlines)
+                //   - For N blank lines: return '\n'.repeat(N-1)
+                const blankNode = node as BlankLineNode;
+                if (blankNode.count <= 1) {
+                    return this.options.keepIndentOnEmptyLines ? this.getIndent() : '';
+                }
+                // For N > 1, generate N-1 newlines
+                const indent = this.options.keepIndentOnEmptyLines ? this.getIndent() : '';
+                if (indent) {
+                    // Need to add indent to each blank line
+                    return Array(blankNode.count - 1).fill(indent).join('\n');
+                }
+                return '\n'.repeat(blankNode.count - 1);
             default:
                 return null;
         }
@@ -267,8 +283,8 @@ export class CMakeFormatter {
         if (lowerName === 'if' || lowerName === 'elseif' || lowerName === 'else' || lowerName === 'endif') {
             return this.options.spaceBeforeIfParentheses;
         }
-        // foreach/endforeach follow the same rule
-        if (lowerName === 'foreach' || lowerName === 'endforeach') {
+        // foreach/endforeach and loop control commands (break/continue) follow the same rule
+        if (lowerName === 'foreach' || lowerName === 'endforeach' || lowerName === 'break' || lowerName === 'continue') {
             return this.options.spaceBeforeForeachParentheses;
         }
         // while/endwhile follow the same rule
@@ -298,6 +314,10 @@ export class CMakeFormatter {
         // while/endwhile follow the same rule
         if (lowerName === 'while' || lowerName === 'endwhile') {
             return this.options.spaceInsideWhileParentheses;
+        }
+        // break/continue are loop control commands, follow foreach rule
+        if (lowerName === 'break' || lowerName === 'continue') {
+            return this.options.spaceInsideForeachParentheses;
         }
         if (COMMAND_DEFINITION_COMMANDS.includes(lowerName)) {
             return this.options.spaceInsideCommandDefinitionParentheses;
@@ -401,19 +421,21 @@ export class CMakeFormatter {
         // This preserves the original multi-line structure
         const lineGroups: ArgumentInfo[][] = [];
         let currentGroup: ArgumentInfo[] = [];
-        let currentLine = args[0].line ?? 1;
+        let previousArgEndLine: number | undefined;
 
         for (const arg of args) {
-            const argLine = arg.line ?? currentLine;
-            if (argLine === currentLine) {
-                currentGroup.push(arg);
-            } else {
-                if (currentGroup.length > 0) {
-                    lineGroups.push(currentGroup);
-                }
+            const argLine = arg.line ?? 1;
+            const argEndLine = arg.endLine ?? argLine;
+
+            // Start a new group if this arg starts on a different line than the previous arg ended
+            if (currentGroup.length > 0 && previousArgEndLine !== undefined && argLine !== previousArgEndLine) {
+                lineGroups.push(currentGroup);
                 currentGroup = [arg];
-                currentLine = argLine;
+            } else {
+                currentGroup.push(arg);
             }
+
+            previousArgEndLine = argEndLine;
         }
         if (currentGroup.length > 0) {
             lineGroups.push(currentGroup);

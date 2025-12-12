@@ -18,9 +18,9 @@ This project provides CMake script parsing and formatting as a VS Code extension
 
 ## Code Guidelines
 - Add/adjust test cases when fixing bugs or adding features
-- Run `npm run test:unit` before commit
+- Run `npm run test:unit` and `npm run lint` before commit
 - Use English for git commit messages and PR descriptions
-- All `.md` files must be in English unless filename has language suffix (e.g., `.zh-CN.md`)
+- All `.md` files in `docs/` must be in English
 
 ## Formatting Idempotency Constraints
 - Second format output must match first format output

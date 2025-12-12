@@ -30,5 +30,5 @@
     "command.formatDocument": "CLion CMake Format: Format Document",
     "command.createConfig": "CLion CMake Format: Create Default Config File",
     "formatting.noChanges": "No changes: content is already well-formatted",
-    "formatting.formatted": "Formatted {0} lines"
+    "formatting.formatted": "File formatted successfully"
 }

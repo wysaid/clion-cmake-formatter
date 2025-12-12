@@ -16,30 +16,30 @@ No changes: content is already well-formatted
 
 This helps you quickly understand that the file doesn't need any formatting changes.
 
-### 2. Changed Lines Count
+### 2. Success Notification
 
-When formatting makes changes to the file, you will see how many lines were affected:
+When formatting makes changes to the file, you will see a confirmation:
 
 ```text
-Formatted 9 lines
+File formatted successfully
 ```
 
-This gives you immediate feedback about the impact of the formatting operation.
+This gives you immediate feedback that the formatting operation completed.
 
 ## Implementation Details
 
-### Changed Lines Calculation
+### Change Detection
 
-The extension compares the original text with the formatted text line by line:
-- Lines that are added, removed, or modified are counted as changed lines
-- Empty lines and whitespace changes are included in the count
+The extension compares the original text with the formatted text:
+- If they are identical, a "No changes" message is shown
+- If they differ, a success message is displayed
 - The comparison is done after applying all formatting rules
 
 ### Status Bar Display
 
 - Messages are displayed in the status bar for 3 seconds
 - If formatting made no changes, a "No changes" message is shown
-- If formatting changed the file, the number of changed lines is displayed
+- If formatting changed the file, a success message is displayed
 
 ## Usage
 
@@ -58,7 +58,7 @@ This feature is inspired by CLion's formatting feedback:
 | Feature | CLion | This Extension |
 |---------|-------|----------------|
 | No changes message | ✅ | ✅ |
-| Changed lines count | ✅ | ✅ |
+| Success message | ✅ | ✅ |
 | Display location | Popup notification | Status bar message |
 | Display duration | Persistent until dismissed | 3 seconds |
 
@@ -72,11 +72,11 @@ To test this feature:
 
 4. Open a poorly formatted CMake file (e.g., `test-formatting-demo.cmake`)
 5. Format it
-6. Observe the "Formatted X lines" message
+6. Observe the "File formatted successfully" message
 
 ## Technical Notes
 
 - The feature works with both document formatting and range formatting
-- Line count is calculated before the actual text replacement happens
+- Change detection is done by comparing the original and formatted text directly
 - The status bar message does not block the formatting operation
 - Errors in displaying the notification do not affect the formatting result

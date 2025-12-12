@@ -29,6 +29,6 @@
     "config.enableProjectConfig.description": "启用从 .cc-format.jsonc 文件读取项目级配置。禁用时，仅使用 VS Code 设置。",
     "command.formatDocument": "CLion CMake Format: 格式化文档",
     "command.createConfig": "CLion CMake Format: 创建默认配置文件",
-    "formatting.noChanges": "未更改行: 内容已正确格式化",
-    "formatting.formatted": "已格式化 {0} 行"
+    "formatting.noChanges": "未更改: 内容已正确格式化",
+    "formatting.formatted": "文件格式化成功"
 }

@@ -198,36 +198,14 @@ function findGitRoot(startPath: string): string | null {
 }
 
 /**
- * Calculate the number of changed lines between original and formatted text
- */
-function calculateChangedLines(original: string, formatted: string): number {
-    // Normalize line endings to handle CRLF properly on Windows
-    const originalLines = original.split(/\r?\n/);
-    const formattedLines = formatted.split(/\r?\n/);
-    const maxLines = Math.max(originalLines.length, formattedLines.length);
-    let changedLines = 0;
-
-    for (let i = 0; i < maxLines; i++) {
-        const origLine = i < originalLines.length ? originalLines[i] : undefined;
-        const formLine = i < formattedLines.length ? formattedLines[i] : undefined;
-        
-        if (origLine !== formLine) {
-            changedLines++;
-        }
-    }
-
-    return changedLines;
-}
-
-/**
  * Show formatting result message
  */
-function showFormattingResult(changedLines: number): void {
-    if (changedLines === 0) {
+function showFormattingResult(original: string, formatted: string): void {
+    if (original === formatted) {
         const message = vscode.l10n.t('No changes: content is already well-formatted');
         vscode.window.setStatusBarMessage(message, 3000);
     } else {
-        const message = vscode.l10n.t('Formatted {0} lines', changedLines.toString());
+        const message = vscode.l10n.t('File formatted successfully');
         vscode.window.setStatusBarMessage(message, 3000);
     }
 }
@@ -246,11 +224,8 @@ class CMakeFormattingProvider implements vscode.DocumentFormattingEditProvider {
             const options = getFormatterOptions(document);
             const formatted = formatCMake(source, options);
 
-            // Calculate changed lines
-            const changedLines = calculateChangedLines(source, formatted);
-
             // Show formatting result (non-blocking)
-            showFormattingResult(changedLines);
+            showFormattingResult(source, formatted);
 
             // Create a text edit that replaces the entire document
             const fullRange = new vscode.Range(
@@ -284,11 +259,8 @@ class CMakeRangeFormattingProvider implements vscode.DocumentRangeFormattingEdit
             const options = getFormatterOptions(document);
             const formatted = formatCMake(source, options);
 
-            // Calculate changed lines
-            const changedLines = calculateChangedLines(source, formatted);
-
             // Show formatting result (non-blocking)
-            showFormattingResult(changedLines);
+            showFormattingResult(source, formatted);
 
             // Create a text edit that replaces the entire document
             const fullRange = new vscode.Range(

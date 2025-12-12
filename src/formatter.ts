@@ -422,6 +422,15 @@ export class CMakeFormatter {
             const isFirstGroup = groupIndex === 0;
             const isLastGroup = groupIndex === lineGroups.length - 1;
 
+            // Add blank lines before this group if needed (from first arg in group)
+            const firstArgInGroup = group[0];
+            if (firstArgInGroup.blankLinesBefore && firstArgInGroup.blankLinesBefore > 0) {
+                const blankLinesToAdd = Math.min(firstArgInGroup.blankLinesBefore, this.options.maxBlankLines);
+                for (let i = 0; i < blankLinesToAdd; i++) {
+                    lines.push('');
+                }
+            }
+
             // Format arguments in this group
             const formattedArgs = group.map((arg, i) => {
                 const formatted = this.formatArgument(arg);
@@ -461,6 +470,13 @@ export class CMakeFormatter {
                 } else {
                     // Comment is on a different line, output it as a separate line
                     lines.push(line);
+                    // Add blank lines before the comment if needed
+                    if (lastArgInGroup.blankLinesBefore && lastArgInGroup.blankLinesBefore > 0) {
+                        const blankLinesToAdd = Math.min(lastArgInGroup.blankLinesBefore, this.options.maxBlankLines);
+                        for (let i = 0; i < blankLinesToAdd; i++) {
+                            lines.push('');
+                        }
+                    }
                     lines.push(`${continuationIndent}${inlineComment}`);
                     line = ''; // Mark this line as added
                 }
@@ -514,6 +530,19 @@ export class CMakeFormatter {
             const hasComment = !!arg.inlineComment;
             const isFirst = i === 0;
             const isLast = i === args.length - 1;
+
+            // Add blank lines before this argument if needed
+            if (arg.blankLinesBefore && arg.blankLinesBefore > 0 && currentLine !== commandStart) {
+                // Finish current line first if it has content
+                if (currentLine !== commandStart && currentLine !== continuationIndent) {
+                    lines.push(currentLine);
+                    currentLine = continuationIndent;
+                }
+                const blankLinesToAdd = Math.min(arg.blankLinesBefore, this.options.maxBlankLines);
+                for (let j = 0; j < blankLinesToAdd; j++) {
+                    lines.push('');
+                }
+            }
 
             // Check if we can add this arg to the current line
             // Don't add separator if previous arg ends with '=' (but is not just '=' or '==') and current arg is quoted

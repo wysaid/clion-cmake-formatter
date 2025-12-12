@@ -82,6 +82,8 @@ export interface ArgumentInfo {
     inlineCommentLine?: number;
     /** Line number of this argument */
     line?: number;
+    /** Number of blank lines before this argument (within command arguments) */
+    blankLinesBefore?: number;
 }
 
 /**
@@ -609,11 +611,18 @@ export class CMakeParser {
 
     private parseArguments(): ArgumentInfo[] {
         const args: ArgumentInfo[] = [];
+        let consecutiveNewlines = 0;
 
         while (!this.isAtEnd() && this.peek().type !== TokenType.RightParen) {
             const token = this.peek();
 
-            if (token.type === TokenType.Whitespace || token.type === TokenType.Newline) {
+            if (token.type === TokenType.Whitespace) {
+                this.advance();
+                continue;
+            }
+
+            if (token.type === TokenType.Newline) {
+                consecutiveNewlines++;
                 this.advance();
                 continue;
             }
@@ -623,7 +632,12 @@ export class CMakeParser {
                 if (args.length > 0 && !args[args.length - 1].inlineComment) {
                     args[args.length - 1].inlineComment = token.value;
                     args[args.length - 1].inlineCommentLine = token.line;
+                    // If there were blank lines before the comment, record them
+                    if (consecutiveNewlines > 0) {
+                        args[args.length - 1].blankLinesBefore = Math.max(args[args.length - 1].blankLinesBefore || 0, consecutiveNewlines - 1);
+                    }
                 }
+                consecutiveNewlines = 0;  // Reset after comment
                 this.advance();
                 continue;
             }
@@ -636,7 +650,8 @@ export class CMakeParser {
                     value: token.value,
                     quoted: false,
                     bracket: false,
-                    line: token.line
+                    line: token.line,
+                    blankLinesBefore: consecutiveNewlines > 0 ? consecutiveNewlines - 1 : 0
                 };
             } else if (token.type === TokenType.QuotedArgument) {
                 this.advance();
@@ -644,7 +659,8 @@ export class CMakeParser {
                     value: token.value,
                     quoted: true,
                     bracket: false,
-                    line: token.line
+                    line: token.line,
+                    blankLinesBefore: consecutiveNewlines > 0 ? consecutiveNewlines - 1 : 0
                 };
             } else if (token.type === TokenType.BracketArgument) {
                 this.advance();
@@ -652,7 +668,8 @@ export class CMakeParser {
                     value: token.value,
                     quoted: false,
                     bracket: true,
-                    line: token.line
+                    line: token.line,
+                    blankLinesBefore: consecutiveNewlines > 0 ? consecutiveNewlines - 1 : 0
                 };
             } else {
                 break;
@@ -660,6 +677,7 @@ export class CMakeParser {
 
             if (arg) {
                 args.push(arg);
+                consecutiveNewlines = 0;  // Reset after adding argument
             }
         }
 

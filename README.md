@@ -224,7 +224,7 @@ clion-cmake-formatter/
 
 ## 📊 Test Coverage
 
-- **126 unit tests** covering parser, formatter, and configuration
+- **126+ unit tests** covering parser, formatter, and configuration
 - **Idempotency tests** — formatting twice produces identical output
 - **CMake official tests** — 20 files from CMake repository (6,302 lines)
 - **100% pass rate** ✅

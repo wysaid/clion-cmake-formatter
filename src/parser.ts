@@ -1,6 +1,6 @@
 /**
  * CMake Parser - Tokenizes and parses CMakeLists.txt content
- * 
+ *
  * This module provides tokenization and AST building for CMake files,
  * supporting commands, arguments, comments, blank lines, and nested blocks.
  */
@@ -78,6 +78,8 @@ export interface ArgumentInfo {
     bracketLevel?: number;
     /** Comment attached to this argument (inline comment after the argument) */
     inlineComment?: string;
+    /** Line number of the inline comment */
+    inlineCommentLine?: number;
     /** Line number of this argument */
     line?: number;
 }
@@ -137,21 +139,21 @@ export class CMakeTokenizer {
      */
     tokenize(): Token[] {
         const tokens: Token[] = [];
-        
+
         while (!this.isAtEnd()) {
             const token = this.nextToken();
             if (token) {
                 tokens.push(token);
             }
         }
-        
+
         tokens.push({
             type: TokenType.EOF,
             value: '',
             line: this.line,
             column: this.column
         });
-        
+
         return tokens;
     }
 
@@ -294,30 +296,30 @@ export class CMakeTokenizer {
     private countBracketLevel(): number {
         let level = 0;
         let offset = 1;
-        
+
         while (this.peek(offset) === '=') {
             level++;
             offset++;
         }
-        
+
         if (this.peek(offset) === '[') {
             return level;
         }
-        
+
         return -1;
     }
 
     private readBracketArgument(startLine: number, startColumn: number, level: number): Token {
         let value = '[';
         this.advance(); // [
-        
+
         for (let i = 0; i < level; i++) {
             value += this.advance(); // =
         }
         value += this.advance(); // [
-        
+
         const closingBracket = ']' + '='.repeat(level) + ']';
-        
+
         while (!this.isAtEnd()) {
             // Use startsWith with position parameter to avoid creating substrings
             if (this.source.startsWith(closingBracket, this.pos)) {
@@ -328,7 +330,7 @@ export class CMakeTokenizer {
             }
             value += this.advance();
         }
-        
+
         return {
             type: TokenType.BracketArgument,
             value,
@@ -340,24 +342,24 @@ export class CMakeTokenizer {
     private readBracketComment(startLine: number, startColumn: number): Token {
         let value = '#';
         this.advance(); // #
-        
+
         // Count bracket level
         let level = 0;
-        
+
         this.advance(); // [
         value += '[';
-        
+
         while (this.peek() === '=') {
             value += this.advance();
             level++;
         }
-        
+
         if (this.peek() === '[') {
             value += this.advance();
         }
-        
+
         const closingBracket = ']' + '='.repeat(level) + ']';
-        
+
         while (!this.isAtEnd()) {
             // Use startsWith with position parameter to avoid creating substrings
             if (this.source.startsWith(closingBracket, this.pos)) {
@@ -368,7 +370,7 @@ export class CMakeTokenizer {
             }
             value += this.advance();
         }
-        
+
         return {
             type: TokenType.BracketComment,
             value,
@@ -380,7 +382,7 @@ export class CMakeTokenizer {
     private readQuotedArgument(startLine: number, startColumn: number): Token {
         let value = '';
         this.advance(); // opening "
-        
+
         while (!this.isAtEnd() && this.peek() !== '"') {
             if (this.peek() === '\\' && this.peek(1) !== '') {
                 value += this.advance(); // backslash
@@ -389,11 +391,11 @@ export class CMakeTokenizer {
                 value += this.advance();
             }
         }
-        
+
         if (this.peek() === '"') {
             this.advance(); // closing "
         }
-        
+
         return {
             type: TokenType.QuotedArgument,
             value,
@@ -404,11 +406,11 @@ export class CMakeTokenizer {
 
     private readUnquotedArgument(startLine: number, startColumn: number): Token {
         let value = '';
-        
+
         while (!this.isAtEnd() && this.isUnquotedArgumentChar(this.peek())) {
             value += this.advance();
         }
-        
+
         return {
             type: TokenType.Argument,
             value,
@@ -446,14 +448,14 @@ export class CMakeParser {
      */
     parse(): FileNode {
         const children: ASTNode[] = [];
-        
+
         while (!this.isAtEnd()) {
             const node = this.parseElement();
             if (node) {
                 children.push(node);
             }
         }
-        
+
         return {
             type: NodeType.File,
             children,
@@ -482,18 +484,18 @@ export class CMakeParser {
 
     private parseElement(): ASTNode | null {
         this.skipWhitespace();
-        
+
         if (this.isAtEnd()) {
             return null;
         }
-        
+
         const token = this.peek();
-        
+
         // Handle newlines (blank lines)
         if (token.type === TokenType.Newline) {
             const startLine = token.line;
             this.advance();
-            
+
             // Check if it's a blank line (consecutive newlines)
             if (!this.isAtEnd() && this.peek().type === TokenType.Newline) {
                 let count = 0;
@@ -508,10 +510,10 @@ export class CMakeParser {
                     count
                 } as BlankLineNode;
             }
-            
+
             return null; // Single newline, skip
         }
-        
+
         // Handle comments
         if (token.type === TokenType.Comment || token.type === TokenType.BracketComment) {
             this.advance();
@@ -523,12 +525,12 @@ export class CMakeParser {
                 endLine: token.line
             } as CommentNode;
         }
-        
+
         // Handle commands
         if (token.type === TokenType.Argument) {
             return this.parseCommand();
         }
-        
+
         // Skip unknown tokens
         this.advance();
         return null;
@@ -538,9 +540,9 @@ export class CMakeParser {
         const nameToken = this.advance();
         const commandName = nameToken.value; // Preserve original case
         const startLine = nameToken.line;
-        
+
         this.skipWhitespace();
-        
+
         // Expect left paren
         if (this.isAtEnd() || this.peek().type !== TokenType.LeftParen) {
             // Return command with no arguments
@@ -553,13 +555,13 @@ export class CMakeParser {
                 isMultiLine: false
             };
         }
-        
+
         const leftParenLine = this.peek().line;
         this.advance(); // consume (
-        
+
         // Parse arguments
         const args = this.parseArguments();
-        
+
         // Expect right paren
         let endLine = startLine;
         let rightParenLine = startLine;
@@ -568,23 +570,23 @@ export class CMakeParser {
             rightParenLine = this.peek().line;
             this.advance();
         }
-        
+
         // Check for trailing comment
         this.skipWhitespace();
         let trailingComment: string | undefined;
         if (!this.isAtEnd() && this.peek().type === TokenType.Comment) {
             trailingComment = this.advance().value;
         }
-        
+
         // Determine if command spans multiple lines
         const isMultiLine = endLine > startLine;
-        
+
         // Determine if first arg is on same line as opening paren
         const hasFirstArgOnSameLine = args.length > 0 && args[0].line === leftParenLine;
-        
+
         // Determine if closing paren is on same line as last arg
         const hasClosingParenOnSameLine = args.length > 0 && args[args.length - 1].line === rightParenLine;
-        
+
         const command: CommandNode = {
             type: NodeType.Command,
             name: commandName,
@@ -596,37 +598,38 @@ export class CMakeParser {
             hasFirstArgOnSameLine,
             hasClosingParenOnSameLine
         };
-        
+
         // Check if this is a block-starting command (case-insensitive)
         if (CMakeParser.BLOCK_START_COMMANDS[commandName.toLowerCase()]) {
             return this.parseBlock(command);
         }
-        
+
         return command;
     }
 
     private parseArguments(): ArgumentInfo[] {
         const args: ArgumentInfo[] = [];
-        
+
         while (!this.isAtEnd() && this.peek().type !== TokenType.RightParen) {
             const token = this.peek();
-            
+
             if (token.type === TokenType.Whitespace || token.type === TokenType.Newline) {
                 this.advance();
                 continue;
             }
-            
+
             if (token.type === TokenType.Comment) {
                 // Attach comment to the previous argument if there is one
                 if (args.length > 0 && !args[args.length - 1].inlineComment) {
                     args[args.length - 1].inlineComment = token.value;
+                    args[args.length - 1].inlineCommentLine = token.line;
                 }
                 this.advance();
                 continue;
             }
-            
+
             let arg: ArgumentInfo | null = null;
-            
+
             if (token.type === TokenType.Argument) {
                 this.advance();
                 arg = {
@@ -654,12 +657,12 @@ export class CMakeParser {
             } else {
                 break;
             }
-            
+
             if (arg) {
                 args.push(arg);
             }
         }
-        
+
         return args;
     }
 
@@ -667,26 +670,26 @@ export class CMakeParser {
         const blockType = startCommand.name.toLowerCase(); // Use lowercase for block type matching
         const endCommandName = CMakeParser.BLOCK_START_COMMANDS[blockType];
         const body: ASTNode[] = [];
-        
+
         // Skip newline after start command
         if (!this.isAtEnd() && this.peek().type === TokenType.Newline) {
             this.advance();
         }
-        
+
         // Parse body until we hit the end command
         while (!this.isAtEnd()) {
             this.skipWhitespace();
-            
+
             if (this.isAtEnd()) {
                 break;
             }
-            
+
             const token = this.peek();
-            
+
             // Check for end command
             if (token.type === TokenType.Argument) {
                 const nextName = token.value.toLowerCase();
-                
+
                 // Handle elseif, else within if blocks
                 if (blockType === 'if' && (nextName === 'elseif' || nextName === 'else')) {
                     // Parse the elseif/else as a command and add to body
@@ -694,7 +697,7 @@ export class CMakeParser {
                     body.push(elseCommand);
                     continue;
                 }
-                
+
                 if (nextName === endCommandName) {
                     const endCommand = this.parseCommand() as CommandNode;
                     return {
@@ -708,13 +711,13 @@ export class CMakeParser {
                     };
                 }
             }
-            
+
             const node = this.parseElement();
             if (node) {
                 body.push(node);
             }
         }
-        
+
         // If we didn't find an end command, create a synthetic one
         return {
             type: NodeType.Block,

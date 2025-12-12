@@ -176,10 +176,10 @@ export class CMakeFormatter {
             if (child.type === NodeType.BlankLine) {
                 const blankNode = child as BlankLineNode;
                 const isLastChild = i === node.children.length - 1;
-                
+
                 // Add up to maxBlankLines from the count in this node
                 const linesToAdd = Math.min(blankNode.count, this.options.maxBlankLines - consecutiveBlankLines);
-                
+
                 if (isLastChild) {
                     // Track trailing blank lines separately - don't add to lines array
                     trailingBlankLines = linesToAdd;
@@ -208,17 +208,17 @@ export class CMakeFormatter {
 
         // Join lines
         let result = lines.join('\n');
-        
+
         // Ensure exactly one trailing newline after content
         if (!result.endsWith('\n')) {
             result += '\n';
         }
-        
+
         // Add trailing blank lines (each blank line = one extra newline)
         for (let i = 0; i < trailingBlankLines; i++) {
             result += '\n';
         }
-        
+
         return result;
     }
 
@@ -324,11 +324,11 @@ export class CMakeFormatter {
         // If the original command was multi-line, preserve multi-line format
         if (node.isMultiLine || hasInlineComments) {
             return this.formatCommandPreserveMultiLine(
-                commandName, 
-                node.arguments, 
-                indent, 
-                spaceBeforeParen, 
-                innerPadding, 
+                commandName,
+                node.arguments,
+                indent,
+                spaceBeforeParen,
+                innerPadding,
                 node.trailingComment,
                 node.hasFirstArgOnSameLine,
                 node.hasClosingParenOnSameLine
@@ -355,7 +355,15 @@ export class CMakeFormatter {
         spaceBeforeParen: string,
         innerPadding: string
     ): string {
-        const formattedArgs = args.map(arg => this.formatArgument(arg)).join(' ');
+        const formattedArgs = args.map((arg, i) => {
+            const formatted = this.formatArgument(arg);
+            // Don't add space if previous arg ends with '=' (but is not just '=' or '==') and current arg is quoted
+            const prevArg = i > 0 ? args[i - 1] : null;
+            if (prevArg && prevArg.value.endsWith('=') && prevArg.value.length > 1 && prevArg.value !== '==' && arg.quoted) {
+                return formatted;
+            }
+            return i === 0 ? formatted : ' ' + formatted;
+        }).join('');
         return `${indent}${name}${spaceBeforeParen}(${innerPadding}${formattedArgs}${innerPadding})`;
     }
 
@@ -415,11 +423,21 @@ export class CMakeFormatter {
             const isLastGroup = groupIndex === lineGroups.length - 1;
 
             // Format arguments in this group
-            const formattedArgs = group.map(arg => this.formatArgument(arg)).join(' ');
-            
+            const formattedArgs = group.map((arg, i) => {
+                const formatted = this.formatArgument(arg);
+                // Don't add space if previous arg ends with '=' (but is not just '=' or '==') and current arg is quoted
+                const prevArg = i > 0 ? group[i - 1] : null;
+                if (prevArg && prevArg.value.endsWith('=') && prevArg.value.length > 1 && prevArg.value !== '==' && arg.quoted) {
+                    return formatted;
+                }
+                return i === 0 ? formatted : ' ' + formatted;
+            }).join('');
+
             // Get the inline comment from the last arg in the group
             const lastArgInGroup = group[group.length - 1];
             const inlineComment = lastArgInGroup.inlineComment;
+            const inlineCommentLine = lastArgInGroup.inlineCommentLine;
+            const lastArgLine = lastArgInGroup.line;
 
             let line: string;
             if (isFirstGroup && hasFirstArgOnSameLine) {
@@ -435,7 +453,17 @@ export class CMakeFormatter {
 
             // Add inline comment if present
             if (inlineComment) {
-                line += ' ' + inlineComment;
+                // Check if comment is on the same line as the last argument
+                if (inlineCommentLine !== undefined && lastArgLine !== undefined &&
+                    inlineCommentLine === lastArgLine) {
+                    // Comment is on the same line, add it to the end of the line
+                    line += ' ' + inlineComment;
+                } else {
+                    // Comment is on a different line, output it as a separate line
+                    lines.push(line);
+                    lines.push(`${continuationIndent}${inlineComment}`);
+                    line = ''; // Mark this line as added
+                }
             }
 
             // Add closing paren if this is the last group and it should be on same line
@@ -443,7 +471,9 @@ export class CMakeFormatter {
                 line += ')';
             }
 
-            lines.push(line);
+            if (line) { // Only push if line is not empty
+                lines.push(line);
+            }
         }
 
         // Add closing paren on separate line if needed
@@ -486,7 +516,11 @@ export class CMakeFormatter {
             const isLast = i === args.length - 1;
 
             // Check if we can add this arg to the current line
-            const separator = isFirst ? '' : ' ';
+            // Don't add separator if previous arg ends with '=' (but is not just '=' or '==') and current arg is quoted
+            // This handles cases like -DVAR="value" where we want -DVAR="value" not -DVAR= "value"
+            const prevArg = i > 0 ? args[i - 1] : null;
+            const shouldOmitSeparator = prevArg && prevArg.value.endsWith('=') && prevArg.value.length > 1 && prevArg.value !== '==' && arg.quoted;
+            const separator = isFirst || shouldOmitSeparator ? '' : ' ';
             const testLine = currentLine + separator + formattedArg;
 
             if ((this.options.lineLength === 0 || testLine.length <= this.options.lineLength) && !hasComment) {
@@ -501,7 +535,16 @@ export class CMakeFormatter {
 
             // If this argument has an inline comment, end the line here
             if (hasComment) {
-                currentLine += ' ' + arg.inlineComment;
+                // Check if comment is on the same line as the argument
+                if (arg.inlineCommentLine !== undefined && arg.line !== undefined &&
+                    arg.inlineCommentLine === arg.line) {
+                    // Comment is on the same line, add it to the end of the line
+                    currentLine += ' ' + arg.inlineComment;
+                } else {
+                    // Comment is on a different line, output it as a separate line
+                    lines.push(currentLine);
+                    currentLine = continuationIndent + arg.inlineComment;
+                }
                 lines.push(currentLine);
                 currentLine = continuationIndent;
             }

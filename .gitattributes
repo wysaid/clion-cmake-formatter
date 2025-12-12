@@ -2,14 +2,16 @@
 * text=auto
 
 # TypeScript and JavaScript files should use LF
-*.ts   text eol=lf
-*.js   text eol=lf
+*.ts text eol=lf
+*.js text eol=lf
 *.json text eol=lf
-*.md   text eol=lf
+*.md text eol=lf
+*.cmake text eol=lf
+*CMakeLists.txt text eol=lf
 
 # Shell scripts should use LF
-*.sh   text eol=lf
+*.sh text eol=lf
 
 # Batch files should use CRLF
-*.bat  text eol=crlf
-*.cmd  text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf

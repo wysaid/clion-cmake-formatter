@@ -178,7 +178,7 @@
 
 | 设置 | 类型 | 默认值 | 描述 |
 |------|------|--------|------|
-| `clionCMakeFormatter.lineLength` | number | `0` | 换行前的最大行长度（0 = 不限制，非零值最小为 40） |
+| `clionCMakeFormatter.lineLength` | number | `0` | 换行前的最大行长度（0 = 不限制，非零值最小为 30） |
 | `clionCMakeFormatter.alignMultiLineArguments` | boolean | `false` | 在多行命令中垂直对齐参数 |
 | `clionCMakeFormatter.alignMultiLineParentheses` | boolean | `false` | 在多行命令中将右括号与开始行对齐 |
 | `clionCMakeFormatter.alignControlFlowParentheses` | boolean | `false` | 在多行格式中对齐控制流语句的括号 |

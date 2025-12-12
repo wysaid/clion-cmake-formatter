@@ -178,7 +178,7 @@ Configure via VSCode settings (File → Preferences → Settings or `settings.js
 
 | Setting | Type | Default | Description |
 |---------|------|---------|-------------|
-| `clionCMakeFormatter.lineLength` | number | `0` | Maximum line length before wrapping (0 = unlimited, minimum 40 for non-zero values) |
+| `clionCMakeFormatter.lineLength` | number | `0` | Maximum line length before wrapping (0 = unlimited, minimum 30 for non-zero values) |
 | `clionCMakeFormatter.alignMultiLineArguments` | boolean | `false` | Align arguments vertically in multi-line commands |
 | `clionCMakeFormatter.alignMultiLineParentheses` | boolean | `false` | Align closing parenthesis with opening line in multi-line commands |
 | `clionCMakeFormatter.alignControlFlowParentheses` | boolean | `false` | Align control flow statement parentheses in multi-line format |

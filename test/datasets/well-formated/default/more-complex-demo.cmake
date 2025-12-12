@@ -660,7 +660,7 @@ if (APP_DEMO_CI_GTEST)
     add_executable(example-app-tests ${TEST_SOURCES} ${SDK_TEST_SOURCE}
         # Include all source files same as main app, but exclude main.cpp
         ${MY_ICON_RC} # windows icon
-        ${MY_SOURCE_FOR_TEST}  # Use version without main.cpp
+        ${MY_SOURCE_FOR_TEST} # Use version without main.cpp
         ${ENGINE_TEST_SOURCE}
         ${ENGINE_ANGLE_CONTEXT_SOURCE}
         ${DEMO_SOURCE_OBJC}
@@ -741,7 +741,7 @@ if (APP_DEMO_CI_GTEST)
     if (USE_MAC_BUNDLE)
         set_target_properties(example-app-tests PROPERTIES
             MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist
-            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/example-app.app/Contents/MacOS"  # Ensure output to same directory level as example-app
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/example-app.app/Contents/MacOS" # Ensure output to same directory level as example-app
         )
     endif ()
 

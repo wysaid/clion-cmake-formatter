@@ -219,11 +219,18 @@ function calculateChangedLines(original: string, formatted: string): number {
 }
 
 /**
+ * Keybinding information returned by VS Code
+ */
+interface KeybindingInfo {
+    key?: string;
+}
+
+/**
  * Get the keybinding for the format document command
  */
 async function getFormatKeybinding(): Promise<string | undefined> {
     try {
-        const keybindings = await vscode.commands.executeCommand<any[]>(
+        const keybindings = await vscode.commands.executeCommand<KeybindingInfo[]>(
             'vscode.executeCommandKeybindings',
             'editor.action.formatDocument'
         );

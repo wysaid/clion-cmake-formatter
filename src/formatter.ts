@@ -236,7 +236,7 @@ export class CMakeFormatter {
                 return this.formatBlock(node as BlockNode);
             case NodeType.Comment:
                 return this.formatComment(node as CommentNode);
-            case NodeType.BlankLine:
+            case NodeType.BlankLine: {
                 // Generate blank lines for blocks
                 // When lines.join('\n') is used:
                 //   - For 1 blank line: return '' (join adds 1 newline)
@@ -253,6 +253,7 @@ export class CMakeFormatter {
                     return Array(blankNode.count - 1).fill(indent).join('\n');
                 }
                 return '\n'.repeat(blankNode.count - 1);
+            }
             default:
                 return null;
         }

@@ -29,7 +29,11 @@ Each style directory (e.g., `default/`) has exactly **one** `.cc-format.jsonc` c
 
 ## Available Styles
 
-- **default**: Tests the plugin's default configuration settings
+- **default**: Tests the plugin's default configuration settings (4-space indent, space before control flow parentheses, unchanged command case)
+- **lowercase**: Modern CMake style with lowercase commands
+- **uppercase**: Legacy CMake style with uppercase commands
+- **compact**: Minimal style with 2-space indent, no space before parentheses, maxBlankLines=1, lowercase commands
+- **jetbrains**: JetBrains CLion-like style with continuationIndentSize=8, lowercase commands
 
 ## Adding New Test Cases
 
@@ -53,10 +57,13 @@ For each file in this directory:
 
 ## Implementation
 
-- Test file: `test/well-formated.test.ts`
+- Test files: 
+  - `test/well-formated.test.ts` - Tests idempotency for the default style root files
+  - `test/dataset-styles.test.ts` - Tests formatting with different styles and idempotency for all categories
 - Helper functions: `test/helpers.ts`
   - `listWellFormatedFiles()` - Recursively scans all `.cmake` files
   - `loadWellFormatedConfigForFile()` - Loads the style root configuration
+- Generation script: `scripts/generate-well-formatted.ts` - Generates expected outputs for non-default styles
 
 ## Note on cmake-official Directory
 

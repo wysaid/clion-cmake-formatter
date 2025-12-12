@@ -4,7 +4,7 @@ if (NOT DEFINED CMAKE_POLICY_VERSION_MINIMUM)
     set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 endif ()
 
-# 目前 MacOS 上只支持编译到 x86_64 目标
+# Currently only x86_64 target is supported on macOS
 if (NOT DEFINED CMAKE_OSX_ARCHITECTURES)
     set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "")
 endif ()
@@ -15,7 +15,7 @@ cmake_policy(SET CMP0079 NEW)
 
 project(example-app LANGUAGES CXX)
 
-# 特性编辑模式,默认打开
+# Feature editor mode, enabled by default
 option(USE_FEATURE_EDIT "Enable feature editor." OFF)
 set(USE_FEATURE_EDIT ON CACHE BOOL "Enable feature editor" FORCE)
 option(GRAPHICS_ENABLE_STATISTICS_HOOK "enable Statistics Hook" OFF)
@@ -91,13 +91,13 @@ set(USE_QT ON CACHE INTERNAL "")
 set(USE_RG ON CACHE INTERNAL "")
 # set(ENGINE_NO_FFMPEG_VIDEO_MODULE ON CACHE INTERNAL "")
 
-# 定义一个宏避免每一帧自动清理AI数据,定义EXAMPLE_FEATURE_QT会被当做动态库存在编译问题
+# Define macro to prevent automatic data cleanup per frame, define EXAMPLE_FEATURE_QT as static library
 add_definitions(-DEXAMPLE_FEATURE_QT_STATIC=1)
 
 # ExampleSDK
 add_subdirectory(${DEMO_SDK_DIR})
 
-# graphics-framework 不需要单独引用 stb_image, 因为 astc encoder 已经引用了.
+# graphics-framework doesn't need separate stb_image reference, as astc encoder already includes it.
 target_compile_definitions(graphics-framework PRIVATE -DDISABLE_STB_IMAGE_IMPLEMENTATION=1)
 
 # Utilities
@@ -114,7 +114,7 @@ endif ()
 set(ML_TOOLKIT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/dep/ml-toolkit)
 include(${ML_TOOLKIT_DIR}/ml_toolkit_lib.cmake)
 
-# 不知道为啥和 CMake 文档上写的不一样
+# Workaround for CMake documentation inconsistency
 if (WIN32)
     get_target_property(ML_TOOLKIT_LOCATION_DEBUG ml_toolkit_lib IMPORTED_IMPLIB_DEBUG)
     get_target_property(ML_TOOLKIT_LOCATION_RELEASE ml_toolkit_lib IMPORTED_IMPLIB_RELEASE)
@@ -139,10 +139,10 @@ endif ()
 
 # ## ml-toolkit end
 
-# 设置 glfw 依赖
+# Setup GLFW dependency
 include(${GRAPHICS_DIR}/utils/findGLFW.cmake)
 
-# 设置 Qt 依赖
+# Setup Qt dependency
 include(${GRAPHICS_DIR}/utils/findQt.cmake)
 
 set(CMAKE_AUTOUIC ON)
@@ -238,8 +238,8 @@ file(GLOB_RECURSE MY_SOURCE_QT "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
 list(APPEND MY_SOURCE_QT ${UTILITIES_CODE_SOURCE})
 
 if (APP_INTERACTION_DISPLAY_ONLY)
-    # 如果开启 APP_INTERACTION_DISPLAY_ONLY,
-    # 那么从 MY_SOURCE_QT 中移除不需要的文件
+    # If APP_INTERACTION_DISPLAY_ONLY is enabled,
+    # remove unnecessary files from MY_SOURCE_QT
     file(GLOB_RECURSE MY_SOURCE_NOT_DISPLAY
         "${CMAKE_CURRENT_SOURCE_DIR}/src/feature/*"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/MainWindow.*"
@@ -284,7 +284,7 @@ source_group(TREE ${DEMO_SDK_DIR} FILES ${SDK_TEST_SOURCE})
 
 if (NOT APP_DEMO_CI_GTEST)
     if (USE_MAC_BUNDLE)
-        # 设置一下图标
+        # Setup application icon
         if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/icon.icns")
             set(MACOSX_BUNDLE_ICON_FILE icon.icns)
             set(MY_ICON_FILE ${CMAKE_CURRENT_SOURCE_DIR}/icon.icns)
@@ -292,7 +292,7 @@ if (NOT APP_DEMO_CI_GTEST)
         endif ()
 
         add_executable(example-app MACOSX_BUNDLE
-            ${MY_ICON_FILE} # app 图标
+            ${MY_ICON_FILE} # app icon
             ${MY_SOURCE_QT}
             ${SDK_TEST_SOURCE}
             ${ENGINE_TEST_SOURCE}
@@ -307,7 +307,7 @@ if (NOT APP_DEMO_CI_GTEST)
         endif ()
 
         add_executable(example-app
-            ${MY_ICON_RC} # windows 图标
+            ${MY_ICON_RC} # windows icon
             ${MY_SOURCE_QT}
             ${SDK_TEST_SOURCE}
             ${ENGINE_TEST_SOURCE}
@@ -352,7 +352,7 @@ if (NOT APP_DEMO_CI_GTEST)
     set(QT_LIBS ${QT}::Core ${QT}::Widgets ${QT}::Gui ${QT}::Network)
 
     if (${QT_VERSION} GREATER_EQUAL 6)
-        # QT 版本大于等于 6 时, 增加 openglwidgets
+        # Add openglwidgets component for Qt version >= 6
         find_package(${QT} COMPONENTS openglwidgets REQUIRED)
         set(QT_LIBS ${QT_LIBS} ${QT}::OpenGLWidgets)
     endif ()
@@ -432,7 +432,7 @@ if (NOT APP_DEMO_CI_GTEST)
 
         file(GLOB FFMPEG_DLLS "${DEMO_ENGINE_DIR}/3rdparty/ffmpeg4windows/bin64/*.dll")
         foreach (DLL_FILE ${FFMPEG_DLLS})
-            # 如果以 d.dll 结尾, 则为 debug 版本的 dll, 否则为 release 版本的 dll
+            # If ends with d.dll, it's debug version, otherwise release version
             if (${DLL_FILE} MATCHES "d.dll$")
                 list(APPEND DLL_LIBS_DEBUG ${DLL_FILE})
             else ()
@@ -451,7 +451,7 @@ if (NOT APP_DEMO_CI_GTEST)
 
         # ref <https://stackoverflow.com/questions/1620006/post-build-step-only-for-release-build>
 
-        # debug 版本的 dll, 仅在 debug 模式下复制
+        # Copy debug DLLs only in debug mode
         foreach (DLL_FILE ${DLL_LIBS_DEBUG})
             add_custom_command(TARGET example-app POST_BUILD
                 COMMAND cmd.exe /c if "$(Configuration)" == "Debug"
@@ -460,37 +460,37 @@ if (NOT APP_DEMO_CI_GTEST)
             )
         endforeach ()
 
-        # release 版本的 dll, 仅在 release 模式下复制
+        # Copy release DLLs only in release mode
         foreach (DLL_FILE ${DLL_LIBS_RELEASE})
             add_custom_command(TARGET example-app POST_BUILD
                 COMMAND cmd.exe /c if not "$(Configuration)" == "Debug"
                 ${CMAKE_COMMAND} -E copy_if_different ${DLL_FILE} $<TARGET_FILE_DIR:example-app>
-                COMMENT "Copying Non-Debug: ${DLL_FILE} -- $<TARGET_FILE_DIR:fm-demo>"
+                COMMENT "Copying Non-Debug: ${DLL_FILE} -- $<TARGET_FILE_DIR:example-app>"
             )
         endforeach ()
 
-        # 软链接 ${CMAKE_CURRENT_SOURCE_DIR}/dep/ml-models 至 $<TARGET_FILE_DIR:example-app>/ml-models
+        # Create symlink from ${CMAKE_CURRENT_SOURCE_DIR}/dep/ml-models to $<TARGET_FILE_DIR:example-app>/ml-models
         add_custom_command(TARGET example-app POST_BUILD
 
-            # 先删除原来的软链接或者目录
+            # Remove existing symlink or directory first
             COMMAND ${CMAKE_COMMAND} -E remove_directory $<TARGET_FILE_DIR:example-app>/ml-models
             COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_SOURCE_DIR}/dep/ml-models $<TARGET_FILE_DIR:example-app>/ml-models
             COMMENT "Creating symlink ml-models"
         )
 
-        # 软链接 ${CMAKE_CURRENT_SOURCE_DIR}/resource 至 $<TARGET_FILE_DIR:example-app>/resource
+        # Create symlink from ${CMAKE_CURRENT_SOURCE_DIR}/resource to $<TARGET_FILE_DIR:example-app>/resource
         add_custom_command(TARGET example-app POST_BUILD
 
-            # 先删除原来的软链接或者目录
+            # Remove existing symlink or directory first
             COMMAND ${CMAKE_COMMAND} -E remove_directory $<TARGET_FILE_DIR:example-app>/resource
             COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_SOURCE_DIR}/resource $<TARGET_FILE_DIR:example-app>/resource
             COMMENT "Creating symlink resource"
         )
     endif ()
 
-    # MacOS 下修改可执行文件与库寻找路径
+    # Setup executable and library search paths for macOS
     if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
-        # NOTE: 可能需要 GLEW 库
+        # NOTE: May require GLEW library
         set(glew_LIB ${CMAKE_CURRENT_SOURCE_DIR}/dep/libGLEW.2.2.dylib)
         if (NOT EXISTS ${glew_LIB})
             message(STATUS "DOWNLOAD libGLEW.2.2.dylib")
@@ -507,7 +507,7 @@ if (NOT APP_DEMO_CI_GTEST)
         )
         set_property(TARGET example-app APPEND PROPERTY INSTALL_RPATH "@executable_path/../Frameworks")
 
-        # Apple Silicon 似乎不会自动搜索 /usr/local/lib, 这里 patch 一下
+        # Apple Silicon doesn't automatically search /usr/local/lib, add it explicitly
         if (${Vulkan_LIBRARY} MATCHES "^/usr/local/")
             set_property(TARGET example-app APPEND PROPERTY INSTALL_RPATH "/usr/local/lib")
         endif ()
@@ -590,7 +590,7 @@ if (APP_DEMO_CI_GTEST)
     set(QT_LIBS ${QT}::Core ${QT}::Widgets ${QT}::Gui ${QT}::Network)
 
     if (${QT_VERSION} GREATER_EQUAL 6)
-        # QT 版本大于等于 6 时, 增加 openglwidgets
+        # Add openglwidgets component for Qt version >= 6
         find_package(${QT} COMPONENTS openglwidgets REQUIRED)
         set(QT_LIBS ${QT_LIBS} ${QT}::OpenGLWidgets)
     endif ()
@@ -613,9 +613,9 @@ if (APP_DEMO_CI_GTEST)
         )
     endif ()
 
-    # MacOS 下修改可执行文件与库寻找路径
+    # Setup executable and library search paths for macOS
     if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
-        # NOTE: 可能需要 GLEW 库
+        # NOTE: May require GLEW library
         set(glew_LIB ${CMAKE_CURRENT_SOURCE_DIR}/dep/libGLEW.2.2.dylib)
         if (NOT EXISTS ${glew_LIB})
             message(STATUS "DOWNLOAD libGLEW.2.2.dylib")
@@ -629,7 +629,7 @@ if (APP_DEMO_CI_GTEST)
         endif ()
     endif ()
 
-    # 为 example-app-tests 单独定义一份源文件变量
+    # Define separate source file variable for example-app-tests
     set(MY_SOURCE_FOR_TEST ${MY_SOURCE_QT})
 
     list(REMOVE_ITEM MY_SOURCE_FOR_TEST
@@ -658,9 +658,9 @@ if (APP_DEMO_CI_GTEST)
     )
 
     add_executable(example-app-tests ${TEST_SOURCES} ${SDK_TEST_SOURCE}
-        # 包含与主应用相同的所有源文件，但排除主程序的 main.cpp
-        ${MY_ICON_RC} # windows 图标
-        ${MY_SOURCE_FOR_TEST}  # 使用不包含 main.cpp 的版本
+        # Include all source files same as main app, but exclude main.cpp
+        ${MY_ICON_RC} # windows icon
+        ${MY_SOURCE_FOR_TEST}  # Use version without main.cpp
         ${ENGINE_TEST_SOURCE}
         ${ENGINE_ANGLE_CONTEXT_SOURCE}
         ${DEMO_SOURCE_OBJC}
@@ -737,19 +737,19 @@ if (APP_DEMO_CI_GTEST)
         target_compile_definitions(example-app-tests PUBLIC ENGINE_COMPILE_WITH_METAL)
     endif ()
 
-    # 设置与example-app相同的bundle结构
+    # Setup same bundle structure as example-app
     if (USE_MAC_BUNDLE)
         set_target_properties(example-app-tests PROPERTIES
             MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist
-            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/example-app.app/Contents/MacOS"  # 确保输出到与example-app相同的目录层级
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/example-app.app/Contents/MacOS"  # Ensure output to same directory level as example-app
         )
     endif ()
 
-    # macOS: 为 example-app-tests 设置正确的 rpath，确保它能找到 Bundle 内的动态库
+    # macOS: Setup correct rpath for example-app-tests to find dynamic libraries in Bundle
     if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
         set_property(TARGET example-app-tests APPEND PROPERTY INSTALL_RPATH "@executable_path")
         set_property(TARGET example-app-tests APPEND PROPERTY INSTALL_RPATH "@executable_path/../Frameworks")
-        # Apple Silicon 支持
+        # Apple Silicon support
         if (${Vulkan_LIBRARY} MATCHES "^/usr/local/")
             set_property(TARGET example-app-tests APPEND PROPERTY INSTALL_RPATH "/usr/local/lib")
         endif ()
@@ -766,10 +766,10 @@ if (APP_DEMO_CI_GTEST)
             COMMAND ${CMAKE_COMMAND} -E copy_if_different
             ${DEMO_SDK_DIR}/dependencies/angle/osx/libGLESv2.dylib
             $<TARGET_FILE_DIR:example-app-tests>/
-            # 修正可执行文件依赖路径
+            # Fix executable dependency paths
             COMMAND install_name_tool -change "./libEGL.dylib" "@executable_path/libEGL.dylib" $<TARGET_FILE:example-app-tests>
             COMMAND install_name_tool -change "./libGLESv2.dylib" "@executable_path/libGLESv2.dylib" $<TARGET_FILE:example-app-tests>
-            # 修正 dylib 自身 install_name
+            # Fix dylib install_name
             COMMAND install_name_tool -id "@executable_path/libEGL.dylib" $<TARGET_FILE_DIR:example-app-tests>/libEGL.dylib
             COMMAND install_name_tool -id "@executable_path/libGLESv2.dylib" $<TARGET_FILE_DIR:example-app-tests>/libGLESv2.dylib
         )

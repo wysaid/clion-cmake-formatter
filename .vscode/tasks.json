@@ -7,6 +7,7 @@
             "label": "npm: compile",
             "type": "npm",
             "script": "compile",
+            "detail": "Compile TypeScript to JavaScript",
             "problemMatcher": "$tsc",
             "group": {
                 "kind": "build"
@@ -20,6 +21,7 @@
             "label": "npm: watch",
             "type": "npm",
             "script": "watch",
+            "detail": "Watch and compile TypeScript on changes",
             "isBackground": true,
             "problemMatcher": "$tsc-watch",
             "group": "build",
@@ -32,6 +34,7 @@
             "label": "npm: lint",
             "type": "npm",
             "script": "lint",
+            "detail": "Check code quality with ESLint",
             "problemMatcher": [
                 "$eslint-stylish"
             ],
@@ -45,6 +48,7 @@
             "label": "npm: test:unit",
             "type": "npm",
             "script": "test:unit",
+            "detail": "Run unit tests",
             "problemMatcher": [],
             "group": {
                 "kind": "test"
@@ -60,6 +64,7 @@
             "label": "npm: package",
             "type": "npm",
             "script": "package",
+            "detail": "Package the VS Code extension",
             "problemMatcher": [],
             "group": "none",
             "presentation": {

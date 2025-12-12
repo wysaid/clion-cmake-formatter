@@ -140,29 +140,59 @@ export function listWellFormatedStyles(): string[] {
 }
 
 /**
- * List all cmake files in a well-formatted style directory
+ * List all cmake files in a well-formatted style directory (recursively)
  * @param style - The style directory name (e.g., 'default')
  */
 export function listWellFormatedFiles(style: string): string[] {
     const stylePath = path.join(getWellFormatedPath(), style);
 
     try {
-        const files = fs.readdirSync(stylePath);
-        return files.filter(f => f.endsWith('.cmake'));
+        return listCMakeFilesRecursively(stylePath, stylePath);
     } catch (error) {
         return [];
     }
 }
 
 /**
+ * Recursively list all cmake files in a directory
+ * @param dirPath - The directory to scan
+ * @param basePath - The base path to calculate relative paths from
+ * @returns Array of relative file paths
+ */
+function listCMakeFilesRecursively(dirPath: string, basePath: string): string[] {
+    const results: string[] = [];
+
+    try {
+        const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+
+        for (const entry of entries) {
+            const fullPath = path.join(dirPath, entry.name);
+
+            if (entry.isDirectory()) {
+                // Skip hidden directories and node_modules
+                if (!entry.name.startsWith('.') && entry.name !== 'node_modules') {
+                    results.push(...listCMakeFilesRecursively(fullPath, basePath));
+                }
+            } else if (entry.isFile() && entry.name.endsWith('.cmake')) {
+                // Get relative path from basePath
+                const relativePath = path.relative(basePath, fullPath);
+                results.push(relativePath);
+            }
+        }
+    } catch (error) {
+        // Ignore errors for individual directories
+    }
+
+    return results;
+}
+
+/**
  * Load a well-formatted cmake file
  * @param style - The style directory name (e.g., 'default')
- * @param filename - The cmake filename
+ * @param filename - The cmake filename (can be a relative path like 'cmake-official/file.cmake')
  */
 export function loadWellFormated(style: string, filename: string): string {
-    if (!filename.endsWith('.cmake')) {
-        filename = `${filename}.cmake`;
-    }
+    // Support both simple filenames and relative paths with subdirectories
     const filePath = path.join(getWellFormatedPath(), style, filename);
     try {
         return fs.readFileSync(filePath, 'utf-8');
@@ -182,4 +212,21 @@ export function loadWellFormatedConfig(style: string): string {
     } catch (error) {
         throw new Error(`Failed to load config file for style '${style}': ${configPath}\n${error}`);
     }
+}
+
+/**
+ * Load the .cc-format.jsonc config file for a specific file in a well-formatted style directory
+ *
+ * Note: The well-formatted test suite only uses the root-level configuration file for each style.
+ * Subdirectories are not allowed to have their own configuration files, as this suite tests
+ * the idempotency of the default configuration.
+ *
+ * @param style - The style directory name (e.g., 'default')
+ * @param filename - The cmake filename (can be a relative path like 'cmake-official/file.cmake')
+ * @returns The content of the config file at the style root
+ */
+export function loadWellFormatedConfigForFile(style: string, filename: string): string {
+    // Always use the style root configuration
+    // Subdirectories are not allowed to override the configuration
+    return loadWellFormatedConfig(style);
 }

@@ -12,7 +12,7 @@ import {
     listWellFormatedStyles,
     listWellFormatedFiles,
     loadWellFormated,
-    loadWellFormatedConfig
+    loadWellFormatedConfigForFile
 } from './helpers';
 
 describe('Well-Formatted CMake Files', () => {
@@ -20,26 +20,22 @@ describe('Well-Formatted CMake Files', () => {
 
     styles.forEach(style => {
         describe(`Style: ${style}`, () => {
-            // Load the config for this style
-            let configOptions: ReturnType<typeof parseConfigContent>;
-
-            before(() => {
-                const configContent = loadWellFormatedConfig(style);
-                configOptions = parseConfigContent(configContent);
-                assert.ok(configOptions !== null, `Config file for style '${style}' should be valid`);
-            });
-
             const files = listWellFormatedFiles(style);
 
             files.forEach(file => {
                 it(`should keep '${file}' unchanged after formatting`, () => {
+                    // Load the config for this specific file (may be in a subdirectory with its own config)
+                    const configContent = loadWellFormatedConfigForFile(style, file);
+                    const configOptions = parseConfigContent(configContent);
+                    assert.ok(configOptions !== null, `Config file for '${file}' should be valid`);
+
                     const original = loadWellFormated(style, file);
-                    const formatted = formatCMake(original, configOptions!);
+                    const formatted = formatCMake(original, configOptions);
 
                     assert.strictEqual(
                         formatted,
                         original,
-                        `File '${file}' should remain unchanged after formatting with '${style}' style.\n` +
+                        `File '${file}' should remain unchanged after formatting with its directory config.\n` +
                         `\n=== ORIGINAL ===\n${JSON.stringify(original)}\n` +
                         `\n=== FORMATTED ===\n${JSON.stringify(formatted)}`
                     );

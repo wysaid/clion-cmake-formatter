@@ -201,15 +201,16 @@ function findGitRoot(startPath: string): string | null {
  * Calculate the number of changed lines between original and formatted text
  */
 function calculateChangedLines(original: string, formatted: string): number {
-    const originalLines = original.split('\n');
-    const formattedLines = formatted.split('\n');
+    // Normalize line endings to handle CRLF properly on Windows
+    const originalLines = original.split(/\r?\n/);
+    const formattedLines = formatted.split(/\r?\n/);
     const maxLines = Math.max(originalLines.length, formattedLines.length);
     let changedLines = 0;
 
     for (let i = 0; i < maxLines; i++) {
         const origLine = i < originalLines.length ? originalLines[i] : undefined;
         const formLine = i < formattedLines.length ? formattedLines[i] : undefined;
-
+        
         if (origLine !== formLine) {
             changedLines++;
         }

@@ -10,7 +10,7 @@ This extension now provides visual feedback when formatting CMake files, similar
 
 When you format a file that is already well-formatted, you will see a status bar message:
 
-```
+```text
 No changes: content is already well-formatted - Reformat Code (Ctrl+Shift+I)
 ```
 
@@ -20,7 +20,7 @@ This helps you quickly understand that the file doesn't need any formatting chan
 
 When formatting makes changes to the file, you will see how many lines were affected:
 
-```
+```text
 Formatted 9 lines - Reformat Code (Ctrl+Shift+I)
 ```
 

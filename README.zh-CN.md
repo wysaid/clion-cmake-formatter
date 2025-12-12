@@ -1,8 +1,8 @@
 # CLion CMake 格式化工具
 
-[![CI](https://github.com/wysaid/clion-cmake-formatter/actions/workflows/ci.yml/badge.svg)](https://github.com/wysaid/clion-cmake-formatter/actions/workflows/ci.yml)
+[![CI](https://github.com/wysaid/clion-cmake-format/actions/workflows/ci.yml/badge.svg)](https://github.com/wysaid/clion-cmake-format/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![VS Code Marketplace](https://img.shields.io/badge/VS%20Code-Marketplace-blue.svg)](https://marketplace.visualstudio.com/items?itemName=wysaid.clion-cmake-formatter)
+[![VS Code Marketplace](https://img.shields.io/badge/VS%20Code-Marketplace-blue.svg)](https://marketplace.visualstudio.com/items?itemName=wysaid.clion-cmake-format)
 
 一个 VS Code 扩展，使用 JetBrains CLion 的格式化风格来格式化 CMake 文件（`CMakeLists.txt` 和 `*.cmake`）。**零外部依赖** — 无需 Python、cmake-format 或 gersemi。
 
@@ -30,7 +30,7 @@
 
 ### 从 VSIX 安装
 
-1. 从 [Releases](https://github.com/wysaid/clion-cmake-formatter/releases) 页面下载 `.vsix` 文件
+1. 从 [Releases](https://github.com/wysaid/clion-cmake-format/releases) 页面下载 `.vsix` 文件
 2. 在 VS Code 中，进入扩展 (`Ctrl+Shift+X`)
 3. 点击 `...` → **从 VSIX 安装...**
 4. 选择下载的文件
@@ -51,7 +51,7 @@
 {
   "[cmake]": {
     "editor.formatOnSave": true,
-    "editor.defaultFormatter": "wysaid.clion-cmake-formatter"
+    "editor.defaultFormatter": "wysaid.clion-cmake-format"
   }
 }
 ```
@@ -114,7 +114,7 @@ endif ()
 在项目根目录创建 `.cc-format.jsonc`：
 
 ```jsonc
-// https://github.com/wysaid/clion-cmake-formatter
+// https://github.com/wysaid/clion-cmake-format
 {
     "indentSize": 4,
     "commandCase": "lowercase",
@@ -182,8 +182,8 @@ endif ()
 ### 设置
 
 ```bash
-git clone https://github.com/wysaid/clion-cmake-formatter.git
-cd clion-cmake-formatter
+git clone https://github.com/wysaid/clion-cmake-format.git
+cd clion-cmake-format
 npm install
 npm run compile
 npm run test:unit
@@ -202,7 +202,7 @@ npm run test:unit
 ### 项目结构
 
 ```
-clion-cmake-formatter/
+clion-cmake-format/
 ├── src/
 │   ├── parser.ts      # CMake 分词器和 AST 构建器
 │   ├── formatter.ts   # 格式化逻辑
@@ -253,7 +253,7 @@ endforeach ()
 
 ## 🔗 链接
 
-- [VS Code 市场](https://marketplace.visualstudio.com/items?itemName=wysaid.clion-cmake-formatter)
-- [GitHub 仓库](https://github.com/wysaid/clion-cmake-formatter)
-- [问题反馈](https://github.com/wysaid/clion-cmake-formatter/issues)
+- [VS Code 市场](https://marketplace.visualstudio.com/items?itemName=wysaid.clion-cmake-format)
+- [GitHub 仓库](https://github.com/wysaid/clion-cmake-format)
+- [问题反馈](https://github.com/wysaid/clion-cmake-format/issues)
 - [更新日志](CHANGELOG.md)

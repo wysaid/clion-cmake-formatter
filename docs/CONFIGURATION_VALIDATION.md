@@ -124,4 +124,4 @@ The validation logic is built into the extension and cannot be disabled. This is
 - Configuration files with invalid or extreme values
 - Poor user experience from malformed output
 
-If you believe a validation limit is too restrictive for your use case, please [open an issue](https://github.com/wysaid/clion-cmake-formatter/issues) to discuss adjusting the limits.
+If you believe a validation limit is too restrictive for your use case, please [open an issue](https://github.com/wysaid/clion-cmake-format/issues) to discuss adjusting the limits.

@@ -1,4 +1,4 @@
-# clion-cmake-formatter Project Instructions
+# clion-cmake-format Project Instructions
 
 This project provides CMake script parsing and formatting as a VS Code extension.
 

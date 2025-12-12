@@ -278,7 +278,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
     // Register a command to format the current CMake document
     const formatCommand = vscode.commands.registerCommand(
-        'clion-cmake-formatter.formatDocument',
+        'clion-cmake-format.formatDocument',
         async () => {
             const editor = vscode.window.activeTextEditor;
             if (!editor) {
@@ -297,7 +297,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
     // Register a command to create a default configuration file
     const createConfigCommand = vscode.commands.registerCommand(
-        'clion-cmake-formatter.createConfig',
+        'clion-cmake-format.createConfig',
         async () => {
             let targetPath: string | undefined;
 

@@ -58,14 +58,14 @@ The generated configuration file uses the plugin's default parameters, meaning l
 
 - **文件名**：`.cc-format.jsonc`
 - **格式**：JSONC（支持注释的 JSON）
-- **必需头部**：第一行必须是 `// https://github.com/wysaid/clion-cmake-formatter`
+- **必需头部**：第一行必须是 `// https://github.com/wysaid/clion-cmake-format`
 - **自动打开**：创建后自动在编辑器中打开
 
 ---
 
 - **Filename**: `.cc-format.jsonc`
 - **Format**: JSONC (JSON with Comments)
-- **Required Header**: First line must be `// https://github.com/wysaid/clion-cmake-formatter`
+- **Required Header**: First line must be `// https://github.com/wysaid/clion-cmake-format`
 - **Auto-open**: Automatically opens in editor after creation
 
 ### 冲突处理 / Conflict Handling
@@ -119,7 +119,7 @@ The plugin searches upward from the document's directory and uses the first conf
 ### 生成的配置文件示例 / Generated Configuration File Example
 
 ```jsonc
-// https://github.com/wysaid/clion-cmake-formatter
+// https://github.com/wysaid/clion-cmake-format
 {
     // Tab and Indentation
     "useTabs": false,

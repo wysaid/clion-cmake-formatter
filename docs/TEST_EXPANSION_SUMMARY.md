@@ -120,7 +120,7 @@ endif()
 ### 5. 项目结构变化
 
 ```
-clion-cmake-formatter/
+clion-cmake-format/
 ├── scripts/                     [新增]
 │   ├── fetch-cmake-tests.sh     # Bash 手动选择器
 │   ├── select-cmake-tests.py    # Python 智能选择器

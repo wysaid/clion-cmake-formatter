@@ -15,7 +15,7 @@ export { FORMATTER_DEFAULT_OPTIONS as DEFAULT_OPTIONS };
 /**
  * The project URL that identifies cc-format configuration files
  */
-export const PROJECT_URL = 'https://github.com/wysaid/clion-cmake-formatter';
+export const PROJECT_URL = 'https://github.com/wysaid/clion-cmake-format';
 
 /**
  * The configuration file names (in order of priority)

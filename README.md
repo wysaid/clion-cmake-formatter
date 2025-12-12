@@ -1,8 +1,8 @@
 # CLion CMake Formatter
 
-[![CI](https://github.com/wysaid/clion-cmake-formatter/actions/workflows/ci.yml/badge.svg)](https://github.com/wysaid/clion-cmake-formatter/actions/workflows/ci.yml)
+[![CI](https://github.com/wysaid/clion-cmake-format/actions/workflows/ci.yml/badge.svg)](https://github.com/wysaid/clion-cmake-format/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![VS Code Marketplace](https://img.shields.io/badge/VS%20Code-Marketplace-blue.svg)](https://marketplace.visualstudio.com/items?itemName=wysaid.clion-cmake-formatter)
+[![VS Code Marketplace](https://img.shields.io/badge/VS%20Code-Marketplace-blue.svg)](https://marketplace.visualstudio.com/items?itemName=wysaid.clion-cmake-format)
 
 A VS Code extension that formats CMake files (`CMakeLists.txt` and `*.cmake`) using JetBrains CLion's formatting style. **Zero external dependencies** — no Python, cmake-format, or gersemi required.
 
@@ -30,7 +30,7 @@ English | [简体中文](README.zh-CN.md)
 
 ### From VSIX
 
-1. Download the `.vsix` file from the [Releases](https://github.com/wysaid/clion-cmake-formatter/releases) page
+1. Download the `.vsix` file from the [Releases](https://github.com/wysaid/clion-cmake-format/releases) page
 2. In VS Code, go to Extensions (`Ctrl+Shift+X`)
 3. Click `...` → **Install from VSIX...**
 4. Select the downloaded file
@@ -51,7 +51,7 @@ Add to your VS Code `settings.json`:
 {
   "[cmake]": {
     "editor.formatOnSave": true,
-    "editor.defaultFormatter": "wysaid.clion-cmake-formatter"
+    "editor.defaultFormatter": "wysaid.clion-cmake-format"
   }
 }
 ```
@@ -114,7 +114,7 @@ Configuration can be set via:
 Create `.cc-format.jsonc` in your project root:
 
 ```jsonc
-// https://github.com/wysaid/clion-cmake-formatter
+// https://github.com/wysaid/clion-cmake-format
 {
     "indentSize": 4,
     "commandCase": "lowercase",
@@ -182,8 +182,8 @@ Create `.cc-format.jsonc` in your project root:
 ### Setup
 
 ```bash
-git clone https://github.com/wysaid/clion-cmake-formatter.git
-cd clion-cmake-formatter
+git clone https://github.com/wysaid/clion-cmake-format.git
+cd clion-cmake-format
 npm install
 npm run compile
 npm run test:unit
@@ -202,7 +202,7 @@ npm run test:unit
 ### Project Structure
 
 ```
-clion-cmake-formatter/
+clion-cmake-format/
 ├── src/
 │   ├── parser.ts      # CMake tokenizer and AST builder
 │   ├── formatter.ts   # Formatting logic
@@ -253,7 +253,7 @@ endforeach ()
 
 ## 🔗 Links
 
-- [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=wysaid.clion-cmake-formatter)
-- [GitHub Repository](https://github.com/wysaid/clion-cmake-formatter)
-- [Report Issues](https://github.com/wysaid/clion-cmake-formatter/issues)
+- [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=wysaid.clion-cmake-format)
+- [GitHub Repository](https://github.com/wysaid/clion-cmake-format)
+- [Report Issues](https://github.com/wysaid/clion-cmake-format/issues)
 - [Changelog](CHANGELOG.md)

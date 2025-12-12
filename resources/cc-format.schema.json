@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://github.com/wysaid/clion-cmake-formatter/blob/main/resources/cc-format.schema.json",
+  "$id": "https://github.com/wysaid/clion-cmake-format/blob/main/resources/cc-format.schema.json",
   "title": "cc-format Configuration",
   "description": "Configuration schema for cc-format (CLion CMake Formatter)",
   "type": "object",

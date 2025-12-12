@@ -1,5 +1,5 @@
 {
-    "name": "clion-cmake-formatter",
+    "name": "clion-cmake-format",
     "displayName": "%displayName%",
     "description": "%description%",
     "version": "1.0.0",
@@ -16,9 +16,13 @@
         "cmake",
         "clion",
         "format",
-        "jetbrains",
         "formatter",
-        "cc-format"
+        "formatting",
+        "CMakeLists",
+        "jetbrains",
+        "cc-format",
+        "indent",
+        "code-style"
     ],
     "activationEvents": [
         "onLanguage:cmake"
@@ -47,11 +51,11 @@
         ],
         "commands": [
             {
-                "command": "clion-cmake-formatter.formatDocument",
+                "command": "clion-cmake-format.formatDocument",
                 "title": "%command.formatDocument%"
             },
             {
-                "command": "clion-cmake-formatter.createConfig",
+                "command": "clion-cmake-format.createConfig",
                 "title": "%command.createConfig%"
             }
         ],
@@ -237,10 +241,10 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/wysaid/clion-cmake-formatter"
+        "url": "https://github.com/wysaid/clion-cmake-format"
     },
     "bugs": {
-        "url": "https://github.com/wysaid/clion-cmake-formatter/issues"
+        "url": "https://github.com/wysaid/clion-cmake-format/issues"
     },
-    "homepage": "https://github.com/wysaid/clion-cmake-formatter#readme"
+    "homepage": "https://github.com/wysaid/clion-cmake-format#readme"
 }

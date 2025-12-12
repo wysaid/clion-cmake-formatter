@@ -2,7 +2,7 @@
     "name": "clion-cmake-formatter",
     "displayName": "%displayName%",
     "description": "%description%",
-    "version": "0.1.0",
+    "version": "1.0.0",
     "publisher": "wysaid",
     "license": "MIT",
     "engines": {

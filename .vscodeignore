@@ -1,7 +1,6 @@
 # Source files (only dist is needed)
 src/**
 test/**
-resources/**
 
 # Exclude test dist files
 dist/test/**
@@ -28,6 +27,16 @@ package-lock.json
 
 # Test artifacts
 coverage/**
+
+# Documentation
+docs/**
+
+# Scripts
+scripts/**
+
+# Sample and non-essential resources
+resources/sample-input.cmake
+resources/sample.cc-format.jsonc
 
 # Other
 *.vsix

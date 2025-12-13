@@ -1,0 +1,69 @@
+CMAKE_POLICY(SET CMP0169 OLD)
+
+INCLUDE(FetchContent)
+
+# Test using saved details
+FETCHCONTENT_DECLARE(
+    t1
+    SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/savedSrc
+    BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/savedBin
+    DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E make_directory <SOURCE_DIR> <BINARY_DIR>
+)
+FETCHCONTENT_POPULATE(t1)
+IF (NOT IS_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/savedSrc)
+    MESSAGE(FATAL_ERROR "Saved details SOURCE_DIR override failed")
+ENDIF ()
+IF (NOT IS_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/savedBin)
+    MESSAGE(FATAL_ERROR "Saved details BINARY_DIR override failed")
+ENDIF ()
+
+# Test direct population
+FETCHCONTENT_POPULATE(
+    t2
+    SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/directSrc
+    BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/directBin
+    DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E make_directory <SOURCE_DIR> <BINARY_DIR>
+)
+IF (NOT IS_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/directSrc)
+    MESSAGE(FATAL_ERROR "Direct details SOURCE_DIR override failed")
+ENDIF ()
+
+# Ensure setting BINARY_DIR to SOURCE_DIR works (a technique to
+# prevent an unwanted separate BINARY_DIR from being created, which
+# ExternalProject_Add() does whether we like it or not)
+FETCHCONTENT_DECLARE(
+    t3
+    SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/savedNoBuildDir
+    BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/savedNoBuildDir
+    DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E make_directory <SOURCE_DIR>
+)
+FETCHCONTENT_POPULATE(t3)
+IF (IS_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/savedNobuildDir-build)
+    MESSAGE(FATAL_ERROR "Saved details BINARY_DIR override failed")
+ENDIF ()
+
+FETCHCONTENT_POPULATE(
+    t4
+    SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/directNoBuildDir
+    BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/directNoBuildDir
+    DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E make_directory <SOURCE_DIR>
+)
+IF (IS_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/savedNobuildDir-build)
+    MESSAGE(FATAL_ERROR "Direct details BINARY_DIR override failed")
+ENDIF ()
+
+# Test overriding the source directory by reusing the one from t1
+SET(FETCHCONTENT_SOURCE_DIR_T5 ${CMAKE_CURRENT_BINARY_DIR}/savedSrc)
+FETCHCONTENT_DECLARE(
+    t5
+    SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/doesNotExist
+    BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/wontBeCreated
+    DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E false
+)
+FETCHCONTENT_POPULATE(t5)
+IF (NOT "${t5_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}/savedSrc")
+    MESSAGE(FATAL_ERROR "Wrong SOURCE_DIR returned: ${t5_SOURCE_DIR}")
+ENDIF ()
+IF (NOT "${t5_BINARY_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}/wontBeCreated")
+    MESSAGE(FATAL_ERROR "Wrong BINARY_DIR returned: ${t5_BINARY_DIR}")
+ENDIF ()

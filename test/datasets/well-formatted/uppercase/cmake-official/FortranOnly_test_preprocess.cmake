@@ -1,0 +1,7 @@
+SET(TEST_FILE CMakeFiles/preprocess.dir/preprocess.F.i)
+FILE(READ ${TEST_FILE} CONTENTS)
+IF ("${CONTENTS}" MATCHES "PRINT *")
+    MESSAGE(STATUS "${TEST_FILE} created successfully!")
+ELSE ()
+    MESSAGE(FATAL_ERROR "${TEST_FILE} creation failed!")
+ENDIF ()

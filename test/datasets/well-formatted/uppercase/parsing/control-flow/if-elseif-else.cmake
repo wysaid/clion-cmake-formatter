@@ -1,0 +1,7 @@
+IF (WIN32)
+    MESSAGE("windows")
+ELSEIF (UNIX)
+    MESSAGE("unix")
+ELSE ()
+    MESSAGE("other")
+ENDIF ()

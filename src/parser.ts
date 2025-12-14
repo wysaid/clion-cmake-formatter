@@ -338,6 +338,9 @@ export class CMakeTokenizer {
 
         const endLine = this.line;
 
+        // Normalize line endings in bracket arguments
+        value = value.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
         return {
             type: TokenType.BracketArgument,
             value,
@@ -379,6 +382,9 @@ export class CMakeTokenizer {
             value += this.advance();
         }
 
+        // Normalize line endings in bracket comments
+        value = value.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
         return {
             type: TokenType.BracketComment,
             value,
@@ -405,6 +411,9 @@ export class CMakeTokenizer {
         }
 
         const endLine = this.line;
+
+        // Normalize line endings in quoted arguments
+        value = value.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
 
         return {
             type: TokenType.QuotedArgument,
@@ -784,6 +793,9 @@ export class CMakeParser {
                 this.advance();
             }
         }
+
+        // Normalize line endings in nested parentheses
+        value = value.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
 
         return {
             value: value,

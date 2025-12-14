@@ -198,10 +198,21 @@ function findGitRoot(startPath: string): string | null {
 }
 
 /**
+ * Normalize line endings to LF for comparison
+ */
+function normalizeLineEndings(text: string): string {
+    return text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+}
+
+/**
  * Show formatting result message
  */
 function showFormattingResult(original: string, formatted: string): void {
-    if (original === formatted) {
+    // Normalize line endings before comparison to handle CRLF vs LF
+    const normalizedOriginal = normalizeLineEndings(original);
+    const normalizedFormatted = normalizeLineEndings(formatted);
+
+    if (normalizedOriginal === normalizedFormatted) {
         const message = vscode.l10n.t('No changes: content is already well-formatted');
         vscode.window.setStatusBarMessage(message, 3000);
     } else {

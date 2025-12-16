@@ -1,0 +1,47 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "CMake: Configure",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "-B",
+                "${workspaceFolder}/build",
+                "-S",
+                "${workspaceFolder}"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "CMake: Build",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceFolder}/build"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "CMake: Clean",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceFolder}/build",
+                "--target",
+                "clean"
+            ],
+            "group": "build",
+            "problemMatcher": []
+        }
+    ]
+}

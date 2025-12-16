@@ -15,6 +15,44 @@ import { getConfigForDocument, clearConfigCache, generateSampleConfig, DEFAULT_O
 const shownWarnings = new Set<string>();
 
 /**
+ * Copy a file from source to destination, replacing placeholders
+ */
+function copyTemplateFile(sourcePath: string, destPath: string, replacements: Record<string, string>): void {
+    let content = fs.readFileSync(sourcePath, 'utf-8');
+    
+    // Replace all placeholders
+    for (const [key, value] of Object.entries(replacements)) {
+        const placeholder = `{{${key}}}`;
+        content = content.split(placeholder).join(value);
+    }
+    
+    fs.writeFileSync(destPath, content, 'utf-8');
+}
+
+/**
+ * Recursively copy a directory
+ */
+function copyDirectoryRecursive(sourceDir: string, destDir: string, replacements: Record<string, string>): void {
+    // Create destination directory if it doesn't exist
+    if (!fs.existsSync(destDir)) {
+        fs.mkdirSync(destDir, { recursive: true });
+    }
+
+    const entries = fs.readdirSync(sourceDir, { withFileTypes: true });
+
+    for (const entry of entries) {
+        const sourcePath = path.join(sourceDir, entry.name);
+        const destPath = path.join(destDir, entry.name);
+
+        if (entry.isDirectory()) {
+            copyDirectoryRecursive(sourcePath, destPath, replacements);
+        } else if (entry.isFile()) {
+            copyTemplateFile(sourcePath, destPath, replacements);
+        }
+    }
+}
+
+/**
  * Validate numeric value within a range
  */
 function validateRange(value: number, min: number, max: number, name: string): number {
@@ -460,28 +498,23 @@ export function activate(context: vscode.ExtensionContext): void {
             }
 
             try {
-                // Create CMakeLists.txt
-                const cmakeContent = `cmake_minimum_required(VERSION 3.10)
-project(${projectName})
+                // Get template directory path
+                const templatePath = path.join(context.extensionPath, 'resources', 'cmake_template');
+                
+                // Check if template directory exists
+                if (!fs.existsSync(templatePath)) {
+                    vscode.window.showErrorMessage(`Template directory not found at ${templatePath}`);
+                    return;
+                }
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+                // Prepare replacements for placeholders
+                const replacements: Record<string, string> = {
+                    // eslint-disable-next-line @typescript-eslint/naming-convention
+                    PROJECT_NAME: projectName
+                };
 
-add_executable(${projectName} main.cpp)
-`;
-                const cmakePath = path.join(projectPath, 'CMakeLists.txt');
-                fs.writeFileSync(cmakePath, cmakeContent, 'utf-8');
-
-                // Create main.cpp
-                const cppContent = `#include <iostream>
-
-int main() {
-    std::cout << "Hello, world" << std::endl;
-    return 0;
-}
-`;
-                const cppPath = path.join(projectPath, 'main.cpp');
-                fs.writeFileSync(cppPath, cppContent, 'utf-8');
+                // Copy all template files to project directory
+                copyDirectoryRecursive(templatePath, projectPath, replacements);
 
                 // Open the project in VS Code
                 const openFolder = await vscode.window.showInformationMessage(

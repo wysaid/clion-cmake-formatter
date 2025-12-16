@@ -1,0 +1,34 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "C++ Launch",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/{{PROJECT_NAME}}",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "CMake: Build",
+            "miDebuggerPath": "/usr/bin/gdb",
+            "windows": {
+                "program": "${workspaceFolder}/build/Debug/{{PROJECT_NAME}}.exe",
+                "MIMode": "gdb",
+                "miDebuggerPath": "gdb.exe"
+            },
+            "osx": {
+                "MIMode": "lldb"
+            }
+        }
+    ]
+}

@@ -8,39 +8,55 @@ import * as fs from 'fs';
 import * as os from 'os';
 
 describe('CMake Template Project', () => {
+    const templatePath = path.join(__dirname, '..', 'resources', 'cmake_template');
+
+    describe('Template Files', () => {
+        it('should have CMakeLists.txt template', () => {
+            const cmakePath = path.join(templatePath, 'CMakeLists.txt');
+            assert.ok(fs.existsSync(cmakePath), 'CMakeLists.txt template should exist');
+
+            const content = fs.readFileSync(cmakePath, 'utf-8');
+            assert.ok(content.includes('cmake_minimum_required'), 'Should have cmake_minimum_required');
+            assert.ok(content.includes('{{PROJECT_NAME}}'), 'Should have PROJECT_NAME placeholder');
+            assert.ok(content.includes('CMAKE_CXX_STANDARD'), 'Should have CMAKE_CXX_STANDARD');
+        });
+
+        it('should have main.cpp template', () => {
+            const cppPath = path.join(templatePath, 'main.cpp');
+            assert.ok(fs.existsSync(cppPath), 'main.cpp template should exist');
+
+            const content = fs.readFileSync(cppPath, 'utf-8');
+            assert.ok(content.includes('#include <iostream>'), 'Should include iostream');
+            assert.ok(content.includes('int main()'), 'Should have main function');
+            assert.ok(content.includes('Hello, world'), 'Should print Hello, world');
+        });
+
+        it('should have .vscode directory', () => {
+            const vscodePath = path.join(templatePath, '.vscode');
+            assert.ok(fs.existsSync(vscodePath), '.vscode directory should exist');
+            assert.ok(fs.statSync(vscodePath).isDirectory(), '.vscode should be a directory');
+        });
+
+        it('should have VS Code configuration files', () => {
+            const vscodePath = path.join(templatePath, '.vscode');
+            const expectedFiles = ['tasks.json', 'launch.json', 'settings.json'];
+
+            for (const file of expectedFiles) {
+                const filePath = path.join(vscodePath, file);
+                assert.ok(fs.existsSync(filePath), `${file} should exist`);
+            }
+        });
+
+        it('should have .gitignore file', () => {
+            const gitignorePath = path.join(templatePath, '.gitignore');
+            assert.ok(fs.existsSync(gitignorePath), '.gitignore should exist');
+
+            const content = fs.readFileSync(gitignorePath, 'utf-8');
+            assert.ok(content.includes('build/'), 'Should ignore build directory');
+        });
+    });
+
     describe('Template Generation', () => {
-        it('should generate valid CMakeLists.txt content', () => {
-            const projectName = 'TestProject';
-            const expectedContent = `cmake_minimum_required(VERSION 3.10)
-project(${projectName})
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-add_executable(${projectName} main.cpp)
-`;
-            // Validate that content has expected structure
-            assert.ok(expectedContent.includes('cmake_minimum_required'));
-            assert.ok(expectedContent.includes(`project(${projectName})`));
-            assert.ok(expectedContent.includes('CMAKE_CXX_STANDARD'));
-            assert.ok(expectedContent.includes(`add_executable(${projectName} main.cpp)`));
-        });
-
-        it('should generate valid main.cpp content', () => {
-            const expectedContent = `#include <iostream>
-
-int main() {
-    std::cout << "Hello, world" << std::endl;
-    return 0;
-}
-`;
-            // Validate that content has expected structure
-            assert.ok(expectedContent.includes('#include <iostream>'));
-            assert.ok(expectedContent.includes('int main()'));
-            assert.ok(expectedContent.includes('Hello, world'));
-            assert.ok(expectedContent.includes('return 0;'));
-        });
-
         it('should validate project name format', () => {
             // Valid project names
             const validNames = ['MyProject', 'my-project', 'my_project', 'Project123', 'ABC-123_xyz'];
@@ -57,8 +73,8 @@ int main() {
             }
         });
 
-        it('should create template files in temporary directory', () => {
-            const projectName = 'TempTestProject';
+        it('should replace placeholders in template files', () => {
+            const projectName = 'MyTestProject';
             const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cmake-test-'));
             const projectPath = path.join(tempDir, projectName);
 
@@ -66,49 +82,20 @@ int main() {
                 // Create project directory
                 fs.mkdirSync(projectPath, { recursive: true });
 
-                // Create CMakeLists.txt
-                const cmakeContent = `cmake_minimum_required(VERSION 3.10)
-project(${projectName})
+                // Read template and replace placeholders
+                const templateCMake = fs.readFileSync(path.join(templatePath, 'CMakeLists.txt'), 'utf-8');
+                const processedContent = templateCMake.replace(/\{\{PROJECT_NAME\}\}/g, projectName);
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-add_executable(${projectName} main.cpp)
-`;
+                // Write to project directory
                 const cmakePath = path.join(projectPath, 'CMakeLists.txt');
-                fs.writeFileSync(cmakePath, cmakeContent, 'utf-8');
+                fs.writeFileSync(cmakePath, processedContent, 'utf-8');
 
-                // Create main.cpp
-                const cppContent = `#include <iostream>
-
-int main() {
-    std::cout << "Hello, world" << std::endl;
-    return 0;
-}
-`;
-                const cppPath = path.join(projectPath, 'main.cpp');
-                fs.writeFileSync(cppPath, cppContent, 'utf-8');
-
-                // Verify files exist
+                // Verify file exists and placeholders are replaced
                 assert.ok(fs.existsSync(cmakePath), 'CMakeLists.txt should exist');
-                assert.ok(fs.existsSync(cppPath), 'main.cpp should exist');
-
-                // Verify file contents
-                const cmakeActual = fs.readFileSync(cmakePath, 'utf-8');
-                const cppActual = fs.readFileSync(cppPath, 'utf-8');
-
-                assert.strictEqual(cmakeActual, cmakeContent, 'CMakeLists.txt content should match');
-                assert.strictEqual(cppActual, cppContent, 'main.cpp content should match');
-
-                // Verify CMakeLists.txt contains required CMake commands
-                assert.ok(cmakeActual.includes('cmake_minimum_required'), 'Should have cmake_minimum_required');
-                assert.ok(cmakeActual.includes('project('), 'Should have project command');
-                assert.ok(cmakeActual.includes('add_executable('), 'Should have add_executable command');
-
-                // Verify main.cpp is valid C++ that prints "Hello, world"
-                assert.ok(cppActual.includes('#include <iostream>'), 'Should include iostream');
-                assert.ok(cppActual.includes('int main()'), 'Should have main function');
-                assert.ok(cppActual.includes('Hello, world'), 'Should print Hello, world');
+                const content = fs.readFileSync(cmakePath, 'utf-8');
+                assert.ok(content.includes(`project(${projectName})`), 'Should have replaced project name');
+                assert.ok(content.includes(`add_executable(${projectName} main.cpp)`), 'Should have replaced executable name');
+                assert.ok(!content.includes('{{PROJECT_NAME}}'), 'Should not have placeholder');
 
             } finally {
                 // Clean up

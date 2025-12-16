@@ -1,0 +1,8 @@
+{
+    "cmake.configureOnOpen": true,
+    "cmake.buildDirectory": "${workspaceFolder}/build",
+    "files.associations": {
+        "*.cmake": "cmake",
+        "CMakeLists.txt": "cmake"
+    }
+}

@@ -1,0 +1,3 @@
+MACRO(MY_MACRO)
+    SET(VAR value)
+ENDMACRO()

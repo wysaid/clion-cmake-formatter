@@ -1,0 +1,1 @@
+set(VAR [[literal content]])

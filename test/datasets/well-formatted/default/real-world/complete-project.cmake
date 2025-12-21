@@ -1,0 +1,18 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
+PROJECT(MyProject)
+
+SET(CMAKE_CXX_STANDARD 17)
+SET(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Source files
+SET(SOURCES
+    src/main.cpp
+    src/utils.cpp
+    src/parser.cpp
+)
+
+ADD_EXECUTABLE(myapp ${SOURCES})
+
+IF (WIN32)
+    TARGET_LINK_LIBRARIES(myapp ws2_32)
+ENDIF ()

@@ -1,0 +1,5 @@
+IF (TRUE)
+    IF (FALSE)
+        MESSAGE("nested")
+    ENDIF ()
+ENDIF ()

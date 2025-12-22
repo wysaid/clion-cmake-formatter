@@ -159,16 +159,17 @@ jobs:
       env:
         VSCE_PAT: ${{ secrets.MS_STORE_TOKEN }}
       run: |
-        set +e  # Don't exit on error
         if [ "${{ steps.validate_tag.outputs.is_stable_release }}" == "true" ]; then
           echo "Publishing as stable release to VS Code Marketplace..."
           npx vsce publish -p $VSCE_PAT 2>&1 | tee publish_output.txt
+          EXIT_CODE=$?
         else
           echo "Publishing as pre-release to VS Code Marketplace..."
           npx vsce publish --pre-release -p $VSCE_PAT 2>&1 | tee publish_output.txt
+          EXIT_CODE=$?
         fi
-        echo "exit_code=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
-        exit ${PIPESTATUS[0]}
+        echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
+        exit $EXIT_CODE
 
     - name: Skip publish if version exists
       if: steps.validate_tag.outputs.should_publish == 'true' && steps.trigger_type.outputs.is_dry_run == 'false' && steps.check_marketplace.outputs.exists == 'true'

@@ -4,8 +4,13 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![VS Code Marketplace](https://img.shields.io/badge/VS%20Code-Marketplace-blue.svg)](https://marketplace.visualstudio.com/items?itemName=wysaid.clion-cmake-format)
 [![Downloads](https://img.shields.io/visual-studio-marketplace/d/wysaid.clion-cmake-format)](https://marketplace.visualstudio.com/items?itemName=wysaid.clion-cmake-format)
+[![npm](https://img.shields.io/npm/v/cc-format)](https://www.npmjs.com/package/cc-format)
 
-**Professional CMake code formatting for VS Code** — Format your `CMakeLists.txt` and `*.cmake` files with JetBrains CLion's proven formatting style. **Zero external dependencies** — no Python, cmake-format, or gersemi required. Pure TypeScript, lightning fast.
+**Professional CMake code formatting** — Format your `CMakeLists.txt` and `*.cmake` files with JetBrains CLion's proven formatting style. **Zero external dependencies** — no Python, cmake-format, or gersemi required. Pure TypeScript, lightning fast.
+
+Available as:
+- 🔌 **VS Code Extension** — [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=wysaid.clion-cmake-format)
+- 💻 **CLI Tool** — [npm package](https://www.npmjs.com/package/cc-format)
 
 > **Project Codename**: `cc-format` (CLion CMake Format)
 > **Why choose this formatter?** Precision, configurability, and zero hassle. If you value clean, maintainable CMake scripts, this is for you.
@@ -86,6 +91,92 @@ Share formatting rules with your team:
 3. Edit `.cc-format.jsonc` in your project root
 
 Changes are applied automatically — no restart needed!
+
+---
+
+## 💻 CLI Tool (npm package)
+
+The same formatting functionality is available as a command-line tool for CI/CD pipelines, pre-commit hooks, or direct terminal use.
+
+### Installation
+
+```bash
+# Install globally
+npm install -g cc-format
+
+# Or use with npx (no installation)
+npx cc-format --help
+```
+
+### Basic Usage
+
+```bash
+# Format a single file (output to stdout)
+cc-format CMakeLists.txt
+
+# Format and write back to file
+cc-format -w CMakeLists.txt
+
+# Format all CMake files in a directory
+cc-format -w src/
+
+# Check if files are formatted (for CI)
+cc-format --check CMakeLists.txt
+
+# Format from stdin
+echo 'project(Test)' | cc-format --stdin
+```
+
+### CLI Options
+
+| Option | Description |
+|--------|-------------|
+| `-w, --write` | Write formatted output back to files |
+| `-c, --check` | Check if files are formatted (exit 1 if not) |
+| `--stdin` | Read from stdin and write to stdout |
+| `--no-project-config` | Ignore project-level `.cc-format.jsonc` files |
+| `--command-case <case>` | Set command case: `unchanged`, `lowercase`, `uppercase` |
+| `--indent-size <size>` | Number of spaces for indentation |
+| `--use-tabs` | Use tabs instead of spaces |
+| `--line-length <length>` | Maximum line length (0 for unlimited) |
+| `--init` | Create a `.cc-format.jsonc` config file in current directory |
+| `--init-global` | Create a global config file |
+| `--config-path` | Show path to global config file |
+
+### Global Configuration
+
+The CLI supports a global configuration file for user-wide settings:
+
+```bash
+# Show global config path
+cc-format --config-path
+# Output: ~/.config/cc-format/.cc-format.jsonc
+
+# Create global config
+cc-format --init-global
+```
+
+The global config file uses the same format as project config files. Settings priority:
+1. CLI options (highest)
+2. Project config (`.cc-format.jsonc` in project directory)
+3. Global config (`~/.config/cc-format/.cc-format.jsonc`)
+4. Default options (lowest)
+
+### CI/CD Integration
+
+```yaml
+# GitHub Actions example
+- name: Check CMake formatting
+  run: npx cc-format --check **/*.cmake CMakeLists.txt
+```
+
+```bash
+# Pre-commit hook
+#!/bin/sh
+cc-format --check $(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(cmake|CMakeLists\.txt)$') || exit 1
+```
+
+---
 
 ## 📋 Before & After Examples
 

@@ -268,5 +268,20 @@
     "bugs": {
         "url": "https://github.com/wysaid/clion-cmake-format/issues"
     },
-    "homepage": "https://github.com/wysaid/clion-cmake-format#readme"
+    "homepage": "https://github.com/wysaid/clion-cmake-format#readme",
+    "files": [
+        "dist/src/**/*.js",
+        "dist/src/**/*.d.ts",
+        "resources/cc-format.schema.json",
+        "README.md",
+        "README.zh-CN.md",
+        "LICENSE",
+        "CHANGELOG.md"
+    ],
+    "bin": {
+        "cc-format": "./dist/src/cli.js"
+    },
+    "dependencies": {
+        "commander": "^14.0.2"
+    }
 }

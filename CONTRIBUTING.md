@@ -41,11 +41,14 @@ clion-cmake-format/
 │   ├── parser.ts      # CMake tokenizer and AST builder
 │   ├── formatter.ts   # Formatting logic and rules
 │   ├── config.ts      # Configuration file loader and validator
+│   ├── cli.ts         # Command-line interface (npm package)
+│   ├── validator.ts   # Validation utilities
 │   └── extension.ts   # VS Code extension integration
 ├── test/
 │   ├── parser.test.ts      # Parser unit tests
 │   ├── formatter.test.ts   # Formatter unit tests
 │   ├── config.test.ts      # Config unit tests
+│   ├── cli.test.ts         # CLI unit tests
 │   ├── well-formated.test.ts  # Idempotency tests
 │   └── datasets/           # Test fixtures
 │       ├── basic/          # Basic syntax tests

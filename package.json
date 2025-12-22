@@ -2,7 +2,7 @@
     "name": "clion-cmake-format",
     "displayName": "%displayName%",
     "description": "%description%",
-    "version": "1.3.0",
+    "version": "1.4.0",
     "publisher": "wysaid",
     "license": "MIT",
     "icon": "logo.png",
@@ -178,6 +178,13 @@
                     "description": "%config.maxBlankLines.description%",
                     "order": 30
                 },
+                "clionCMakeFormatter.maxTrailingBlankLines": {
+                    "type": "number",
+                    "default": 1,
+                    "minimum": 0,
+                    "description": "%config.maxTrailingBlankLines.description%",
+                    "order": 31
+                },
                 "clionCMakeFormatter.commandCase": {
                     "type": "string",
                     "default": "unchanged",
@@ -192,7 +199,7 @@
                         "%config.commandCase.uppercase%"
                     ],
                     "description": "%config.commandCase.description%",
-                    "order": 31
+                    "order": 32
                 },
                 "clionCMakeFormatter.lineLength": {
                     "type": "number",

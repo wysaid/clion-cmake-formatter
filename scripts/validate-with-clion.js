@@ -210,9 +210,18 @@ function detectClionPath() {
         }
     } else if (platform === 'win32') {
         const programFiles = process.env['ProgramFiles'] || 'C:\\Program Files';
+        const userProfile = process.env['USERPROFILE'] || process.env['HOME'];
+
         possiblePaths.push(
             path.join(programFiles, 'JetBrains', 'CLion', 'bin', 'clion64.exe'),
         );
+
+        // JetBrains Toolbox installation path
+        if (userProfile) {
+            possiblePaths.push(
+                path.join(userProfile, 'AppData', 'Local', 'Programs', 'CLion', 'bin', 'clion64.exe'),
+            );
+        }
     }
 
     for (const possiblePath of possiblePaths) {
@@ -253,14 +262,14 @@ function formatCMakeFilesWithClion(clionPath, files) {
             // Look for common error patterns (case-insensitive)
             const stderr = result.stderr.toLowerCase();
             const errorPatterns = [
-                'error:', 
-                'exception:', 
-                'failed to', 
+                'error:',
+                'exception:',
+                'failed to',
                 'cannot find',
                 'no such file'
             ];
             const hasError = errorPatterns.some(pattern => stderr.includes(pattern));
-            
+
             if (hasError) {
                 return { success: false, error: result.stderr };
             }

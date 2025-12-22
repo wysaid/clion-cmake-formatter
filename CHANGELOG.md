@@ -5,6 +5,32 @@ All notable changes to the CLion CMake Format extension will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [1.4.0] - 2025-12-23
+
+### Added
+
+- **Enhanced validator with detailed rule violation detection** — Validator now reports specific rule violations (indentation, spacing, blank lines, command case, trailing whitespace) instead of generic "formatted output differs" messages
+- **`maxTrailingBlankLines` configuration option** — Control maximum blank lines at end of file (default: 1, range: >= 0). Set to a large number to preserve all trailing blank lines
+- **`RuleViolationType` and `RuleViolation` types** — Structured violation information with rule type, line number, message, and original/expected content
+- **`detectRuleViolations()` function** — Analyzes differences between original and formatted content to categorize violations by specific rules
+- **`validateContent()` function** — Allows programmatic validation of CMake content without file I/O
+- **Comprehensive test datasets** — 9 poorly-formatted samples and 5 configuration style templates (compact, lowercase, uppercase, tabs, two-space-indent)
+- **Adversarial tests** — Validates formatting idempotency and ensures poorly-formatted files fail validation
+- **Multi-config style validation** — Tests all well-formatted style directories automatically
+
+### Fixed
+
+- **Trailing newline preservation** — Formatter now respects input file's trailing newline preference (only adds trailing newline if input had one or if trailing blank lines are configured)
+- **Integration test stability** — CLion comparison now tolerates trailing whitespace differences for better test reliability
+- **Windows CLion detection** — Added JetBrains Toolbox installation path for Windows users
+
+### Changed
+
+- **Validator output** — `ValidationResult` now includes optional `violations` array with detailed rule violation information
+- **Test organization** — Expanded validator tests from 31 lines to 350 lines with comprehensive rule coverage
+
 ## [1.3.0] - 2025-12-22
 
 ### ⚠️ Breaking Changes
@@ -117,7 +143,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Configuration System
 
-- **21 configuration options** — Comprehensive control over formatting behavior
+- **23 configuration options** — Comprehensive control over formatting behavior
 - **Project-level configuration** — Support for `.cc-format.jsonc` files in project root
 - **Configuration file watching** — Automatic reload when config files change
 - **Configuration caching** — LRU cache for optimized performance

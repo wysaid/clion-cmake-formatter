@@ -20,6 +20,7 @@
     "spaceInsideWhileParentheses": false,
     // Blank Lines
     "maxBlankLines": 2,
+    "maxTrailingBlankLines": 1,
     // Command Case: "unchanged" (default), "lowercase", or "uppercase"
     "commandCase": "unchanged",
     // Line Wrapping and Alignment

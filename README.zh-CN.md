@@ -20,7 +20,7 @@
 无需安装 Python。无需 pip 包。无需配置困扰。只需安装即可格式化 — 开箱即用。
 
 ### 🔧 完全可自定义
-22 个配置选项让您完全掌控：
+23 个配置选项让您完全掌控：
 - **缩进**：制表符、空格、大小、续行
 - **空格**：所有命令类型的括号前后空格
 - **换行**：自定义长度、对齐规则
@@ -141,6 +141,7 @@ endif ()
 | `commandCase` | `"unchanged"` | 命令大小写：`unchanged` / `lowercase` / `uppercase` |
 | `lineLength` | `0` | 最大行长度（0 = 不限制，设置时最小 30） |
 | `maxBlankLines` | `2` | 最大连续空行数（0-20） |
+| `maxTrailingBlankLines` | `1` | 文件末尾最大空行数（>= 0） |
 | `spaceBeforeIfParentheses` | `true` | `if ()` / `elseif ()` / `endif ()` 括号前空格 |
 | `spaceBeforeForeachParentheses` | `true` | `foreach ()` / `endforeach ()` 括号前空格 |
 | `alignMultiLineArguments` | `false` | 垂直对齐参数 |
@@ -176,6 +177,7 @@ endif ()
 
     // Blank Lines
     "maxBlankLines": 2,
+    "maxTrailingBlankLines": 0,
 
     // Command Case: "unchanged", "lowercase", or "uppercase"
     "commandCase": "unchanged",
@@ -188,7 +190,7 @@ endif ()
 }
 ```
 
-📖 **[查看全部 22 个配置选项 →](https://github.com/wysaid/clion-cmake-format/blob/main/README.zh-CN.md#完整配置参考)**
+📖 **[查看全部 23 个配置选项 →](https://github.com/wysaid/clion-cmake-format/blob/main/README.zh-CN.md#完整配置参考)**
 
 ## 📚 其他资源
 
@@ -249,6 +251,7 @@ endif ()
 |------|------|--------|------|
 | `commandCase` | string | `"unchanged"` | `unchanged`、`lowercase` 或 `uppercase` |
 | `maxBlankLines` | number | `2` | 最大连续空行数 (0-20) |
+| `maxTrailingBlankLines` | number | `1` | 文件末尾最大空行数 (>= 0，设置大数字保留所有) |
 | `enableProjectConfig` | boolean | `true` | 启用 `.cc-format.jsonc` 文件 |
 
 ---

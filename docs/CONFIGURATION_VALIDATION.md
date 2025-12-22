@@ -30,8 +30,7 @@ The validation limits are intentionally **permissive** to allow for diverse codi
 
 **Rationale**:
 - 0 blank lines removes all spacing between logical sections
-- More than 20 consecutive blank lines is rarely intentional and likely indicates a mistake
-
+- More than 20 consecutive blank lines is rarely intentional and likely indicates a mistake- Trailing blank lines at end of file should be minimal (0-1) to avoid excessive whitespace
 ### Line Length
 
 | Setting | Valid Range | Default | Description |

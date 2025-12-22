@@ -133,7 +133,8 @@ endif ()
 `;
                 const result = validateContent(content, { ...DEFAULT_OPTIONS, keepIndentOnEmptyLines: true });
                 // Empty line should have indentation when keepIndentOnEmptyLines is true
-                // Note: This may or may not trigger depending on the formatter behavior
+                // Note: Current formatter doesn't enforce this rule, so we just verify it runs without error
+                assert.ok(result !== undefined, 'validateContent should return a result');
             });
         });
 

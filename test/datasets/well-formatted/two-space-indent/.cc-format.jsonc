@@ -17,6 +17,7 @@
     "spaceInsideForeachParentheses": false,
     "spaceInsideWhileParentheses": false,
     "maxBlankLines": 2,
+    "maxTrailingBlankLines": 1,
     "commandCase": "unchanged",
     "lineLength": 0,
     "alignMultiLineArguments": false,

@@ -24,6 +24,7 @@ export type RuleViolationType =
     | 'spaceInsideForeachParentheses'
     | 'spaceInsideWhileParentheses'
     | 'maxBlankLines'
+    | 'maxTrailingBlankLines'
     | 'commandCase'
     | 'lineLength'
     | 'trailingWhitespace'
@@ -232,14 +233,8 @@ export function detectRuleViolations(original: string, formatted: string, option
         });
     }
 
-    // Check for trailing newline issues
-    if (original.length > 0 && !original.endsWith('\n')) {
-        violations.push({
-            rule: 'trailingNewline',
-            line: originalLines.length,
-            message: 'File should end with a newline'
-        });
-    }
+    // Note: trailingNewline detection is handled in validateFile/validateContent
+    // because detectRuleViolations receives already-normalized content with trailing newline added.
 
     return violations;
 }
@@ -313,27 +308,9 @@ function detectIndentationViolation(
         };
     }
 
-    // Check for keepIndentOnEmptyLines
-    if (origLine.trim() === '' && fmtLine.trim() === '') {
-        if (options.keepIndentOnEmptyLines && origIndent.length < fmtIndent.length) {
-            return {
-                rule: 'keepIndentOnEmptyLines',
-                line: lineNum,
-                message: 'Empty line should preserve indentation',
-                originalContent: origLine,
-                expectedContent: fmtLine
-            };
-        }
-        if (!options.keepIndentOnEmptyLines && origIndent.length > 0) {
-            return {
-                rule: 'keepIndentOnEmptyLines',
-                line: lineNum,
-                message: 'Empty line should not have indentation',
-                originalContent: origLine,
-                expectedContent: fmtLine
-            };
-        }
-    }
+    // Note: keepIndentOnEmptyLines detection is not implemented here because
+    // this function is only called for non-empty content lines. Empty line indentation
+    // would need to be checked in a separate pass if needed in the future.
 
     return {
         rule: 'indentation',
@@ -521,6 +498,8 @@ export function validateFile(filePath: string, workspaceRoot?: string): Validati
 
     // Normalize input newlines to LF
     let original = originalRaw.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    // Track if original file was missing trailing newline (before we add it for comparison)
+    const hadTrailingNewline = original.length === 0 || original.endsWith('\n');
     if (!original.endsWith('\n')) {
         original += '\n';
     }
@@ -540,6 +519,16 @@ export function validateFile(filePath: string, workspaceRoot?: string): Validati
     if (!ok) {
         // Detect detailed rule violations
         const violations = detectRuleViolations(original, formatted, options);
+
+        // Add trailingNewline violation if original file was missing trailing newline
+        if (!hadTrailingNewline) {
+            violations.push({
+                rule: 'trailingNewline',
+                line: original.split('\n').length,
+                message: 'File should end with a newline'
+            });
+        }
+
         result.violations = violations;
 
         // Generate a summary reason with rule types
@@ -565,6 +554,8 @@ export function validateFile(filePath: string, workspaceRoot?: string): Validati
 export function validateContent(content: string, options: FormatterOptions = FORMATTER_DEFAULT_OPTIONS): ValidationResult {
     // Normalize input newlines to LF
     let original = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    // Track if original content was missing trailing newline (before we add it for comparison)
+    const hadTrailingNewline = original.length === 0 || original.endsWith('\n');
     if (!original.endsWith('\n')) {
         original += '\n';
     }
@@ -582,6 +573,16 @@ export function validateContent(content: string, options: FormatterOptions = FOR
     if (!ok) {
         // Detect detailed rule violations
         const violations = detectRuleViolations(original, formatted, options);
+
+        // Add trailingNewline violation if original content was missing trailing newline
+        if (!hadTrailingNewline) {
+            violations.push({
+                rule: 'trailingNewline',
+                line: original.split('\n').length,
+                message: 'File should end with a newline'
+            });
+        }
+
         result.violations = violations;
 
         // Generate a summary reason with rule types

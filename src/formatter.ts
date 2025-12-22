@@ -65,6 +65,8 @@ export interface FormatterOptions {
     // === Blank Lines ===
     /** Maximum consecutive blank lines (default: 2) */
     maxBlankLines: number;
+    /** Maximum trailing blank lines at end of file (default: 0, max: 1) */
+    maxTrailingBlankLines: number;
 
     // === Command Case ===
     /** Force command case (default: 'unchanged') */
@@ -108,6 +110,7 @@ export const DEFAULT_OPTIONS: FormatterOptions = {
 
     // Blank Lines
     maxBlankLines: 2,
+    maxTrailingBlankLines: 1,
 
     // Command Case
     commandCase: 'unchanged',
@@ -128,6 +131,7 @@ const COMMAND_DEFINITION_COMMANDS = ['function', 'endfunction', 'macro', 'endmac
 export class CMakeFormatter {
     private options: FormatterOptions;
     private indentLevel: number = 0;
+    private inputEndsWithNewline: boolean = false;
 
     constructor(options: Partial<FormatterOptions> = {}) {
         this.options = { ...DEFAULT_OPTIONS, ...options };
@@ -137,6 +141,8 @@ export class CMakeFormatter {
      * Format CMake source code
      */
     format(source: string): string {
+        // Track whether input ends with newline
+        this.inputEndsWithNewline = source.endsWith('\n') || source.endsWith('\r\n');
         const ast = parseCMake(source);
         return this.formatFile(ast);
     }
@@ -220,13 +226,20 @@ export class CMakeFormatter {
         // Join lines
         let result = lines.join('\n');
 
-        // Ensure exactly one trailing newline after content
-        if (!result.endsWith('\n')) {
+        // Only add trailing newline if:
+        // 1. Input ended with newline, OR
+        // 2. There are trailing blank lines to add
+        const hasTrailingNewline = this.inputEndsWithNewline || trailingBlankLines > 0;
+        
+        if (hasTrailingNewline && !result.endsWith('\n')) {
             result += '\n';
         }
 
         // Add trailing blank lines (each blank line = one extra newline)
-        for (let i = 0; i < trailingBlankLines; i++) {
+        // Limited by maxTrailingBlankLines (default: 1)
+        const maxTrailingLines = Math.max(0, this.options.maxTrailingBlankLines);
+        const allowedTrailingLines = Math.min(trailingBlankLines, maxTrailingLines);
+        for (let i = 0; i < allowedTrailingLines; i++) {
             result += '\n';
         }
 

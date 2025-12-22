@@ -93,6 +93,12 @@
             "maximum": 20,
             "description": "Maximum number of consecutive blank lines to preserve"
         },
+        "maxTrailingBlankLines": {
+            "type": "number",
+            "default": 1,
+            "minimum": 0,
+            "description": "Maximum number of blank lines allowed at the end of file (>= 0). Set to a large number to keep all trailing blank lines."
+        },
         "commandCase": {
             "type": "string",
             "default": "unchanged",

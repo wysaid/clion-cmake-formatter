@@ -28,3 +28,4 @@ This project provides CMake script parsing and formatting as a VS Code extension
 - Preserve necessary spaces, comments, and multi-line formats
 - Evaluate backward compatibility and default values when adding config keys
 - Command case style must match existing test data
+- Keep `cc-format.schema.json` and `sample.cc-format.jsonc` in sync when adding or removing feature options.

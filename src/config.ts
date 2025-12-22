@@ -268,6 +268,9 @@ function validateConfigOptions(parsed: Record<string, unknown>): Partial<Formatt
     if (typeof parsed.maxBlankLines === 'number' && parsed.maxBlankLines >= 0 && parsed.maxBlankLines <= 20) {
         options.maxBlankLines = Math.floor(parsed.maxBlankLines);
     }
+    if (typeof parsed.maxTrailingBlankLines === 'number' && parsed.maxTrailingBlankLines >= 0) {
+        options.maxTrailingBlankLines = Math.floor(parsed.maxTrailingBlankLines);
+    }
 
     // Command Case
     if (typeof parsed.commandCase === 'string') {
@@ -515,6 +518,7 @@ export function generateSampleConfig(options: Partial<FormatterOptions> = {}): s
         '',
         '    // Blank Lines',
         `    "maxBlankLines": ${config.maxBlankLines},`,
+        `    "maxTrailingBlankLines": ${config.maxTrailingBlankLines},`,
         '',
         '    // Command Case: "unchanged", "lowercase", or "uppercase"',
         `    "commandCase": "${config.commandCase}",`,

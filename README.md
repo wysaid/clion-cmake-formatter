@@ -21,7 +21,7 @@ Precisely replicates JetBrains CLion's CMake formatting — trusted by millions 
 No Python installation. No pip packages. No configuration hell. Just install and format — it works out of the box.
 
 ### 🔧 Fully Customizable
-22 configuration options give you complete control:
+23 configuration options give you complete control:
 - **Indentation**: tabs, spaces, size, continuation
 - **Spacing**: before/inside parentheses for all command types
 - **Line Wrapping**: custom length, alignment rules
@@ -142,6 +142,7 @@ Customize formatting behavior via:
 | `commandCase` | `"unchanged"` | Command case: `unchanged` / `lowercase` / `uppercase` |
 | `lineLength` | `0` | Max line length (0 = unlimited, min 30 if set) |
 | `maxBlankLines` | `2` | Maximum consecutive blank lines (0-20) |
+| `maxTrailingBlankLines` | `0` | Maximum blank lines at end of file (0-1) |
 | `spaceBeforeIfParentheses` | `true` | Space before `if ()` / `elseif ()` / `endif ()` |
 | `spaceBeforeForeachParentheses` | `true` | Space before `foreach ()` / `endforeach ()` |
 | `alignMultiLineArguments` | `false` | Align arguments vertically |
@@ -177,6 +178,7 @@ Create `.cc-format.jsonc` in your project root:
 
     // Blank Lines
     "maxBlankLines": 2,
+    "maxTrailingBlankLines": 0,
 
     // Command Case: "unchanged", "lowercase", or "uppercase"
     "commandCase": "unchanged",
@@ -189,11 +191,11 @@ Create `.cc-format.jsonc` in your project root:
 }
 ```
 
-📖 **[View all 22 configuration options →](https://github.com/wysaid/clion-cmake-format#full-configuration-reference)**
+📖 **[View all 23 configuration options →](https://github.com/wysaid/clion-cmake-format#full-configuration-reference)**
 
 ## 📚 Additional Resources
 
-- 📖 **[Complete Configuration Reference](#full-configuration-reference)** — All 22 options explained
+- 📖 **[Complete Configuration Reference](#full-configuration-reference)** — All 23 options explained
 - 🛠️ **[Contributing Guide](CONTRIBUTING.md)** — Development setup, testing, and contribution guidelines
 - 📝 **[Changelog](CHANGELOG.md)** — Release history and updates
 - 🐛 **[Report Issues](https://github.com/wysaid/clion-cmake-format/issues)** — Bug reports and feature requests
@@ -250,6 +252,7 @@ Create `.cc-format.jsonc` in your project root:
 |---------|------|---------|-------------|
 | `commandCase` | string | `"unchanged"` | `unchanged`, `lowercase`, or `uppercase` |
 | `maxBlankLines` | number | `2` | Max consecutive blank lines (0-20) |
+| `maxTrailingBlankLines` | number | `1` | Max blank lines at end of file (>= 0, set large number to keep all) |
 | `enableProjectConfig` | boolean | `true` | Enable `.cc-format.jsonc` files |
 
 ---

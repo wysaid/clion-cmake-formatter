@@ -470,3 +470,68 @@ describe('Numeric Configuration Validation Tests', () => {
         assert.ok(output4.includes('set'), 'Should handle maximum maxBlankLines');
     });
 });
+
+describe('Trailing Newline Tests', () => {
+    it('should not add trailing newline when input has none', () => {
+        const input = 'set(VAR value)'; // No trailing newline
+        const output = formatCMake(input, { maxTrailingBlankLines: 0 });
+        
+        // Should not add a trailing newline
+        assert.strictEqual(output, 'set(VAR value)', 'Should not add trailing newline when input has none');
+    });
+
+    it('should preserve single trailing newline when maxTrailingBlankLines is 0', () => {
+        const input = 'set(VAR value)\n'; // One trailing newline
+        const output = formatCMake(input, { maxTrailingBlankLines: 0 });
+        
+        // Should keep the single trailing newline
+        assert.strictEqual(output, 'set(VAR value)\n', 'Should preserve single trailing newline');
+    });
+
+    it('should remove extra trailing blank lines when maxTrailingBlankLines is 0', () => {
+        const input = 'set(VAR value)\n\n\n'; // Multiple trailing newlines
+        const output = formatCMake(input, { maxTrailingBlankLines: 0 });
+        
+        // Should only keep one trailing newline
+        assert.strictEqual(output, 'set(VAR value)\n', 'Should remove extra trailing newlines');
+    });
+
+    it('should allow up to maxTrailingBlankLines blank lines at end', () => {
+        const input = 'set(VAR value)\n\n\n'; // 2 trailing blank lines (3 newlines total)
+        const output = formatCMake(input, { maxTrailingBlankLines: 2 });
+        
+        // Should keep 2 blank lines (3 newlines total)
+        assert.strictEqual(output, 'set(VAR value)\n\n\n', 'Should preserve up to maxTrailingBlankLines');
+    });
+
+    it('should not add trailing newline to empty file', () => {
+        const input = ''; // Empty file
+        const output = formatCMake(input, { maxTrailingBlankLines: 0 });
+        
+        assert.strictEqual(output, '', 'Should not add trailing newline to empty file');
+    });
+
+    it('should respect maxTrailingBlankLines with default value 1', () => {
+        const input = 'set(VAR value)\n\n\n\n'; // 3 trailing blank lines
+        const output = formatCMake(input); // default maxTrailingBlankLines = 1
+        
+        // Should limit to 1 blank line (2 newlines total)
+        assert.strictEqual(output, 'set(VAR value)\n\n', 'Should limit to default maxTrailingBlankLines=1');
+    });
+
+    it('should not add newline when formatting single command without trailing newline', () => {
+        const input = 'if(WIN32)\n    set(VAR value)\nendif()'; // No trailing newline
+        const output = formatCMake(input, { maxTrailingBlankLines: 0 });
+        
+        // Should not add trailing newline
+        assert.strictEqual(output.endsWith('\n'), false, 'Should not add trailing newline to multi-line input');
+    });
+
+    it('should preserve trailing newline in multi-line input', () => {
+        const input = 'if(WIN32)\n    set(VAR value)\nendif()\n'; // Has trailing newline
+        const output = formatCMake(input, { maxTrailingBlankLines: 0 });
+        
+        // Should preserve trailing newline
+        assert.strictEqual(output, 'if (WIN32)\n    set(VAR value)\nendif ()\n', 'Should preserve trailing newline in multi-line input');
+    });
+});

@@ -98,6 +98,7 @@ The plugin searches upward from the document's directory and uses the first conf
 
     // Blank Lines
     "maxBlankLines": 2,
+    "maxTrailingBlankLines": 0,
 
     // Command Case: "unchanged", "lowercase", or "uppercase"
     "commandCase": "unchanged",

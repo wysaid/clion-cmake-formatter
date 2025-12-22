@@ -111,9 +111,18 @@ function detectClionPath(): string | null {
         }
     } else if (platform === 'win32') {
         const programFiles = process.env['ProgramFiles'] || 'C:\\Program Files';
+        const userProfile = process.env['USERPROFILE'] || process.env['HOME'];
+
         possiblePaths.push(
             path.join(programFiles, 'JetBrains', 'CLion', 'bin', 'clion64.exe'),
         );
+
+        // JetBrains Toolbox installation path
+        if (userProfile) {
+            possiblePaths.push(
+                path.join(userProfile, 'AppData', 'Local', 'Programs', 'CLion', 'bin', 'clion64.exe'),
+            );
+        }
     }
 
     for (const possiblePath of possiblePaths) {
@@ -248,6 +257,55 @@ function getDiffBetweenDirs(dir1: string, dir2: string): { files: string[]; hasD
 }
 
 /**
+ * Check if two file contents are equivalent after considering acceptable differences:
+ * 1. CLion may have trailing whitespace on lines that plugin doesn't
+ * 2. CLion may have more trailing newlines than plugin
+ */
+function areContentsEquivalent(pluginContent: string, clionContent: string): boolean {
+    // Quick check: if exactly equal, no need for further processing
+    if (pluginContent === clionContent) {
+        return true;
+    }
+
+    // Normalize break() for both
+    const normalizedPlugin = normalizeBreak(pluginContent);
+    const normalizedClion = normalizeBreak(clionContent);
+
+    // Remove trailing whitespace from each line for both
+    const pluginLines = normalizedPlugin.split('\n').map(line => line.replace(/\s+$/, ''));
+    const clionLines = normalizedClion.split('\n').map(line => line.replace(/\s+$/, ''));
+
+    // If they're equal after removing line-trailing whitespace, they're equivalent
+    if (pluginLines.join('\n') === clionLines.join('\n')) {
+        return true;
+    }
+
+    // Check if the only difference is trailing newlines
+    // Count trailing empty lines
+    let pluginTrailingEmpty = 0;
+    for (let i = pluginLines.length - 1; i >= 0 && pluginLines[i] === ''; i--) {
+        pluginTrailingEmpty++;
+    }
+
+    let clionTrailingEmpty = 0;
+    for (let i = clionLines.length - 1; i >= 0 && clionLines[i] === ''; i--) {
+        clionTrailingEmpty++;
+    }
+
+    // Get non-empty parts
+    const pluginNonEmpty = pluginLines.slice(0, pluginLines.length - pluginTrailingEmpty);
+    const clionNonEmpty = clionLines.slice(0, clionLines.length - clionTrailingEmpty);
+
+    // If non-empty parts are equal, consider them equivalent
+    // We're tolerant of both having different amounts of trailing newlines
+    if (pluginNonEmpty.join('\n') === clionNonEmpty.join('\n')) {
+        return true;
+    }
+
+    return false;
+}
+
+/**
  * Manual directory comparison fallback
  */
 function manualDirDiff(dir1: string, dir2: string, basePath = ''): { files: string[]; hasDiff: boolean } {
@@ -271,11 +329,10 @@ function manualDirDiff(dir1: string, dir2: string, basePath = ''): { files: stri
             const content1 = fs.readFileSync(fullPath1, 'utf-8');
             const content2 = fs.readFileSync(fullPath2, 'utf-8');
 
-            // Normalize break() for comparison
-            const normalized1 = normalizeBreak(content1);
-            const normalized2 = normalizeBreak(content2);
+            // Check if contents are equivalent (dir1 is plugin, dir2 is CLion)
+            const equivalent = areContentsEquivalent(content1, content2);
 
-            if (normalized1 !== normalized2) {
+            if (!equivalent) {
                 diffFiles.push(relativePath);
             }
         }
@@ -312,12 +369,11 @@ function keepOnlyDifferences(dir1: string, dir2: string, basePath = ''): void {
             const content1 = fs.readFileSync(fullPath1, 'utf-8');
             const content2 = fs.readFileSync(fullPath2, 'utf-8');
 
-            // Normalize break() for comparison
-            const normalized1 = normalizeBreak(content1);
-            const normalized2 = normalizeBreak(content2);
+            // Check if contents are equivalent (dir1 is plugin, dir2 is CLion)
+            const equivalent = areContentsEquivalent(content1, content2);
 
-            if (normalized1 === normalized2) {
-                // Files are identical (after normalization), delete both
+            if (equivalent) {
+                // Files are equivalent (after normalization), delete both
                 fs.unlinkSync(fullPath1);
                 fs.unlinkSync(fullPath2);
             }

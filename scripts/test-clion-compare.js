@@ -253,6 +253,7 @@ function restoreFile(filePath) {
 
 /**
  * Check if a directory has uncommitted changes
+ * Ignores untracked files (new files that are not in git yet)
  */
 function checkDirectoryClean(dirPath) {
     try {
@@ -262,9 +263,19 @@ function checkDirectoryClean(dirPath) {
         });
 
         const output = result.stdout.trim();
+        
+        // Filter out untracked files (lines starting with '??')
+        // We only care about modifications to tracked files
+        const lines = output.split('\n').filter(line => {
+            const trimmed = line.trim();
+            return trimmed.length > 0 && !trimmed.startsWith('??');
+        });
+        
+        const filteredOutput = lines.join('\n');
+        
         return {
-            clean: output.length === 0,
-            changes: output
+            clean: filteredOutput.length === 0,
+            changes: filteredOutput
         };
     } catch (e) {
         return { clean: false, error: e.message };

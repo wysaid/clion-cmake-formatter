@@ -4,8 +4,13 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![VS Code Marketplace](https://img.shields.io/badge/VS%20Code-Marketplace-blue.svg)](https://marketplace.visualstudio.com/items?itemName=wysaid.clion-cmake-format)
 [![Downloads](https://img.shields.io/visual-studio-marketplace/d/wysaid.clion-cmake-format)](https://marketplace.visualstudio.com/items?itemName=wysaid.clion-cmake-format)
+[![npm](https://img.shields.io/npm/v/cc-format)](https://www.npmjs.com/package/cc-format)
 
-**VS Code 专业级 CMake 代码格式化工具** — 使用 JetBrains CLion 成熟的格式化风格，格式化您的 `CMakeLists.txt` 和 `*.cmake` 文件。**零外部依赖** — 无需 Python、cmake-format 或 gersemi。纯 TypeScript 实现，极速快捷。
+**专业级 CMake 代码格式化工具** — 使用 JetBrains CLion 成熟的格式化风格，格式化您的 `CMakeLists.txt` 和 `*.cmake` 文件。**零外部依赖** — 无需 Python、cmake-format 或 gersemi。纯 TypeScript 实现，极速快捷。
+
+提供多种使用方式：
+- 🔌 **VS Code 扩展** — [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=wysaid.clion-cmake-format)
+- 💻 **命令行工具** — [npm 包](https://www.npmjs.com/package/cc-format)
 
 > **为什么选择这个格式化工具？** 精准、可配置、零麻烦。如果您重视简洁、可维护的 CMake 脚本，这就是您的选择。
 
@@ -85,6 +90,92 @@
 3. 在项目根目录编辑 `.cc-format.jsonc`
 
 更改会自动应用 — 无需重启！
+
+---
+
+## 💻 命令行工具 (npm 包)
+
+同样的格式化功能也可以作为命令行工具使用，适用于 CI/CD 流水线、pre-commit 钩子或直接在终端中使用。
+
+### 安装
+
+```bash
+# 全局安装
+npm install -g cc-format
+
+# 或使用 npx（无需安装）
+npx cc-format --help
+```
+
+### 基本用法
+
+```bash
+# 格式化单个文件（输出到 stdout）
+cc-format CMakeLists.txt
+
+# 格式化并写回文件
+cc-format -w CMakeLists.txt
+
+# 格式化目录下所有 CMake 文件
+cc-format -w src/
+
+# 检查文件是否已格式化（用于 CI）
+cc-format --check CMakeLists.txt
+
+# 从 stdin 格式化
+echo 'project(Test)' | cc-format --stdin
+```
+
+### CLI 选项
+
+| 选项 | 描述 |
+|------|------|
+| `-w, --write` | 将格式化后的内容写回文件 |
+| `-c, --check` | 检查文件是否已格式化（如未格式化则退出码为 1） |
+| `--stdin` | 从 stdin 读取并输出到 stdout |
+| `--no-project-config` | 忽略项目级 `.cc-format.jsonc` 文件 |
+| `--command-case <case>` | 设置命令大小写：`unchanged`、`lowercase`、`uppercase` |
+| `--indent-size <size>` | 缩进空格数 |
+| `--use-tabs` | 使用制表符代替空格 |
+| `--line-length <length>` | 最大行长度（0 表示不限制） |
+| `--init` | 在当前目录创建 `.cc-format.jsonc` 配置文件 |
+| `--init-global` | 创建全局配置文件 |
+| `--config-path` | 显示全局配置文件路径 |
+
+### 全局配置
+
+CLI 支持用户级全局配置文件：
+
+```bash
+# 显示全局配置路径
+cc-format --config-path
+# 输出: ~/.config/cc-format/.cc-format.jsonc
+
+# 创建全局配置
+cc-format --init-global
+```
+
+全局配置文件使用与项目配置相同的格式。配置优先级：
+1. CLI 选项（最高）
+2. 项目配置（项目目录下的 `.cc-format.jsonc`）
+3. 全局配置（`~/.config/cc-format/.cc-format.jsonc`）
+4. 默认选项（最低）
+
+### CI/CD 集成
+
+```yaml
+# GitHub Actions 示例
+- name: 检查 CMake 格式化
+  run: npx cc-format --check **/*.cmake CMakeLists.txt
+```
+
+```bash
+# Pre-commit 钩子
+#!/bin/sh
+cc-format --check $(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(cmake|CMakeLists\.txt)$') || exit 1
+```
+
+---
 
 ## 📋 格式化前后对比
 

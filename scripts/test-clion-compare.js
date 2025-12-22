@@ -263,16 +263,16 @@ function checkDirectoryClean(dirPath) {
         });
 
         const output = result.stdout.trim();
-        
+
         // Filter out untracked files (lines starting with '??')
         // We only care about modifications to tracked files
         const lines = output.split('\n').filter(line => {
             const trimmed = line.trim();
             return trimmed.length > 0 && !trimmed.startsWith('??');
         });
-        
+
         const filteredOutput = lines.join('\n');
-        
+
         return {
             clean: filteredOutput.length === 0,
             changes: filteredOutput

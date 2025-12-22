@@ -1,0 +1,10 @@
+# Test file with incorrect nested block indentation
+if (CONDITION1)
+message("level 1 not indented")
+if (CONDITION2)
+message("level 2 not indented")
+if (CONDITION3)
+message("level 3 not indented")
+endif ()
+endif ()
+endif ()

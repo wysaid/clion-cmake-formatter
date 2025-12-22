@@ -1,0 +1,5 @@
+# Test file using tabs instead of spaces (when spaces are configured)
+if (TRUE)
+	message("using tabs")
+	set(VAR "value")
+endif ()

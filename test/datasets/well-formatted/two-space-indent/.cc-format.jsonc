@@ -1,0 +1,25 @@
+// https://github.com/wysaid/clion-cmake-format
+{
+    // Two-space indent style - use 2 spaces for indentation
+    "useTabs": false,
+    "tabSize": 2,
+    "indentSize": 2,
+    "continuationIndentSize": 4,
+    "keepIndentOnEmptyLines": false,
+    "spaceBeforeCommandDefinitionParentheses": false,
+    "spaceBeforeCommandCallParentheses": false,
+    "spaceBeforeIfParentheses": true,
+    "spaceBeforeForeachParentheses": true,
+    "spaceBeforeWhileParentheses": true,
+    "spaceInsideCommandDefinitionParentheses": false,
+    "spaceInsideCommandCallParentheses": false,
+    "spaceInsideIfParentheses": false,
+    "spaceInsideForeachParentheses": false,
+    "spaceInsideWhileParentheses": false,
+    "maxBlankLines": 2,
+    "commandCase": "unchanged",
+    "lineLength": 0,
+    "alignMultiLineArguments": false,
+    "alignMultiLineParentheses": false,
+    "alignControlFlowParentheses": false
+}

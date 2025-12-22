@@ -1,0 +1,25 @@
+// https://github.com/wysaid/clion-cmake-format
+{
+    // Compact style - no spaces before/after parentheses
+    "useTabs": false,
+    "tabSize": 4,
+    "indentSize": 4,
+    "continuationIndentSize": 8,
+    "keepIndentOnEmptyLines": false,
+    "spaceBeforeCommandDefinitionParentheses": false,
+    "spaceBeforeCommandCallParentheses": false,
+    "spaceBeforeIfParentheses": false,
+    "spaceBeforeForeachParentheses": false,
+    "spaceBeforeWhileParentheses": false,
+    "spaceInsideCommandDefinitionParentheses": false,
+    "spaceInsideCommandCallParentheses": false,
+    "spaceInsideIfParentheses": false,
+    "spaceInsideForeachParentheses": false,
+    "spaceInsideWhileParentheses": false,
+    "maxBlankLines": 1,
+    "commandCase": "unchanged",
+    "lineLength": 0,
+    "alignMultiLineArguments": false,
+    "alignMultiLineParentheses": false,
+    "alignControlFlowParentheses": false
+}

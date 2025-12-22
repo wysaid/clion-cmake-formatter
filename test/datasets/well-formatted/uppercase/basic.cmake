@@ -1,0 +1,21 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
+PROJECT(UppercaseStyle)
+
+OPTION(BUILD_TESTS "Build tests" OFF)
+
+IF (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    MESSAGE("Debug build")
+    SET(DEBUG_VAR "value")
+ENDIF ()
+
+FOREACH (item IN ITEMS a b c)
+    MESSAGE("Item: ${item}")
+ENDFOREACH ()
+
+FUNCTION(my_function ARG1 ARG2)
+    MESSAGE("Arg1: ${ARG1}")
+    MESSAGE("Arg2: ${ARG2}")
+ENDFUNCTION()
+
+ADD_EXECUTABLE(myapp main.cpp)
+TARGET_LINK_LIBRARIES(myapp PRIVATE somelib)

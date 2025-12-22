@@ -131,20 +131,25 @@ jobs:
         echo "Checking if version $VERSION exists in VS Code Marketplace..."
         
         # Query the marketplace API
-        RESPONSE=$(curl -s "https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery" \
+        RESPONSE=$(curl -s -f "https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery" \
           -H "Content-Type: application/json" \
           -H "Accept: application/json;api-version=3.0-preview.1" \
-          -d "{\"filters\":[{\"criteria\":[{\"filterType\":7,\"value\":\"$EXTENSION_ID\"}]}],\"flags\":914}")
+          -d "{\"filters\":[{\"criteria\":[{\"filterType\":7,\"value\":\"$EXTENSION_ID\"}]}],\"flags\":914}" || echo "")
         
-        # Check if the specific version exists
-        VERSION_EXISTS=$(echo "$RESPONSE" | grep -o "\"version\":\"$VERSION\"" || echo "")
-        
-        if [ -n "$VERSION_EXISTS" ]; then
-          echo "exists=true" >> $GITHUB_OUTPUT
-          echo "⚠️ Warning: Version $VERSION already exists in VS Code Marketplace"
-        else
+        if [ -z "$RESPONSE" ]; then
+          echo "⚠️ Warning: Could not query marketplace API"
           echo "exists=false" >> $GITHUB_OUTPUT
-          echo "✓ Version $VERSION does not exist in VS Code Marketplace"
+        else
+          # Check if the specific version exists (with word boundary)
+          VERSION_EXISTS=$(echo "$RESPONSE" | grep -oP "\"version\":\s*\"${VERSION}(?![\d])\"" || echo "")
+          
+          if [ -n "$VERSION_EXISTS" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "⚠️ Warning: Version $VERSION already exists in VS Code Marketplace"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "✓ Version $VERSION does not exist in VS Code Marketplace"
+          fi
         fi
 
     - name: Warn if version exists (dry-run)
@@ -161,11 +166,11 @@ jobs:
       run: |
         if [ "${{ steps.validate_tag.outputs.is_stable_release }}" == "true" ]; then
           echo "Publishing as stable release to VS Code Marketplace..."
-          npx vsce publish -p $VSCE_PAT 2>&1 | tee publish_output.txt
+          npx vsce publish -p "$VSCE_PAT" 2>&1 | tee publish_output.txt
           EXIT_CODE=$?
         else
           echo "Publishing as pre-release to VS Code Marketplace..."
-          npx vsce publish --pre-release -p $VSCE_PAT 2>&1 | tee publish_output.txt
+          npx vsce publish --pre-release -p "$VSCE_PAT" 2>&1 | tee publish_output.txt
           EXIT_CODE=$?
         fi
         echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT

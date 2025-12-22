@@ -61,6 +61,34 @@
             }
         },
         {
+            "label": "npm: test:integration",
+            "type": "npm",
+            "script": "test:integration",
+            "detail": "Run integration tests (requires CLion installed)",
+            "problemMatcher": [],
+            "group": "test",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true,
+                "focus": false
+            }
+        },
+        {
+            "label": "npm: test:all",
+            "type": "npm",
+            "script": "test:all",
+            "detail": "Run all tests (unit + integration)",
+            "problemMatcher": [],
+            "group": "test",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true,
+                "focus": false
+            }
+        },
+        {
             "label": "npm: package",
             "type": "npm",
             "script": "package",

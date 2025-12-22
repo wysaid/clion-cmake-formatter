@@ -1,3 +1,12 @@
+# Release workflow for publishing to VS Code Marketplace and creating GitHub Releases
+#
+# Triggers:
+# - Tag push (X.Y.Z or X.Y.Z-suffix): Full release - build, publish to Marketplace, create GitHub Release
+# - Master push: Dry-run mode - build, test, upload VSIX artifact (no publishing)
+#
+# Note: Master branch pushes will trigger both CI and Release workflows intentionally.
+# The Release workflow's dry-run mode validates the release pipeline and produces
+# downloadable VSIX artifacts with longer retention (30 days vs 7 days).
 name: Release
 
 on:
@@ -29,7 +38,8 @@ jobs:
         else
           echo "is_tag=false" >> $GITHUB_OUTPUT
           echo "is_dry_run=true" >> $GITHUB_OUTPUT
-          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          # Use sed instead of node to avoid dependency on Node.js before setup
+          PACKAGE_VERSION=$(sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' package.json)
           echo "tag=$PACKAGE_VERSION" >> $GITHUB_OUTPUT
           echo "Triggered by master branch push (dry-run mode)"
           echo "Using version from package.json: $PACKAGE_VERSION"
@@ -83,6 +93,17 @@ jobs:
         echo "version=$VERSION" >> $GITHUB_OUTPUT
         echo "Extracted version: $VERSION"
 
+    - name: Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22.x
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    # Version validation: Tag base version (e.g., 1.0.3 from 1.0.3-alpha) must match package.json version
+    # This applies to both stable releases and pre-releases
     - name: Check version consistency with package.json
       if: steps.validate_tag.outputs.should_publish == 'true' && steps.trigger_type.outputs.is_tag == 'true'
       run: |
@@ -98,15 +119,6 @@ jobs:
         fi
         
         echo "Version check passed: $TAG_VERSION"
-
-    - name: Use Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 22.x
-        cache: 'npm'
-
-    - name: Install dependencies
-      run: npm ci
 
     - name: Compile TypeScript
       run: npm run compile
@@ -140,10 +152,9 @@ jobs:
           echo "⚠️ Warning: Could not query marketplace API"
           echo "exists=false" >> $GITHUB_OUTPUT
         else
-          # Check if the specific version exists (exact match with quotes and comma or closing brace after)
-          VERSION_EXISTS=$(echo "$RESPONSE" | grep -E "\"version\":\s*\"${VERSION}\"[,}]" || echo "")
-          
-          if [ -n "$VERSION_EXISTS" ]; then
+          # Check if the specific version exists by inspecting the extension versions array using jq
+          if echo "$RESPONSE" | jq -e --arg version "$VERSION" \
+            '.results[0].extensions[0].versions[].version | select(. == $version)' >/dev/null 2>&1; then
             echo "exists=true" >> $GITHUB_OUTPUT
             echo "⚠️ Warning: Version $VERSION already exists in VS Code Marketplace"
           else
@@ -200,13 +211,13 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: clion-cmake-format-${{ steps.trigger_type.outputs.tag }}
-        path: ./*.vsix
+        path: "*.vsix"
         retention-days: 30
 
     - name: Create GitHub Release
       if: steps.validate_tag.outputs.should_publish == 'true' && steps.trigger_type.outputs.is_dry_run == 'false'
       uses: softprops/action-gh-release@v2
       with:
-        files: ./*.vsix
+        files: "*.vsix"
         prerelease: ${{ steps.validate_tag.outputs.is_prerelease }}
         generate_release_notes: true

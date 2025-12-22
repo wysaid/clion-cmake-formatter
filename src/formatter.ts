@@ -679,6 +679,8 @@ export class CMakeFormatter {
      */
     private formatBlock(node: BlockNode): string {
         const lines: string[] = [];
+        const maxBlankLines = Math.max(0, this.options.maxBlankLines);
+        let consecutiveBlankLines = 0;
 
         // Format start command
         lines.push(this.formatCommand(node.startCommand));
@@ -688,6 +690,23 @@ export class CMakeFormatter {
 
         // Format body
         for (const child of node.body) {
+            // Handle blank lines with maxBlankLines limit
+            if (child.type === NodeType.BlankLine) {
+                const blankNode = child as BlankLineNode;
+                // Add up to maxBlankLines from the count in this node
+                const remaining = Math.max(0, maxBlankLines - consecutiveBlankLines);
+                const linesToAdd = Math.min(blankNode.count, remaining);
+                
+                for (let j = 0; j < linesToAdd; j++) {
+                    lines.push(this.options.keepIndentOnEmptyLines ? this.getIndent() : '');
+                }
+                consecutiveBlankLines += linesToAdd;
+                continue;
+            }
+
+            // Reset consecutive blank lines counter when we hit non-blank content
+            consecutiveBlankLines = 0;
+
             // Handle elseif/else at the same level as if
             if (child.type === NodeType.Command) {
                 const cmdNode = child as CommandNode;

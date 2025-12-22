@@ -69,6 +69,8 @@ function detectClionPath(): string | null {
     }
 
     if (platform === 'darwin') {
+        // On macOS, prioritize .app bundles over symlinks/scripts (e.g., /usr/local/bin/clion)
+        // because the CLI tools may not work reliably for formatting
         const appLocations = [
             '/Applications/CLion.app',
             path.join(os.homedir(), 'Applications/CLion.app'),
@@ -83,10 +85,11 @@ function detectClionPath(): string | null {
             }
         }
 
+        // Add 'which clion' result with LOWER priority (after .app bundles)
         try {
             const result = spawnSync('which', ['clion'], { encoding: 'utf-8' });
             if (result.status === 0 && result.stdout.trim()) {
-                possiblePaths.unshift(result.stdout.trim());
+                possiblePaths.push(result.stdout.trim());
             }
         } catch (e) {
             // Ignore
@@ -239,11 +242,11 @@ function manualDirDiff(dir1: string, dir2: string, basePath = ''): { files: stri
         } else {
             const content1 = fs.readFileSync(fullPath1, 'utf-8');
             const content2 = fs.readFileSync(fullPath2, 'utf-8');
-            
+
             // Normalize break() for comparison
             const normalized1 = normalizeBreak(content1);
             const normalized2 = normalizeBreak(content2);
-            
+
             if (normalized1 !== normalized2) {
                 diffFiles.push(relativePath);
             }
@@ -280,11 +283,11 @@ function keepOnlyDifferences(dir1: string, dir2: string, basePath = ''): void {
         } else {
             const content1 = fs.readFileSync(fullPath1, 'utf-8');
             const content2 = fs.readFileSync(fullPath2, 'utf-8');
-            
+
             // Normalize break() for comparison
             const normalized1 = normalizeBreak(content1);
             const normalized2 = normalizeBreak(content2);
-            
+
             if (normalized1 === normalized2) {
                 // Files are identical (after normalization), delete both
                 fs.unlinkSync(fullPath1);
@@ -406,7 +409,7 @@ describe('CLion vs Plugin Formatting Comparison', function () {
         const errorPluginDir = path.join(errorResultsDir, 'plugin');
         const errorClionDir = path.join(errorResultsDir, 'clion');
         fs.mkdirSync(errorResultsDir, { recursive: true });
-        
+
         // Copy directories (to handle cross-device moves)
         copyDirectory(pluginDir, errorPluginDir);
         copyDirectory(clionDir, errorClionDir);
@@ -423,12 +426,12 @@ describe('CLion vs Plugin Formatting Comparison', function () {
         for (const file of diff.files) {
             const pluginFile = path.join(errorPluginDir, file);
             const clionFile = path.join(errorClionDir, file);
-            
+
             if (!fs.existsSync(pluginFile) || !fs.existsSync(clionFile)) {
                 validatedDiffs.push(file);
                 continue;
             }
-            
+
             // Special case: whitespace-only.cmake should have exactly 2 blank lines
             if (file === 'edge-cases/whitespace-only.cmake') {
                 const pluginContent = fs.readFileSync(pluginFile, 'utf-8');
@@ -442,7 +445,7 @@ describe('CLion vs Plugin Formatting Comparison', function () {
                     continue;
                 }
             }
-            
+
             // Skip CMakeLists.txt for now (known complex issue)
             if (file === 'cmake-official/CMakeLists.txt') {
                 console.log(`   ⏸️  ${file}: Skipped (known complex issue, to be addressed later)`);
@@ -450,10 +453,10 @@ describe('CLion vs Plugin Formatting Comparison', function () {
                 fs.unlinkSync(clionFile);
                 continue;
             }
-            
+
             validatedDiffs.push(file);
         }
-        
+
         // If no validated differences remain, test passes
         if (validatedDiffs.length === 0) {
             console.log(`\n✅ All validated differences resolved!`);

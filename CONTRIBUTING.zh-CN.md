@@ -131,7 +131,7 @@ npm run test:unit # 运行所有测试
 npm run test:clion
 ```
 
-此测试使用 CLion 和本插件分别格式化文件，然后比较结果。详情请参阅 [docs/CLION_COMPARISON_TESTING.md](docs/CLION_COMPARISON_TESTING.md)（英文）。
+此测试使用 CLion 和本插件分别格式化文件，然后比较结果。详情请参阅 [docs/CLION_INTEGRATION_TESTING.md](docs/CLION_INTEGRATION_TESTING.md)（英文）。
 
 ## 📝 代码指南
 
@@ -218,7 +218,7 @@ npx mocha --require ts-node/register test/parser.test.ts
 
 ## 📚 其他文档
 
-- [CLion 对比测试](docs/CLION_COMPARISON_TESTING.md)（英文）
+- [CLion 集成测试](docs/CLION_INTEGRATION_TESTING.md)（英文）
 - [配置验证](docs/CONFIGURATION_VALIDATION.md)（英文）
 - [创建配置命令](docs/CREATE_CONFIG_COMMAND.md)（英文）
 - [扩展测试](docs/EXTENDING_TESTS.md)（英文）

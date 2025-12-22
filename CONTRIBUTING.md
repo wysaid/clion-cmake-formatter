@@ -131,7 +131,7 @@ To ensure compatibility with CLion's native formatter, you can run comparison te
 npm run test:clion
 ```
 
-This test formats files using both CLion and this plugin, then compares the results. See [docs/CLION_COMPARISON_TESTING.md](docs/CLION_COMPARISON_TESTING.md) for details.
+This test formats files using both CLion and this plugin, then compares the results. See [docs/CLION_INTEGRATION_TESTING.md](docs/CLION_INTEGRATION_TESTING.md) for details.
 
 ## 📝 Code Guidelines
 
@@ -218,7 +218,7 @@ When modifying the formatter, ensure:
 
 ## 📚 Additional Documentation
 
-- [CLion Comparison Testing](docs/CLION_COMPARISON_TESTING.md)
+- [CLion Integration Testing](docs/CLION_INTEGRATION_TESTING.md)
 - [Configuration Validation](docs/CONFIGURATION_VALIDATION.md)
 - [Create Config Command](docs/CREATE_CONFIG_COMMAND.md)
 - [Extending Tests](docs/EXTENDING_TESTS.md)

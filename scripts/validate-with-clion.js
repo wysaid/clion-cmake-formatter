@@ -1,22 +1,25 @@
 #!/usr/bin/env node
 
 /**
- * Compare formatting results between CLion and this plugin
+ * Validate test datasets against CLion's formatting standard
+ *
+ * This script verifies that test files are correctly formatted according to CLion's formatter.
+ * It does NOT compare plugin output with CLion - for that, see test/integration/clion-comparison.test.ts
  *
  * This script:
- * 1. Formats test files in-place using CLion's command-line formatter
+ * 1. Formats test directory using CLion's command-line formatter (batch mode with -R flag)
  * 2. Uses `git diff` to detect any changes
- * 3. Reports files that differ from CLion's formatting
- * 4. Restores files to original state after testing
+ * 3. Reports files that differ from CLion's formatting standard
+ * 4. Optionally restores files to original state after testing
  *
  * Usage:
- *   node scripts/test-clion-compare.js [options]
+ *   node scripts/validate-with-clion.js [options]
  *
  * Options:
  *   --clion-path <path>   Path to CLion executable (auto-detected if not set)
  *   --test-dir <path>     Directory containing test files (default: test/datasets/well-formatted/default)
- *   --file <name>         Test a specific file only
- *   --no-restore          Don't restore files after testing (keep CLion formatted version)
+ *   --file <name>         Test a specific file only (deprecated - use --test-dir with single file dir)
+ *   --restore             Restore files after testing (default: keep CLion formatted version)
  *   --verbose             Show detailed diff output
  *   --help                Show this help message
  *
@@ -26,6 +29,9 @@
  * Requirements:
  *   - CLion must be installed
  *   - Git must be available
+ *
+ * Note: This script now uses batch directory formatting (-R flag) for better performance,
+ *       instead of formatting files one by one.
  */
 
 const fs = require('fs');
@@ -70,13 +76,16 @@ for (let i = 0; i < args.length; i++) {
 
 if (options.help) {
     console.log(`
-CLion vs Plugin Formatter Comparison Test
+Validate Test Datasets with CLion Formatter
 
-This test formats files using CLion and checks for differences using git diff.
-Test files should already be correctly formatted - any change indicates a mismatch.
+This script validates that test files match CLion's formatting standard by formatting
+them with CLion and checking for changes. Test files should already be correctly 
+formatted - any change indicates they need adjustment.
+
+Note: This does NOT compare plugin vs CLion output. For that, run: npm run test:integration
 
 Usage:
-  node scripts/test-clion-compare.js [options]
+  node scripts/validate-with-clion.js [options]
 
 Options:
   --clion-path <path>   Path to CLion executable (auto-detected if not set)
@@ -91,14 +100,17 @@ Environment:
   CLION_PATH            Path to CLion executable (alternative to --clion-path)
 
 Examples:
-  # Run all tests with auto-detected CLion
-  node scripts/test-clion-compare.js
+  # Validate all files with auto-detected CLion
+  node scripts/validate-with-clion.js
 
-  # Test a specific file
-  node scripts/test-clion-compare.js --file simple-command.cmake
+  # Validate a specific directory
+  node scripts/validate-with-clion.js --test-dir test/datasets/basic
 
-  # Restore files after testing
-  node scripts/test-clion-compare.js --restore --verbose
+  # Restore files after validation
+  node scripts/validate-with-clion.js --restore --verbose
+
+Note: This script uses batch directory formatting (-R flag) for much better performance
+      compared to formatting files individually.
 `);
     process.exit(0);
 }
@@ -139,6 +151,8 @@ function detectClionPath() {
     const possiblePaths = [];
 
     if (platform === 'darwin') {
+        // On macOS, prioritize .app bundles over symlinks/scripts (e.g., /usr/local/bin/clion)
+        // because the CLI tools may not work reliably for formatting
         const appLocations = [
             '/Applications/CLion.app',
             path.join(os.homedir(), 'Applications/CLion.app'),
@@ -153,10 +167,11 @@ function detectClionPath() {
             }
         }
 
+        // Add 'which clion' result with LOWER priority (after .app bundles)
         try {
             const result = spawnSync('which', ['clion'], { encoding: 'utf-8' });
             if (result.status === 0 && result.stdout.trim()) {
-                possiblePaths.unshift(result.stdout.trim());
+                possiblePaths.push(result.stdout.trim());
             }
         } catch (e) {
             // Ignore
@@ -193,13 +208,15 @@ function detectClionPath() {
 }
 
 /**
- * Format a file using CLion command-line formatter (in-place)
+ * Format a directory using CLion command-line formatter (recursive, in-place)
+ * Uses -R flag for batch formatting, which is much faster than formatting files one by one
  */
-function formatWithClion(clionPath, filePath) {
+function formatDirectoryWithClion(clionPath, dir) {
     try {
-        const result = spawnSync(clionPath, ['format', '-allowDefaults', filePath], {
+        // Use -R for recursive scanning of directories
+        const result = spawnSync(clionPath, ['format', '-R', '-allowDefaults', dir], {
             encoding: 'utf-8',
-            timeout: 60000,
+            timeout: 120000, // Increased timeout for directory formatting
             stdio: ['pipe', 'pipe', 'pipe']
         });
 
@@ -207,8 +224,10 @@ function formatWithClion(clionPath, filePath) {
             return { success: false, error: result.error.message };
         }
 
-        if (result.status !== 0) {
-            return { success: false, error: result.stderr || `Exit code: ${result.status}` };
+        // CLion may return non-zero exit codes (e.g., 14) even on successful formatting
+        // Check if there's actual error output
+        if (result.status !== 0 && result.stderr && result.stderr.includes('Error')) {
+            return { success: false, error: result.stderr };
         }
 
         return { success: true };
@@ -312,7 +331,7 @@ function listCMakeFiles(dir) {
 // ============================================================
 
 console.log('============================================================');
-console.log('CLion Formatter Comparison Test');
+console.log('Validate Datasets with CLion Formatter');
 console.log('============================================================');
 
 // Detect or validate CLion path
@@ -408,7 +427,15 @@ if (testFiles.length === 0) {
 
 console.log(`📁 Found ${testFiles.length} test file(s)`);
 console.log(`📂 Test directory: ${options.testDir}`);
-console.log('');
+
+// Format entire directory with CLion (batch mode)
+console.log('\n🔧 Formatting directory with CLion...');
+const formatResult = formatDirectoryWithClion(clionPath, options.testDir);
+if (!formatResult.success) {
+    console.error(`\n❌ CLion formatting failed: ${formatResult.error}`);
+    process.exit(1);
+}
+console.log('✅ Formatting completed');
 
 // Track results
 const results = {
@@ -417,20 +444,14 @@ const results = {
     errors: []
 };
 
-// Test each file
+console.log('\n🔍 Checking for differences...');
+
+// Check each file for differences after batch formatting
 for (let i = 0; i < testFiles.length; i++) {
     const testFile = testFiles[i];
     const relativePath = path.relative(options.testDir, testFile);
 
     process.stdout.write(`[${i + 1}/${testFiles.length}] ${relativePath}... `);
-
-    // Format with CLion (in-place)
-    const formatResult = formatWithClion(clionPath, testFile);
-    if (!formatResult.success) {
-        console.log(`⚠️  CLion format failed: ${formatResult.error}`);
-        results.errors.push({ file: relativePath, error: formatResult.error });
-        continue;
-    }
 
     // Check git diff
     const diffResult = checkGitDiff(testFile);

@@ -82,7 +82,7 @@ if (options.help) {
 Validate Test Datasets with CLion Formatter
 
 This script validates that test files match CLion's formatting standard by formatting
-them with CLion and checking for changes. Test files should already be correctly 
+them with CLion and checking for changes. Test files should already be correctly
 formatted - any change indicates they need adjustment.
 
 Only CMake files (*.cmake and CMakeLists.txt) are formatted - other files are ignored.

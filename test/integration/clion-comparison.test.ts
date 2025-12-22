@@ -209,7 +209,7 @@ function formatDirectoryWithClion(clionPath: string, dir: string): { success: bo
     try {
         // List all CMake files first
         const cmakeFiles = listCMakeFiles(dir);
-        
+
         if (cmakeFiles.length === 0) {
             return { success: true };
         }

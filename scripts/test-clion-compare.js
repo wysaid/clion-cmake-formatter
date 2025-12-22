@@ -306,12 +306,26 @@ console.log('============================================================');
 
 // Detect or validate CLion path
 let clionPath = options.clionPath;
+const userProvidedPath = clionPath; // Save original user input for error reporting
+
 if (clionPath) {
     clionPath = resolveClionPath(clionPath);
+    
+    // Check if user-provided path exists
+    if (!fs.existsSync(clionPath)) {
+        console.error(`❌ User-provided CLion path not found: ${userProvidedPath}`);
+        if (userProvidedPath !== clionPath) {
+            console.error(`   (resolved to: ${clionPath})`);
+        }
+        console.log('🔍 Attempting auto-detection...\n');
+        clionPath = null; // Reset to trigger auto-detection
+    }
 }
 
 if (!clionPath) {
-    console.log('🔍 Auto-detecting CLion path...');
+    if (!userProvidedPath) {
+        console.log('🔍 Auto-detecting CLion path...');
+    }
     clionPath = detectClionPath();
 }
 
@@ -330,12 +344,6 @@ if (!clionPath) {
 }
 
 console.log(`📍 CLion path: ${clionPath}`);
-
-// Verify CLion exists
-if (!fs.existsSync(clionPath)) {
-    console.error(`❌ CLion executable not found: ${clionPath}`);
-    process.exit(1);
-}
 
 // Check git is available
 try {

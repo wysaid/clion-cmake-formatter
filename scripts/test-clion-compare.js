@@ -310,7 +310,7 @@ const userProvidedPath = clionPath; // Save original user input for error report
 
 if (clionPath) {
     clionPath = resolveClionPath(clionPath);
-    
+
     // Check if user-provided path exists
     if (!fs.existsSync(clionPath)) {
         console.error(`❌ User-provided CLion path not found: ${userProvidedPath}`);

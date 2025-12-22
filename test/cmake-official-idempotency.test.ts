@@ -20,7 +20,7 @@ function getCMakeOfficialFiles(): string[] {
     const files = fs.readdirSync(OFFICIAL_DIR)
         .filter(f => f !== 'README.md')
         .filter(f => f.endsWith('.cmake') || f.endsWith('.txt'));
-    
+
     return files.sort();
 }
 
@@ -71,7 +71,7 @@ describe('CMake Official Files - Idempotency', () => {
         });
 
         // This test always passes - it's just for reporting statistics
-        assert.ok(true, 
+        assert.ok(true,
             `Processed ${files.length} CMake official files\n` +
             `Total original lines: ${totalOriginalLines}\n` +
             `Total formatted lines: ${totalFormattedLines}\n` +

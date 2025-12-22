@@ -204,9 +204,17 @@ export class CMakeFormatter {
             }
         }
 
-        // If no content (only blank lines or empty), return single newline
+        // If no content (empty file or only blank lines), match CLion behavior
         if (!hasContent && lines.length === 0) {
-            return '\n';
+            // For truly empty file (no children), return empty string
+            if (node.children.length === 0) {
+                return '';
+            }
+            // For whitespace-only file with trailing blank lines, preserve them
+            if (trailingBlankLines > 0) {
+                return '\n'.repeat(trailingBlankLines);
+            }
+            return '';
         }
 
         // Join lines

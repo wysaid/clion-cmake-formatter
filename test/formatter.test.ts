@@ -258,14 +258,16 @@ endwhile()`;
         it('should handle empty file', () => {
             const input = loadEdgeCase('empty-file');
             const output = formatCMake(input);
-            assert.strictEqual(output, '\n');
+            assert.strictEqual(output, '');
         });
 
         it('should handle whitespace-only file', () => {
             const input = loadEdgeCase('whitespace-only');
             const output = formatCMake(input);
 
-            assert.strictEqual(output, '\n');
+            // whitespace-only.cmake contains 2 newlines (2 blank lines)
+            // and should preserve them
+            assert.strictEqual(output, '\n\n');
         });
 
         it('should handle file with only comments', () => {

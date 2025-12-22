@@ -17,10 +17,10 @@ import * as assert from 'assert';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
-import { spawnSync, execSync } from 'child_process';
-import { formatCMake } from '../src/formatter';
+import { spawnSync } from 'child_process';
+import { formatCMake } from '../../src/formatter';
 
-const TEST_DATASETS_DIR = path.join(__dirname, 'datasets');
+const TEST_DATASETS_DIR = path.join(__dirname, '../datasets');
 const EXCLUDED_DIRS = ['well-formatted']; // Skip well-formatted as they're already tested
 
 /**
@@ -309,7 +309,7 @@ function keepOnlyDifferences(dir1: string, dir2: string, basePath = ''): void {
     }
 }
 
-describe('CLion vs Plugin Formatting Comparison', function() {
+describe('CLion vs Plugin Formatting Comparison', function () {
     // Increase timeout for batch operations
     this.timeout(120000);
 
@@ -317,7 +317,7 @@ describe('CLion vs Plugin Formatting Comparison', function() {
     let pluginDir: string | null = null;
     let clionDir: string | null = null;
 
-    before(function() {
+    before(function () {
         // Try to detect CLion
         clionPath = detectClionPath();
 
@@ -330,14 +330,14 @@ describe('CLion vs Plugin Formatting Comparison', function() {
         }
     });
 
-    it('should format test datasets and compare results', function() {
+    it('should format test datasets and compare results', function () {
         if (!clionPath) {
             this.skip();
             return;
         }
 
         const sourceDir = path.join(TEST_DATASETS_DIR);
-        
+
         // Create temp directories
         const tmpBase = fs.mkdtempSync(path.join(os.tmpdir(), 'cmake-format-test-'));
         pluginDir = path.join(tmpBase, 'plugin');
@@ -367,7 +367,7 @@ describe('CLion vs Plugin Formatting Comparison', function() {
         // Format with CLion
         console.log(`🔧 Formatting with CLion...`);
         const clionResult = formatDirectoryWithClion(clionPath, clionDir);
-        
+
         if (!clionResult.success) {
             console.error(`\n❌ CLion formatting failed: ${clionResult.error}`);
             this.skip();
@@ -400,9 +400,9 @@ describe('CLion vs Plugin Formatting Comparison', function() {
         console.log(`   Plugin output: ${pluginDir}`);
         console.log(`   CLion output:  ${clionDir}`);
         console.log(`\n   Files with differences:`);
-        
+
         const detailedDiffs: string[] = [];
-        
+
         for (const file of diff.files.sort()) {
             const pluginFile = path.join(pluginDir, file);
             const clionFile = path.join(clionDir, file);
@@ -454,7 +454,7 @@ describe('CLion vs Plugin Formatting Comparison', function() {
         );
     });
 
-    after(function() {
+    after(function () {
         // Note: We intentionally don't clean up on failure to allow inspection
         // Only clean up on success (which is handled in the test itself)
     });

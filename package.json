@@ -235,7 +235,9 @@
         "lint": "eslint src --ext ts",
         "pretest": "npm run compile && npm run lint",
         "test": "npm run test:unit",
-        "test:unit": "mocha --require ts-node/register 'test/**/*.test.ts'",
+        "test:unit": "mocha --require ts-node/register 'test/**/*.test.ts' --exclude 'test/integration/**'",
+        "test:integration": "mocha --require ts-node/register 'test/integration/**/*.test.ts'",
+        "test:all": "mocha --require ts-node/register 'test/**/*.test.ts'",
         "test:clion": "node scripts/test-clion-compare.js",
         "package": "vsce package"
     },

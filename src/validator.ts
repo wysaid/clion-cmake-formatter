@@ -30,7 +30,19 @@ export function loadOptionsForDocument(documentPath: string, workspaceRoot?: str
  * Strict comparison is used after normalizing newlines and ensuring trailing newline.
  */
 export function validateFile(filePath: string, workspaceRoot?: string): ValidationResult {
-    const originalRaw = fs.readFileSync(filePath, 'utf-8');
+    let originalRaw: string;
+    try {
+        originalRaw = fs.readFileSync(filePath, 'utf-8');
+    } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        return {
+            ok: false,
+            filePath,
+            original: '',
+            formatted: '',
+            reason: `error reading file: ${message}`
+        };
+    }
 
     // Normalize input newlines to LF
     let original = originalRaw.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
@@ -78,9 +90,9 @@ export function validateDirectory(directory: string, workspaceRoot?: string): Va
         if (e.name.endsWith('.cmake') || e.name === 'CMakeLists.txt') {
             try {
                 results.push(validateFile(full, workspaceRoot));
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            } catch (err: any) {
-                results.push({ ok: false, filePath: full, original: '', formatted: '', reason: `error reading file: ${err && err.message}` });
+            } catch (err: unknown) {
+                const message = err instanceof Error ? err.message : String(err);
+                results.push({ ok: false, filePath: full, original: '', formatted: '', reason: `error reading file: ${message}` });
             }
         }
     }

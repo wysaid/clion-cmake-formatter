@@ -28,3 +28,7 @@ tmp/
 
 # VSCode test folder
 .vscode-test/
+
+# Config files created by testing (don't commit project root config)
+/.cc-format.jsonc
+/.cc-format

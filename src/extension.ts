@@ -98,7 +98,7 @@ function getVSCodeOptions(): Partial<FormatterOptions> {
         useTabs: config.get<boolean>('useTabs', false),
         tabSize: validateTabSize(config.get<number>('tabSize', 4)),
         indentSize: validateIndentSize(config.get<number>('indentSize', 4)),
-        continuationIndentSize: validateContinuationIndentSize(config.get<number>('continuationIndentSize', 4)),
+        continuationIndentSize: validateContinuationIndentSize(config.get<number>('continuationIndentSize', 8)),
         keepIndentOnEmptyLines: config.get<boolean>('keepIndentOnEmptyLines', false),
 
         // Spacing - Before Parentheses

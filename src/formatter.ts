@@ -89,7 +89,7 @@ export const DEFAULT_OPTIONS: FormatterOptions = {
     useTabs: false,
     tabSize: 4,
     indentSize: 4,
-    continuationIndentSize: 4,
+    continuationIndentSize: 8,
     keepIndentOnEmptyLines: false,
 
     // Spacing - Before Parentheses

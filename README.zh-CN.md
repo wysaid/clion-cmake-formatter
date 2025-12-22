@@ -157,7 +157,7 @@ endif ()
     "useTabs": false,
     "tabSize": 4,
     "indentSize": 4,
-    "continuationIndentSize": 4,
+    "continuationIndentSize": 8,
     "keepIndentOnEmptyLines": false,
 
     // Spacing Before Parentheses
@@ -209,7 +209,7 @@ endif ()
 | `useTabs` | boolean | `false` | 使用制表符代替空格 |
 | `tabSize` | number | `4` | 每个制表符的空格数 (1-16) |
 | `indentSize` | number | `4` | 每个缩进级别的空格数 (1-16) |
-| `continuationIndentSize` | number | `4` | 续行缩进 (1-16) |
+| `continuationIndentSize` | number | `8` | 续行缩进 (1-16) |
 | `keepIndentOnEmptyLines` | boolean | `false` | 空行保留缩进 |
 
 ### 括号前空格

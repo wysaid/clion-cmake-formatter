@@ -158,7 +158,7 @@ Create `.cc-format.jsonc` in your project root:
     "useTabs": false,
     "tabSize": 4,
     "indentSize": 4,
-    "continuationIndentSize": 4,
+    "continuationIndentSize": 8,
     "keepIndentOnEmptyLines": false,
 
     // Spacing Before Parentheses
@@ -210,7 +210,7 @@ Create `.cc-format.jsonc` in your project root:
 | `useTabs` | boolean | `false` | Use tabs instead of spaces |
 | `tabSize` | number | `4` | Spaces per tab (1-16) |
 | `indentSize` | number | `4` | Spaces per indent level (1-16) |
-| `continuationIndentSize` | number | `4` | Continuation line indent (1-16) |
+| `continuationIndentSize` | number | `8` | Continuation line indent (1-16) |
 | `keepIndentOnEmptyLines` | boolean | `false` | Preserve indent on empty lines |
 
 ### Spacing Before Parentheses

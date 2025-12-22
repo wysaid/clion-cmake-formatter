@@ -26,7 +26,7 @@
         },
         "continuationIndentSize": {
             "type": "number",
-            "default": 4,
+            "default": 8,
             "minimum": 1,
             "maximum": 16,
             "description": "Additional indentation for continued lines in multi-line commands"

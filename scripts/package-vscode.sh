@@ -43,7 +43,7 @@ cd "$TEMP_DIR"
 # Remove prepublish script to avoid running it in temp dir
 node -e "const pkg=require('./package.json'); delete pkg.scripts['vscode:prepublish']; require('fs').writeFileSync('package.json', JSON.stringify(pkg, null, 2));"
 
-vsce package
+npx --yes @vscode/vsce package
 
 # Move the .vsix file back
 mv *.vsix "$VSCODE_DIR/"

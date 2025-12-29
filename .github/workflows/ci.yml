@@ -41,9 +41,17 @@ jobs:
     - name: Run Unit Tests
       run: npm run test:unit
 
+    # Test CLI tool functionality
+    - name: Test CLI tool
+      run: |
+        echo "Testing CLI tool..."
+        node packages/cli/dist/cli.js --version
+        node packages/cli/dist/cli.js --help
+        echo "set(MY_VAR value)" | node packages/cli/dist/cli.js --stdin
+
     - name: Build VSIX
       if: matrix.node-version == '22.x'
-      run: npm run package:vscode
+      run: bash scripts/package-vscode.sh
 
     - name: Upload VSIX artifact
       if: matrix.node-version == '22.x'
@@ -52,3 +60,51 @@ jobs:
         name: clion-cmake-format-vsix
         path: "packages/vscode/*.vsix"
         retention-days: 7
+
+  # Test CLI tool on multiple platforms
+  cli-cross-platform:
+    name: CLI on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node-version: [22.x]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Verify symlinks (Unix)
+      if: runner.os != 'Windows'
+      run: bash scripts/verify-symlinks.sh
+
+    - name: Compile TypeScript
+      run: npm run build
+
+    - name: Test CLI basic functionality
+      shell: bash
+      run: |
+        node packages/cli/dist/cli.js --version
+        node packages/cli/dist/cli.js --help
+
+    - name: Test CLI stdin formatting
+      shell: bash
+      run: |
+        echo "set(MY_VAR value)" | node packages/cli/dist/cli.js --stdin
+
+    - name: Test CLI file formatting
+      shell: bash
+      run: |
+        mkdir -p temp-test
+        echo "set(TEST value)" > temp-test/test.cmake
+        node packages/cli/dist/cli.js --write temp-test/test.cmake
+        cat temp-test/test.cmake
+        rm -rf temp-test

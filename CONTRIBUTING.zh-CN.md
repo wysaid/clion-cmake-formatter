@@ -60,11 +60,8 @@ clion-cmake-format/
 │   ├── sample-input.cmake     # 示例输入文件
 │   └── sample.cc-format.jsonc # 示例配置文件
 └── docs/
-    ├── CONFIGURATION_VALIDATION.md  # 配置验证详情
-    ├── CREATE_CONFIG_COMMAND.md     # 配置文件创建命令
-    ├── EXTENDING_TESTS.md           # 如何添加测试用例
-    ├── FORMATTING_TIPS.md           # 格式化行为提示
-    └── TEST_EXPANSION_SUMMARY.md    # 测试套件扩展历史
+    ├── CLION_INTEGRATION_TESTING.md # CLion 集成测试指南
+    └── CONFIGURATION_VALIDATION.md  # 配置验证详情
 ```
 
 ## 🐛 调试
@@ -108,7 +105,7 @@ npm run test:unit # 运行所有测试
    - `parsing/` — 解析器特定测试
    - `real-world/` — 真实世界示例
 
-详细说明请参阅 [docs/EXTENDING_TESTS.md](docs/EXTENDING_TESTS.md)。
+添加 CMake 官方测试用例，请参阅 `test/datasets/cmake-official/README.md` 并使用 `scripts/select-cmake-tests.py`。
 
 ### 幂等性测试
 
@@ -220,9 +217,6 @@ npx mocha --require ts-node/register test/parser.test.ts
 
 - [CLion 集成测试](docs/CLION_INTEGRATION_TESTING.md)（英文）
 - [配置验证](docs/CONFIGURATION_VALIDATION.md)（英文）
-- [创建配置命令](docs/CREATE_CONFIG_COMMAND.md)（英文）
-- [扩展测试](docs/EXTENDING_TESTS.md)（英文）
-- [格式化提示](docs/FORMATTING_TIPS.md)（英文）
 
 ## 🙏 有问题？
 

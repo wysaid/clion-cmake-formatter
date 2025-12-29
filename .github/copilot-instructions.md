@@ -16,6 +16,9 @@ This project provides CMake script parsing and formatting as a VS Code extension
 - `npm run test:unit` (must pass before commit)
 - `npm run package`
 
+## Terminal & Working Directory
+- If commands fail with "not found" errors, first run `pwd` to check location or `cd` to project root
+
 ## Code Guidelines
 - Add/adjust test cases when fixing bugs or adding features
 - Run `npm run test:unit` and `npm run lint` before commit

@@ -1,0 +1,19 @@
+# Only include necessary files for the VS Code extension
+
+# Include
+!dist/**
+!resources/**
+!package.json
+!package.nls.json
+!package.nls.zh-cn.json
+!LICENSE
+!logo.png
+!README.md
+
+# Exclude everything else
+**/*
+
+# But then explicitly include what we need
+!dist/**/*.js
+!dist/**/*.d.ts
+!resources/cc-format.schema.json

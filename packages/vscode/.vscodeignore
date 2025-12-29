@@ -6,8 +6,19 @@ test/**
 dist/test/**
 
 # Build files
-.eslintrc.json
 tsconfig.json
+
+# Root level config files and directories that should not be included
+../../.eslintrc.json
+../../tsconfig.*.json
+../../.mocharc.json
+../../.git/**
+../../.github/**
+../../test/**
+../../scripts/**
+../../docs/**
+../../packages/core/**
+../../packages/cli/**
 
 # Git files
 .git/**

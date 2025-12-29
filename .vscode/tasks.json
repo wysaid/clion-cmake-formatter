@@ -113,6 +113,166 @@
                 "clear": true,
                 "focus": false
             }
+        },
+        {
+            "label": "Build: All Packages",
+            "type": "npm",
+            "script": "build",
+            "detail": "Build all monorepo packages (core, cli, vscode)",
+            "problemMatcher": "$tsc",
+            "group": {
+                "kind": "build"
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            }
+        },
+        {
+            "label": "Build: Core Package",
+            "type": "npm",
+            "script": "build:core",
+            "detail": "Build @cc-format/core package",
+            "problemMatcher": "$tsc",
+            "group": "build",
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Build: CLI Package",
+            "type": "npm",
+            "script": "build:cli",
+            "detail": "Build cc-format CLI package",
+            "problemMatcher": "$tsc",
+            "group": "build",
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Build: VS Code Package",
+            "type": "npm",
+            "script": "build:vscode",
+            "detail": "Build clion-cmake-format VS Code extension",
+            "problemMatcher": "$tsc",
+            "group": "build",
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Package VSIX: VS Code Extension",
+            "type": "npm",
+            "script": "package:vscode",
+            "detail": "Package VS Code extension to .vsix file",
+            "problemMatcher": [],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true,
+                "focus": true
+            }
+        },
+        {
+            "label": "Test: Unit + Build",
+            "dependsOn": [
+                "Build: All Packages",
+                "npm: test:unit"
+            ],
+            "dependsOrder": "sequence",
+            "detail": "Build all packages then run unit tests",
+            "problemMatcher": [],
+            "group": {
+                "kind": "test"
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            }
+        },
+        {
+            "label": "Verify: Full Build & Test",
+            "dependsOn": [
+                "Build: All Packages",
+                "npm: lint",
+                "npm: test:unit"
+            ],
+            "dependsOrder": "sequence",
+            "detail": "Complete verification: build + lint + test",
+            "problemMatcher": [],
+            "group": "test",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true,
+                "focus": true
+            }
+        },
+        {
+            "label": "Verify: Package Extension",
+            "dependsOn": [
+                "Verify: Full Build & Test",
+                "Package VSIX: VS Code Extension"
+            ],
+            "dependsOrder": "sequence",
+            "detail": "Full verification then package VS Code extension",
+            "problemMatcher": [],
+            "group": "none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true,
+                "focus": true
+            }
+        },
+        {
+            "label": "Install: cc-format CLI (Global)",
+            "type": "shell",
+            "command": "cd packages/cli && npm link",
+            "detail": "Install cc-format CLI globally via symlink (Development use only)",
+            "problemMatcher": [],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true,
+                "focus": true
+            }
+        },
+        {
+            "label": "Uninstall: cc-format CLI (Global)",
+            "type": "shell",
+            "command": "npm unlink -g cc-format || echo 'cc-format not installed globally'",
+            "detail": "Uninstall cc-format CLI from global scope",
+            "problemMatcher": [],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true,
+                "focus": true
+            }
+        },
+        {
+            "label": "Test: cc-format CLI",
+            "type": "shell",
+            "command": "which cc-format && cc-format --version && echo '\n✓ cc-format is ready' || echo '\n✗ cc-format not installed (run Install: cc-format CLI task)'",
+            "detail": "Test if cc-format CLI is installed and working",
+            "problemMatcher": [],
+            "group": "test",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true,
+                "focus": true
+            }
         }
     ]
 }

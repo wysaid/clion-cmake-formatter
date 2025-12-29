@@ -63,11 +63,8 @@ clion-cmake-format/
 │   ├── sample-input.cmake     # Sample input file
 │   └── sample.cc-format.jsonc # Sample config file
 └── docs/
-    ├── CONFIGURATION_VALIDATION.md  # Config validation details
-    ├── CREATE_CONFIG_COMMAND.md     # Config file creation command
-    ├── EXTENDING_TESTS.md           # How to add test cases
-    ├── FORMATTING_TIPS.md           # Formatting behavior tips
-    └── TEST_EXPANSION_SUMMARY.md    # Test suite expansion history
+    ├── CLION_INTEGRATION_TESTING.md # CLion integration testing guide
+    └── CONFIGURATION_VALIDATION.md  # Config validation details
 ```
 
 ## 🐛 Debugging
@@ -111,7 +108,7 @@ When fixing bugs or adding features, you should:
    - `parsing/` — Parser-specific tests
    - `real-world/` — Real-world examples
 
-See [docs/EXTENDING_TESTS.md](docs/EXTENDING_TESTS.md) for detailed instructions.
+For adding CMake official test cases, see `test/datasets/cmake-official/README.md` and use `scripts/select-cmake-tests.py`.
 
 ### Idempotency Testing
 
@@ -223,9 +220,6 @@ When modifying the formatter, ensure:
 
 - [CLion Integration Testing](docs/CLION_INTEGRATION_TESTING.md)
 - [Configuration Validation](docs/CONFIGURATION_VALIDATION.md)
-- [Create Config Command](docs/CREATE_CONFIG_COMMAND.md)
-- [Extending Tests](docs/EXTENDING_TESTS.md)
-- [Formatting Tips](docs/FORMATTING_TIPS.md)
 
 ## 🙏 Questions?
 

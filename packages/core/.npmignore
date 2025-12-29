@@ -1,0 +1,13 @@
+# Source files (only dist is needed)
+src/
+tsconfig.json
+
+# Tests
+**/*.test.ts
+**/*.test.js
+
+# Build files
+*.tsbuildinfo
+
+# Development files
+.eslintrc.json

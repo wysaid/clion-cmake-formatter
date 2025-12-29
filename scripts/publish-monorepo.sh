@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# DEPRECATED: Use scripts/publish.sh instead
+# This script is kept for backward compatibility but will be removed in v2.0.0
+#
 # Publish script for the monorepo packages
 
 set -e

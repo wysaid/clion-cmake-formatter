@@ -20,10 +20,11 @@
         "test:integration": "mocha 'test/integration/**/*.test.ts'",
         "test:all": "mocha 'test/**/*.test.ts'",
         "test:clion": "node scripts/validate-with-clion.js",
-        "package:vscode": "cd packages/vscode && vsce package",
+        "package:vscode": "bash scripts/package-vscode.sh",
         "publish:core": "npm publish -w @cc-format/core",
         "publish:cli": "npm publish -w cc-format",
-        "publish:vscode": "cd packages/vscode && vsce publish"
+        "publish:vscode": "cd packages/vscode && vsce publish",
+        "verify-symlinks": "bash scripts/verify-symlinks.sh"
     },
     "devDependencies": {
         "@types/mocha": "^10.0.6",

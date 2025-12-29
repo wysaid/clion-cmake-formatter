@@ -11,6 +11,10 @@
         "url": "https://github.com/wysaid/clion-cmake-format",
         "directory": "packages/core"
     },
+    "homepage": "https://github.com/wysaid/clion-cmake-format#readme",
+    "bugs": {
+        "url": "https://github.com/wysaid/clion-cmake-format/issues"
+    },
     "keywords": [
         "cmake",
         "formatter",
@@ -20,11 +24,14 @@
     "files": [
         "dist/**/*.js",
         "dist/**/*.d.ts",
-        "README.md"
+        "LICENSE",
+        "README.md",
+        "CHANGELOG.md"
     ],
     "scripts": {
         "build": "tsc",
-        "clean": "rm -rf dist"
+        "clean": "rm -rf dist",
+        "prepublishOnly": "npm run build"
     },
     "engines": {
         "node": ">=18"

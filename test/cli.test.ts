@@ -8,17 +8,22 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
 
-const CLI_PATH = path.join(__dirname, '..', 'dist', 'src', 'cli.js');
+const CLI_PATH = path.join(__dirname, '..', 'packages', 'cli', 'dist', 'cli.js');
 const REPO_ROOT = path.join(__dirname, '..');
 
 /**
  * Run the CLI with given arguments
  */
 function runCLI(args: string[], options?: { stdin?: string; cwd?: string }): { stdout: string; stderr: string; exitCode: number } {
+    // Remove NODE_OPTIONS to prevent ts-node from being loaded in CLI subprocess
+    const env = { ...process.env };
+    delete env.NODE_OPTIONS;
+
     const result = childProcess.spawnSync('node', [CLI_PATH, ...args], {
         encoding: 'utf-8',
         input: options?.stdin,
-        cwd: options?.cwd || REPO_ROOT
+        cwd: options?.cwd || REPO_ROOT,
+        env
     });
 
     return {

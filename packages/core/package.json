@@ -1,0 +1,32 @@
+{
+    "name": "@cc-format/core",
+    "version": "1.4.0",
+    "description": "Core CMake formatting engine - CLion compatible",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "author": "wysaid",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/wysaid/clion-cmake-format",
+        "directory": "packages/core"
+    },
+    "keywords": [
+        "cmake",
+        "formatter",
+        "clion",
+        "parser"
+    ],
+    "files": [
+        "dist/**/*.js",
+        "dist/**/*.d.ts",
+        "README.md"
+    ],
+    "scripts": {
+        "build": "tsc",
+        "clean": "rm -rf dist"
+    },
+    "engines": {
+        "node": ">=18"
+    }
+}

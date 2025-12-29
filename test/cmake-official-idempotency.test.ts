@@ -9,7 +9,7 @@
 import * as assert from 'assert';
 import * as fs from 'fs';
 import * as path from 'path';
-import { formatCMake } from '../src/formatter';
+import { formatCMake } from '@cc-format/core';
 
 const OFFICIAL_DIR = path.join(__dirname, 'datasets', 'cmake-official');
 

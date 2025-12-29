@@ -1,0 +1,8 @@
+# Don't publish source files
+src/
+
+# Build artifacts from other packages
+../../dist/
+
+# Tests
+../../test/

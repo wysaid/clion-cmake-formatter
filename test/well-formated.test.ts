@@ -7,8 +7,8 @@
 
 import * as assert from 'assert';
 import * as os from 'os';
-import { formatCMake } from '../src/formatter';
-import { parseConfigContent } from '../src/config';
+import { formatCMake } from '@cc-format/core';
+import { parseConfigContent } from '@cc-format/core';
 import {
     listWellFormatedStyles,
     listWellFormatedFiles,

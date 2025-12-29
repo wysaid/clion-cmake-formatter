@@ -11,14 +11,17 @@ import { Command, Option } from 'commander';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
-import { formatCMake, FormatterOptions, DEFAULT_OPTIONS, CommandCase } from './formatter';
 import {
+    formatCMake,
+    FormatterOptions,
+    DEFAULT_OPTIONS,
+    CommandCase,
     findConfigFile,
     loadConfigFile,
     generateSampleConfig,
     CONFIG_FILE_NAMES,
     PROJECT_URL
-} from './config';
+} from '@cc-format/core';
 
 // Package version - read from package.json
 const packageJsonPath = path.join(__dirname, '..', '..', 'package.json');

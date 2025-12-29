@@ -8,8 +8,15 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-import { formatCMake, FormatterOptions, CommandCase } from './formatter';
-import { getConfigForDocument, clearConfigCache, generateSampleConfig, DEFAULT_OPTIONS } from './config';
+import {
+    formatCMake,
+    FormatterOptions,
+    CommandCase,
+    getConfigForDocument,
+    clearConfigCache,
+    generateSampleConfig,
+    DEFAULT_OPTIONS
+} from '@cc-format/core';
 
 // Track which validation warnings have been shown to avoid repetition
 const shownWarnings = new Set<string>();

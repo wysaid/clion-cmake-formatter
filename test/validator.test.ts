@@ -8,8 +8,8 @@ import {
     detectRuleViolations,
     RuleViolation,
     RuleViolationType
-} from '../src/validator';
-import { formatCMake, DEFAULT_OPTIONS, FormatterOptions } from '../src/formatter';
+} from '@cc-format/core';
+import { formatCMake, DEFAULT_OPTIONS, FormatterOptions } from '@cc-format/core';
 
 describe('Validator', () => {
     

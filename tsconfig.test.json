@@ -1,0 +1,26 @@
+{
+    "extends": "./tsconfig.base.json",
+    "compilerOptions": {
+        "types": [
+            "node",
+            "mocha"
+        ],
+        "moduleResolution": "node",
+        "resolveJsonModule": true,
+        "module": "commonjs",
+        "composite": false,
+        "incremental": false,
+        "declaration": false,
+        "declarationMap": false
+    },
+    "include": [
+        "test/**/*",
+        "packages/*/src/**/*"
+    ],
+    "ts-node": {
+        "esm": false,
+        "compilerOptions": {
+            "module": "commonjs"
+        }
+    }
+}

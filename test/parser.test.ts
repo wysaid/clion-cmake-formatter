@@ -11,7 +11,7 @@ import {
     CommandNode,
     BlockNode,
     CommentNode
-} from '../src/parser';
+} from '@cc-format/core';
 import {
     loadBasic,
     loadParsing

@@ -1,0 +1,136 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://github.com/wysaid/clion-cmake-format/blob/main/resources/cc-format.schema.json",
+    "title": "cc-format Configuration",
+    "description": "Configuration schema for cc-format (CLion CMake Format)",
+    "type": "object",
+    "properties": {
+        "useTabs": {
+            "type": "boolean",
+            "default": false,
+            "description": "Use tabs for indentation instead of spaces"
+        },
+        "tabSize": {
+            "type": "number",
+            "default": 4,
+            "minimum": 1,
+            "maximum": 16,
+            "description": "Number of spaces equivalent to one tab character"
+        },
+        "indentSize": {
+            "type": "number",
+            "default": 4,
+            "minimum": 1,
+            "maximum": 16,
+            "description": "Number of spaces for each indentation level"
+        },
+        "continuationIndentSize": {
+            "type": "number",
+            "default": 8,
+            "minimum": 1,
+            "maximum": 16,
+            "description": "Additional indentation for continued lines in multi-line commands"
+        },
+        "keepIndentOnEmptyLines": {
+            "type": "boolean",
+            "default": false,
+            "description": "Preserve indentation whitespace on empty lines"
+        },
+        "spaceBeforeCommandDefinitionParentheses": {
+            "type": "boolean",
+            "default": false,
+            "description": "Add space before parentheses in function and macro definitions"
+        },
+        "spaceBeforeCommandCallParentheses": {
+            "type": "boolean",
+            "default": false,
+            "description": "Add space before parentheses in regular command calls"
+        },
+        "spaceBeforeIfParentheses": {
+            "type": "boolean",
+            "default": true,
+            "description": "Add space before parentheses in if/elseif/else/endif statements"
+        },
+        "spaceBeforeForeachParentheses": {
+            "type": "boolean",
+            "default": true,
+            "description": "Add space before parentheses in foreach/endforeach loops"
+        },
+        "spaceBeforeWhileParentheses": {
+            "type": "boolean",
+            "default": true,
+            "description": "Add space before parentheses in while/endwhile loops"
+        },
+        "spaceInsideCommandDefinitionParentheses": {
+            "type": "boolean",
+            "default": false,
+            "description": "Add space inside parentheses in function and macro definitions"
+        },
+        "spaceInsideCommandCallParentheses": {
+            "type": "boolean",
+            "default": false,
+            "description": "Add space inside parentheses in regular command calls"
+        },
+        "spaceInsideIfParentheses": {
+            "type": "boolean",
+            "default": false,
+            "description": "Add space inside parentheses in if/elseif/else/endif statements"
+        },
+        "spaceInsideForeachParentheses": {
+            "type": "boolean",
+            "default": false,
+            "description": "Add space inside parentheses in foreach/endforeach loops"
+        },
+        "spaceInsideWhileParentheses": {
+            "type": "boolean",
+            "default": false,
+            "description": "Add space inside parentheses in while/endwhile loops"
+        },
+        "maxBlankLines": {
+            "type": "number",
+            "default": 2,
+            "minimum": 0,
+            "maximum": 20,
+            "description": "Maximum number of consecutive blank lines to preserve"
+        },
+        "maxTrailingBlankLines": {
+            "type": "number",
+            "default": 1,
+            "minimum": 0,
+            "description": "Maximum number of blank lines allowed at the end of file (>= 0). Set to a large number to keep all trailing blank lines."
+        },
+        "commandCase": {
+            "type": "string",
+            "default": "unchanged",
+            "enum": [
+                "unchanged",
+                "lowercase",
+                "uppercase"
+            ],
+            "description": "Command name case transformation"
+        },
+        "lineLength": {
+            "type": "number",
+            "default": 0,
+            "minimum": 0,
+            "maximum": 500,
+            "description": "Maximum line length before wrapping (0 means unlimited)"
+        },
+        "alignMultiLineArguments": {
+            "type": "boolean",
+            "default": false,
+            "description": "Align arguments vertically in multi-line commands"
+        },
+        "alignMultiLineParentheses": {
+            "type": "boolean",
+            "default": false,
+            "description": "Align closing parenthesis with opening line in multi-line commands"
+        },
+        "alignControlFlowParentheses": {
+            "type": "boolean",
+            "default": false,
+            "description": "Align control flow statement parentheses in multi-line format"
+        }
+    },
+    "additionalProperties": false
+}

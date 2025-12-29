@@ -19,7 +19,7 @@ import {
     getConfigForDocument,
     CONFIG_FILE_NAMES,
     PROJECT_URL
-} from '../src/config';
+} from '@cc-format/core';
 
 describe('Configuration File Support', () => {
     // Create a temporary directory for test files

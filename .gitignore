@@ -4,6 +4,7 @@ node_modules/
 # Build output
 dist/
 out/
+*.tsbuildinfo
 
 # VSCode extension package
 *.vsix
@@ -32,3 +33,5 @@ tmp/
 # Config files created by testing (don't commit project root config)
 /.cc-format.jsonc
 /.cc-format
+/packages/*/.cc-format.jsonc
+/packages/*/.cc-format

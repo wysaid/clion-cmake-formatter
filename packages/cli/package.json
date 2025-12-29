@@ -1,0 +1,41 @@
+{
+    "name": "cc-format",
+    "version": "1.4.0",
+    "description": "CMake formatter with CLion-compatible style - Command line tool",
+    "main": "./dist/cli.js",
+    "bin": {
+        "cc-format": "./dist/cli.js"
+    },
+    "author": "wysaid",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/wysaid/clion-cmake-format",
+        "directory": "packages/cli"
+    },
+    "keywords": [
+        "cmake",
+        "formatter",
+        "clion",
+        "cli",
+        "command-line",
+        "cmake-format"
+    ],
+    "files": [
+        "dist/**/*.js",
+        "../../resources/cc-format.schema.json",
+        "README.md"
+    ],
+    "scripts": {
+        "build": "tsc",
+        "clean": "rm -rf dist",
+        "prepublishOnly": "npm run build"
+    },
+    "dependencies": {
+        "@cc-format/core": "^1.4.0",
+        "commander": "^12.1.0"
+    },
+    "engines": {
+        "node": ">=18"
+    }
+}

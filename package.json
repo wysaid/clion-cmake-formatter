@@ -1,258 +1,33 @@
 {
-    "name": "clion-cmake-format",
-    "displayName": "%displayName%",
-    "description": "%description%",
+    "name": "clion-cmake-format-monorepo",
     "version": "1.4.0",
-    "publisher": "wysaid",
-    "license": "MIT",
-    "icon": "logo.png",
-    "engines": {
-        "vscode": "^1.50.0",
-        "node": ">=18"
-    },
-    "categories": [
-        "Formatters",
-        "Programming Languages"
+    "private": true,
+    "description": "Monorepo for CMake formatter with CLion-compatible style",
+    "workspaces": [
+        "packages/*"
     ],
-    "keywords": [
-        "cmake",
-        "CMakeLists.txt",
-        "clion",
-        "formatter",
-        "formatting",
-        "beautify",
-        "jetbrains",
-        "cc-format",
-        "indent",
-        "indentation",
-        "code-style",
-        "cmake format",
-        "cmake formatter",
-        "build system",
-        "c++",
-        "cpp",
-        "cmake-format",
-        "gersemi",
-        "zero dependencies",
-        "code quality",
-        "auto-format"
-    ],
-    "activationEvents": [
-        "onLanguage:cmake"
-    ],
-    "main": "./dist/src/extension.js",
-    "contributes": {
-        "languages": [
-            {
-                "id": "cmake",
-                "extensions": [
-                    ".cmake"
-                ],
-                "filenames": [
-                    "CMakeLists.txt"
-                ]
-            }
-        ],
-        "jsonValidation": [
-            {
-                "fileMatch": [
-                    ".cc-format.jsonc",
-                    ".cc-format"
-                ],
-                "url": "./resources/cc-format.schema.json"
-            }
-        ],
-        "commands": [
-            {
-                "command": "clion-cmake-format.formatDocument",
-                "title": "%command.formatDocument%"
-            },
-            {
-                "command": "clion-cmake-format.createConfig",
-                "title": "%command.createConfig%"
-            }
-        ],
-        "configuration": {
-            "title": "%config.title%",
-            "properties": {
-                "clionCMakeFormatter.useTabs": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "%config.useTabs.description%",
-                    "order": 1
-                },
-                "clionCMakeFormatter.tabSize": {
-                    "type": "number",
-                    "default": 4,
-                    "minimum": 1,
-                    "maximum": 16,
-                    "description": "%config.tabSize.description%",
-                    "order": 2
-                },
-                "clionCMakeFormatter.indentSize": {
-                    "type": "number",
-                    "default": 4,
-                    "minimum": 1,
-                    "maximum": 16,
-                    "description": "%config.indentSize.description%",
-                    "order": 3
-                },
-                "clionCMakeFormatter.continuationIndentSize": {
-                    "type": "number",
-                    "default": 8,
-                    "minimum": 1,
-                    "maximum": 16,
-                    "description": "%config.continuationIndentSize.description%",
-                    "order": 4
-                },
-                "clionCMakeFormatter.keepIndentOnEmptyLines": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "%config.keepIndentOnEmptyLines.description%",
-                    "order": 5
-                },
-                "clionCMakeFormatter.spaceBeforeCommandDefinitionParentheses": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "%config.spaceBeforeCommandDefinitionParentheses.description%",
-                    "order": 10
-                },
-                "clionCMakeFormatter.spaceBeforeCommandCallParentheses": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "%config.spaceBeforeCommandCallParentheses.description%",
-                    "order": 11
-                },
-                "clionCMakeFormatter.spaceBeforeIfParentheses": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "%config.spaceBeforeIfParentheses.description%",
-                    "order": 12
-                },
-                "clionCMakeFormatter.spaceBeforeForeachParentheses": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "%config.spaceBeforeForeachParentheses.description%",
-                    "order": 13
-                },
-                "clionCMakeFormatter.spaceBeforeWhileParentheses": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "%config.spaceBeforeWhileParentheses.description%",
-                    "order": 14
-                },
-                "clionCMakeFormatter.spaceInsideCommandDefinitionParentheses": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "%config.spaceInsideCommandDefinitionParentheses.description%",
-                    "order": 20
-                },
-                "clionCMakeFormatter.spaceInsideCommandCallParentheses": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "%config.spaceInsideCommandCallParentheses.description%",
-                    "order": 21
-                },
-                "clionCMakeFormatter.spaceInsideIfParentheses": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "%config.spaceInsideIfParentheses.description%",
-                    "order": 22
-                },
-                "clionCMakeFormatter.spaceInsideForeachParentheses": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "%config.spaceInsideForeachParentheses.description%",
-                    "order": 23
-                },
-                "clionCMakeFormatter.spaceInsideWhileParentheses": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "%config.spaceInsideWhileParentheses.description%",
-                    "order": 24
-                },
-                "clionCMakeFormatter.maxBlankLines": {
-                    "type": "number",
-                    "default": 2,
-                    "minimum": 0,
-                    "maximum": 20,
-                    "description": "%config.maxBlankLines.description%",
-                    "order": 30
-                },
-                "clionCMakeFormatter.maxTrailingBlankLines": {
-                    "type": "number",
-                    "default": 1,
-                    "minimum": 0,
-                    "description": "%config.maxTrailingBlankLines.description%",
-                    "order": 31
-                },
-                "clionCMakeFormatter.commandCase": {
-                    "type": "string",
-                    "default": "unchanged",
-                    "enum": [
-                        "unchanged",
-                        "lowercase",
-                        "uppercase"
-                    ],
-                    "enumDescriptions": [
-                        "%config.commandCase.unchanged%",
-                        "%config.commandCase.lowercase%",
-                        "%config.commandCase.uppercase%"
-                    ],
-                    "description": "%config.commandCase.description%",
-                    "order": 32
-                },
-                "clionCMakeFormatter.lineLength": {
-                    "type": "number",
-                    "default": 0,
-                    "minimum": 0,
-                    "description": "%config.lineLength.description%",
-                    "order": 40
-                },
-                "clionCMakeFormatter.alignMultiLineArguments": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "%config.alignMultiLineArguments.description%",
-                    "order": 41
-                },
-                "clionCMakeFormatter.alignMultiLineParentheses": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "%config.alignMultiLineParentheses.description%",
-                    "order": 42
-                },
-                "clionCMakeFormatter.alignControlFlowParentheses": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "%config.alignControlFlowParentheses.description%",
-                    "order": 43
-                },
-                "clionCMakeFormatter.enableProjectConfig": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "%config.enableProjectConfig.description%",
-                    "order": 50
-                }
-            }
-        }
-    },
     "scripts": {
-        "vscode:prepublish": "npm run compile",
-        "compile": "tsc -p ./",
-        "watch": "tsc -watch -p ./",
-        "lint": "eslint src --ext ts",
-        "pretest": "npm run compile && npm run lint",
-        "test": "npm run test:unit",
-        "test:unit": "mocha --require ts-node/register 'test/**/*.test.ts' --exclude 'test/integration/**'",
-        "test:integration": "mocha --require ts-node/register 'test/integration/**/*.test.ts'",
-        "test:all": "mocha --require ts-node/register 'test/**/*.test.ts'",
+        "build": "npm run build:core && npm run build:cli && npm run build:vscode",
+        "build:core": "npm run build -w @cc-format/core",
+        "build:cli": "npm run build -w cc-format",
+        "build:vscode": "npm run build -w clion-cmake-format",
+        "clean": "npm run clean --workspaces --if-present && rm -rf dist",
+        "compile": "npm run build",
+        "watch": "npm run watch -w clion-cmake-format",
+        "lint": "eslint 'packages/*/src/**/*.ts'",
+        "test": "mocha 'test/**/*.test.ts' --exclude 'test/integration/**'",
+        "test:unit": "mocha 'test/**/*.test.ts' --exclude 'test/integration/**'",
+        "test:integration": "mocha 'test/integration/**/*.test.ts'",
+        "test:all": "mocha 'test/**/*.test.ts'",
         "test:clion": "node scripts/validate-with-clion.js",
-        "package": "vsce package"
+        "package:vscode": "cd packages/vscode && vsce package",
+        "publish:core": "npm publish -w @cc-format/core",
+        "publish:cli": "npm publish -w cc-format",
+        "publish:vscode": "cd packages/vscode && vsce publish"
     },
     "devDependencies": {
         "@types/mocha": "^10.0.6",
         "@types/node": "^20.11.0",
-        "@types/vscode": "^1.50.0",
         "@typescript-eslint/eslint-plugin": "^6.19.0",
         "@typescript-eslint/parser": "^6.19.0",
         "@vscode/test-electron": "^2.3.8",
@@ -260,29 +35,16 @@
         "eslint": "^8.56.0",
         "mocha": "^10.2.0",
         "ts-node": "^10.9.2",
+        "tsx": "^4.21.0",
         "typescript": "^5.3.3"
     },
     "repository": {
         "type": "git",
         "url": "https://github.com/wysaid/clion-cmake-format"
     },
-    "bugs": {
-        "url": "https://github.com/wysaid/clion-cmake-format/issues"
-    },
-    "homepage": "https://github.com/wysaid/clion-cmake-format#readme",
-    "files": [
-        "dist/src/**/*.js",
-        "dist/src/**/*.d.ts",
-        "resources/cc-format.schema.json",
-        "README.md",
-        "README.zh-CN.md",
-        "LICENSE",
-        "CHANGELOG.md"
-    ],
-    "bin": {
-        "cc-format": "./dist/src/cli.js"
-    },
-    "dependencies": {
-        "commander": "^12.1.0"
+    "license": "MIT",
+    "engines": {
+        "node": ">=18",
+        "npm": ">=9"
     }
 }

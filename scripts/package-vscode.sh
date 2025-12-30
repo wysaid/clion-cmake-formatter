@@ -27,16 +27,34 @@ cp "$VSCODE_DIR/package.nls.zh-cn.json" "$TEMP_DIR/"
 cp "$VSCODE_DIR/LICENSE" "$TEMP_DIR/"
 cp "$VSCODE_DIR/logo.png" "$TEMP_DIR/"
 
-# Copy documentation from root
-cp "$SCRIPT_DIR/../README.md" "$TEMP_DIR/" 2>/dev/null || true
-cp "$SCRIPT_DIR/../README.zh-CN.md" "$TEMP_DIR/" 2>/dev/null || true
-cp "$SCRIPT_DIR/../CHANGELOG.md" "$TEMP_DIR/" 2>/dev/null || true
+# Copy documentation from vscode package (includes symbolic links)
+cp "$VSCODE_DIR/README.md" "$TEMP_DIR/" 2>/dev/null || true
+cp "$VSCODE_DIR/CHANGELOG.md" "$TEMP_DIR/" 2>/dev/null || true
 
-# Create .vscodeignore in temp directory
-cat >"$TEMP_DIR/.vscodeignore" <<'EOF'
-.gitignore
+# Copy additional docs from root if not already in vscode package
+cp "$SCRIPT_DIR/../README.zh-CN.md" "$TEMP_DIR/" 2>/dev/null || true
+
+# Copy .vscodeignore from vscode package
+cp "$VSCODE_DIR/.vscodeignore" "$TEMP_DIR/.vscodeignore" 2>/dev/null || (
+    # Fallback: create minimal .vscodeignore if not present
+    cat >"$TEMP_DIR/.vscodeignore" <<'EOF'
+src/**
+test/**
+tsconfig.json
 .npmignore
+.git/**
+.github/**
+node_modules/**
+package-lock.json
+.vscode/**
+.idea/**
+coverage/**
+*.vsix
+*.log
+.DS_Store
+Thumbs.db
 EOF
+)
 
 cd "$TEMP_DIR"
 

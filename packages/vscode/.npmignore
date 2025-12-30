@@ -9,6 +9,7 @@
 !LICENSE
 !logo.png
 !README.md
+!CHANGELOG.md
 
 # Exclude everything else
 **/*

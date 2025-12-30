@@ -24,7 +24,7 @@ import {
 } from '@cc-format/core';
 
 // Package version - read from package.json
-const packageJsonPath = path.join(__dirname, '..', '..', 'package.json');
+const packageJsonPath = path.join(__dirname, '..', 'package.json');
 let version = '1.4.0';
 try {
     const pkg = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
@@ -161,6 +161,10 @@ function formatStdin(options: FormatterOptions): void {
         console.error(`Error reading from stdin: ${err.message}`);
         process.exit(1);
     });
+
+    // Important: resume() to ensure stdin flows
+    // This is necessary when stdin is already readable (e.g., piped input)
+    process.stdin.resume();
 }
 
 /**

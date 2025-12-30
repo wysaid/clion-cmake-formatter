@@ -161,8 +161,6 @@ fi
 
 info "Starting publish process for: ${PUBLISH_TARGET}"
 
-info "Starting publish process for: ${PUBLISH_TARGET}"
-
 if [ "$DRY_RUN" = true ]; then
     warning "Running in DRY-RUN mode - no actual changes will be made"
 fi
@@ -254,6 +252,7 @@ if [ "$CURRENT_BRANCH" != "$DEFAULT_BRANCH" ]; then
     fi
 else
     success "On default branch"
+fi
 
 # Fetch latest from remote
 info "Fetching latest changes from remote..."

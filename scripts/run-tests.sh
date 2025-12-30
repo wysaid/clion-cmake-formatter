@@ -1,7 +1,7 @@
 #!/bin/bash
 # Run tests directly without workspace issues
 
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/.." || exit 1
 
 echo "Running tests..."
 NODE_OPTIONS='--loader ts-node/esm/transpile-only' \

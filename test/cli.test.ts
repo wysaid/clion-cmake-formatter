@@ -50,7 +50,8 @@ describe('CLI', () => {
         it('should display version', () => {
             const result = runCLI(['--version']);
             assert.strictEqual(result.exitCode, 0);
-            assert.ok(/^\d+\.\d+\.\d+$/.test(result.stdout.trim()));
+            // Support both stable (1.4.0) and pre-release (1.4.0-beta.1) versions
+            assert.ok(/^\d+\.\d+\.\d+(-[\w.]+)?$/.test(result.stdout.trim()));
         });
     });
 

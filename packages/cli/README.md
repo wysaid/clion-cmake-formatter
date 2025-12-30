@@ -1,6 +1,25 @@
 # cc-format
 
-Professional CMake code formatter with CLion-compatible style.
+**Professional CMake code formatter with CLion-compatible style**
+
+## 📌 About This Project
+
+`cc-format` is a command-line tool that provides professional CMake code formatting with formatting rules that match JetBrains CLion's built-in CMake formatting style. This tool is part of the **CLion CMake Format** project.
+
+### Why Use cc-format?
+
+- **⚡ No External Dependencies** - Pure TypeScript implementation. No need to install Python, cmake-format, or gersemi
+- **🎯 CLion-Compatible** - Matches CLion's proven formatting style trusted by millions of developers
+- **🔧 Zero Setup** - Works out of the box with sensible defaults
+- **⚙️ Highly Configurable** - 23+ configuration options for fine-grained control
+- **🚀 Fast & Reliable** - Lightning-fast formatting with idempotent results
+
+### Project Links
+
+- 🌐 **GitHub Repository** — [wysaid/clion-cmake-format](https://github.com/wysaid/clion-cmake-format)
+- 📦 **npm Package** — [@cc-format/core](https://www.npmjs.com/package/cc-format)
+- 🔌 **VS Code Extension** — [clion-cmake-format](https://marketplace.visualstudio.com/items?itemName=wysaid.clion-cmake-format)
+- 📖 **Full Documentation** — [GitHub Wiki](https://github.com/wysaid/clion-cmake-format#readme)
 
 ## Installation
 

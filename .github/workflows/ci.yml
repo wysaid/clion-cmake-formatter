@@ -32,8 +32,8 @@ jobs:
     - name: Verify symlinks
       run: bash scripts/verify-symlinks.sh
 
-    - name: Compile TypeScript
-      run: npm run compile
+    - name: Build packages
+      run: npm run build
 
     - name: Run Linter
       run: npm run lint

@@ -10,6 +10,7 @@ Thank you for your interest in contributing! This document provides guidelines f
 
 - Node.js 18+
 - npm
+- Git 2.x+ with symlinks support
 
 ### Getting Started
 
@@ -21,29 +22,72 @@ npm run compile
 npm run test:unit
 ```
 
+### Windows Development Setup
+
+This project uses **symbolic links (symlinks)** for shared files (LICENSE, CHANGELOG.md). Windows users need to configure Git to handle symlinks properly:
+
+**Option 1: Enable Developer Mode (Recommended)**
+1. Open Windows Settings → Update & Security → For Developers
+2. Enable "Developer Mode"
+3. Clone the repository with symlinks enabled:
+   ```bash
+   git clone -c core.symlinks=true https://github.com/wysaid/clion-cmake-format.git
+   ```
+
+**Option 2: Run Git Bash as Administrator**
+1. Right-click "Git Bash" and select "Run as administrator"
+2. Clone the repository:
+   ```bash
+   git config --global core.symlinks true
+   git clone https://github.com/wysaid/clion-cmake-format.git
+   ```
+
+**Verify Symlinks**:
+```bash
+bash scripts/verify-symlinks.sh
+```
+
+If symlinks are not working, you'll see errors when building or running tests. Run `bash scripts/create-symlinks.sh` to recreate them.
+
 ## 📜 Available Scripts
 
 | Script | Description |
 |--------|-------------|
-| `npm run compile` | Compile TypeScript to JavaScript |
+| `npm run build` | Build all packages (core + cli + vscode) |
+| `npm run build:core` | Build @cc-format/core package |
+| `npm run build:cli` | Build cc-format CLI package |
+| `npm run build:vscode` | Build VS Code extension |
+| `npm run compile` | Alias for `npm run build` |
 | `npm run watch` | Watch mode compilation (auto-recompile on changes) |
 | `npm run lint` | Run ESLint to check code quality |
 | `npm run test:unit` | Run all unit tests (must pass before commit) |
 | `npm run test:clion` | Compare formatting with CLion (requires CLion installed) |
-| `npm run test:cmake-official` | Test idempotency on CMake official files |
-| `npm run package` | Package extension as `.vsix` file |
+| `npm run package:vscode` | Package VS Code extension as `.vsix` file |
+| `npm run verify-symlinks` | Verify that all symlinks are valid |
 
 ## 📂 Project Structure
 
+This is a **monorepo** using npm workspaces:
+
 ```
 clion-cmake-format/
-├── src/
-│   ├── parser.ts      # CMake tokenizer and AST builder
-│   ├── formatter.ts   # Formatting logic and rules
-│   ├── config.ts      # Configuration file loader and validator
-│   ├── cli.ts         # Command-line interface (npm package)
-│   ├── validator.ts   # Validation utilities
-│   └── extension.ts   # VS Code extension integration
+├── packages/
+│   ├── core/              # @cc-format/core - Core formatting engine (0 deps)
+│   │   ├── src/
+│   │   │   ├── parser.ts      # CMake tokenizer and AST builder
+│   │   │   ├── formatter.ts   # Formatting logic and rules
+│   │   │   ├── config.ts      # Configuration file loader
+│   │   │   ├── validator.ts   # Validation utilities
+│   │   │   └── index.ts       # Public exports
+│   │   ├── LICENSE → ../../LICENSE (symlink)
+│   │   └── CHANGELOG.md → ../../CHANGELOG.md (symlink)
+│   ├── cli/               # cc-format - CLI tool
+│   │   ├── src/cli.ts     # Command-line interface
+│   │   ├── LICENSE → ../../LICENSE (symlink)
+│   │   └── CHANGELOG.md → ../../CHANGELOG.md (symlink)
+│   └── vscode/            # clion-cmake-format - VS Code extension
+│       ├── src/extension.ts
+│       └── LICENSE → ../../LICENSE (symlink)
 ├── test/
 │   ├── parser.test.ts      # Parser unit tests
 │   ├── formatter.test.ts   # Formatter unit tests

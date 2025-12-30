@@ -30,8 +30,7 @@
         "dist/**/*.d.ts",
         "LICENSE",
         "README.md",
-        "CHANGELOG.md",
-        "examples/**/*"
+        "CHANGELOG.md"
     ],
     "scripts": {
         "build": "tsc",

@@ -110,11 +110,20 @@
             "description": "Command name case transformation"
         },
         "lineLength": {
-            "type": "number",
+            "anyOf": [
+                {
+                    "const": 0,
+                    "description": "Unlimited line length"
+                },
+                {
+                    "type": "number",
+                    "minimum": 30,
+                    "maximum": 500,
+                    "description": "Maximum line length (minimum 30 characters)"
+                }
+            ],
             "default": 0,
-            "minimum": 0,
-            "maximum": 500,
-            "description": "Maximum line length before wrapping (0 means unlimited)"
+            "description": "Maximum line length before wrapping (0 means unlimited, minimum 30 if specified)"
         },
         "alignMultiLineArguments": {
             "type": "boolean",

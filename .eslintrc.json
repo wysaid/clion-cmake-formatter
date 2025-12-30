@@ -17,7 +17,8 @@
             "error",
             {
                 "argsIgnorePattern": "^_",
-                "varsIgnorePattern": "^_"
+                "varsIgnorePattern": "^_",
+                "caughtErrors": "none"
             }
         ],
         "@typescript-eslint/naming-convention": [
@@ -56,17 +57,16 @@
                 ]
             }
         ],
-        "@typescript-eslint/semi": [
-            "warn",
-            "always"
-        ],
         "curly": [
             "warn",
             "multi-line"
         ],
         "eqeqeq": "warn",
         "no-throw-literal": "warn",
-        "semi": "off"
+        "semi": [
+            "warn",
+            "always"
+        ]
     },
     "ignorePatterns": [
         "dist/**",

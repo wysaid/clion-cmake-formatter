@@ -358,7 +358,15 @@ Create `.cc-format.jsonc` in your project root:
 | `maxBlankLines` | number | `2` | Max consecutive blank lines (0-20) |
 | `maxTrailingBlankLines` | number | `1` | Max blank lines at end of file (>= 0, set large number to keep all) |
 | `enableProjectConfig` | boolean | `true` | Enable `.cc-format.jsonc` files |
+### Configuration Validation
 
+Configuration values are automatically validated to prevent common mistakes while remaining permissive for diverse coding styles:
+
+- **Indent sizes (1-16)**: Supports both compact (1-2 spaces) and spacious (8-16 spaces) styles. Values outside this range are clamped to the nearest boundary.
+- **Line length (0 or ≥30)**: 0 means unlimited; non-zero values below 30 are set to 30 to prevent excessive line wrapping that would make even basic commands unreadable.
+- **Blank lines (0-20)**: Prevents accidental excessive whitespace. More than 20 consecutive blank lines is rarely intentional.
+
+When an invalid value is detected, it's automatically corrected to the nearest valid value, and a warning message is displayed explaining the correction.
 ---
 
 ## 💡 Tips & Best Practices

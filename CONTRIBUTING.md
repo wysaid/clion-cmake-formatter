@@ -107,8 +107,7 @@ clion-cmake-format/
 │   ├── sample-input.cmake     # Sample input file
 │   └── sample.cc-format.jsonc # Sample config file
 └── docs/
-    ├── CLION_INTEGRATION_TESTING.md # CLion integration testing guide
-    └── CONFIGURATION_VALIDATION.md  # Config validation details
+    └── CLION_INTEGRATION_TESTING.md # CLion integration testing guide
 ```
 
 ## 🐛 Debugging
@@ -263,7 +262,6 @@ When modifying the formatter, ensure:
 ## 📚 Additional Documentation
 
 - [CLion Integration Testing](docs/CLION_INTEGRATION_TESTING.md)
-- [Configuration Validation](docs/CONFIGURATION_VALIDATION.md)
 
 ## 🙏 Questions?
 

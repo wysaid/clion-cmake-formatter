@@ -60,8 +60,7 @@ clion-cmake-format/
 │   ├── sample-input.cmake     # 示例输入文件
 │   └── sample.cc-format.jsonc # 示例配置文件
 └── docs/
-    ├── CLION_INTEGRATION_TESTING.md # CLion 集成测试指南
-    └── CONFIGURATION_VALIDATION.md  # 配置验证详情
+    └── CLION_INTEGRATION_TESTING.md # CLion 集成测试指南
 ```
 
 ## 🐛 调试
@@ -216,7 +215,6 @@ npx mocha --require ts-node/register test/parser.test.ts
 ## 📚 其他文档
 
 - [CLion 集成测试](docs/CLION_INTEGRATION_TESTING.md)（英文）
-- [配置验证](docs/CONFIGURATION_VALIDATION.md)（英文）
 
 ## 🙏 有问题？
 

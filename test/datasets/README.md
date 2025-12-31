@@ -116,7 +116,7 @@ See [cmake-official/README.md](cmake-official/README.md) for details on file sel
 
 The `well-formatted/` directory contains files that are **already correctly formatted**. These tests verify idempotency:
 
-```
+```text
 Original → Format → Output
 Output should match Original exactly
 ```

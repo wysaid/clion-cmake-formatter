@@ -289,7 +289,7 @@ interface RuleViolation {
     expected?: string;
 }
 
-type RuleViolationType = 
+type RuleViolationType =
     | 'indentation'
     | 'spacing'
     | 'blank_lines'
@@ -309,10 +309,10 @@ import * as fs from 'fs';
 
 function formatCMakeFiles(directory: string) {
     const config = loadConfig(directory);
-    
+
     // Find all CMake files
     const files = findCMakeFiles(directory);
-    
+
     files.forEach(file => {
         const source = fs.readFileSync(file, 'utf-8');
         const formatted = formatCMake(source, config);
@@ -332,7 +332,7 @@ class CMakeFormatter {
             indentSize: getEditorIndentSize(),
             commandCase: 'lowercase'
         });
-        
+
         return formatCMake(document.getText(), options);
     }
 }
@@ -347,11 +347,11 @@ import * as fs from 'fs';
 async function validateCMakeFiles(files: string[]): Promise<boolean> {
     const config = loadConfig(process.cwd());
     let allValid = true;
-    
+
     for (const file of files) {
         const content = fs.readFileSync(file, 'utf-8');
         const result = validateContent(content, file, config);
-        
+
         if (!result.isValid) {
             console.error(`${file}: Formatting violations detected`);
             result.violations?.forEach(v => {
@@ -360,7 +360,7 @@ async function validateCMakeFiles(files: string[]): Promise<boolean> {
             allValid = false;
         }
     }
-    
+
     return allValid;
 }
 ```

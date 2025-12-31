@@ -358,15 +358,39 @@ Create `.cc-format.jsonc` in your project root:
 | `maxBlankLines` | number | `2` | Max consecutive blank lines (0-20) |
 | `maxTrailingBlankLines` | number | `1` | Max blank lines at end of file (>= 0, set large number to keep all) |
 | `enableProjectConfig` | boolean | `true` | Enable `.cc-format.jsonc` files |
+
 ### Configuration Validation
 
 Configuration values are automatically validated to prevent common mistakes while remaining permissive for diverse coding styles:
 
-- **Indent sizes (1-16)**: Supports both compact (1-2 spaces) and spacious (8-16 spaces) styles. Values outside this range are clamped to the nearest boundary.
-- **Line length (0 or ≥30)**: 0 means unlimited; non-zero values below 30 are set to 30 to prevent excessive line wrapping that would make even basic commands unreadable.
-- **Blank lines (0-20)**: Prevents accidental excessive whitespace. More than 20 consecutive blank lines is rarely intentional.
+#### Automatic Corrections
 
-When an invalid value is detected, it's automatically corrected to the nearest valid value, and a warning message is displayed explaining the correction.
+When an invalid value is detected, the formatter automatically corrects it to the nearest valid value and displays a warning message. This ensures formatting always succeeds even with incorrect configuration.
+
+**Validation Rules:**
+
+- **Indent sizes** (`tabSize`, `indentSize`, `continuationIndentSize`): Valid range 1-16
+  - Supports both compact (1-2 spaces) and spacious (8-16 spaces) coding styles
+  - Values outside this range are clamped to nearest boundary
+
+- **Line length** (`lineLength`): 0 (unlimited) or ≥30
+  - 0 means unlimited line length (no wrapping)
+  - Non-zero values below 30 are set to 30 to prevent excessive wrapping
+  - Ensures even basic CMake commands remain readable
+
+- **Blank lines** (`maxBlankLines`): Valid range 0-20
+  - Prevents accidental excessive whitespace
+  - More than 20 consecutive blank lines is rarely intentional
+
+- **Trailing blank lines** (`maxTrailingBlankLines`): ≥0
+  - Set to a large number (e.g., 1000) to keep all trailing blank lines
+
+**Example Warning Messages:**
+```text
+tabSize value 0 is out of range [1, 16]. Using minimum value 1.
+lineLength value 10 is too small. Using minimum value 30.
+maxBlankLines value 25 is out of range [0, 20]. Using maximum value 20.
+```
 ---
 
 ## 💡 Tips & Best Practices

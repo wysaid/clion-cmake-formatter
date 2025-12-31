@@ -7,6 +7,100 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.1] - 2025-12-31
+
+### 🎉 Major Changes
+
+- **Monorepo restructuring** — Complete architectural overhaul into three packages for better modularity and reusability
+- **Command-line interface** — New `cc-format` CLI tool for terminal and CI/CD workflows
+
+### Added
+
+#### Monorepo Architecture
+- **`@cc-format/core` package** — Standalone formatting engine with programmatic API (published to npm)
+- **`cc-format` CLI package** — Command-line tool with rich features (published to npm)
+- **`clion-cmake-format` VS Code extension** — Uses core package as dependency
+- **npm workspaces** — Proper package management for monorepo structure
+- **TypeScript project references** — Correct build order and module resolution
+- **Publishing scripts** — Automated scripts for publishing all packages
+
+#### CLI Tool Features
+- **`--stdin` mode** — Format CMake code from standard input (pipe support)
+- **`--write` mode** — Format files in-place with automatic backup
+- **`--check` mode** — Validate formatting without modifying files (CI-friendly)
+- **`--init` command** — Generate `.cc-format.jsonc` configuration file interactively
+- **`--config` option** — Specify custom configuration file path
+- **`--no-color` option** — Disable colored output for CI environments
+- **Exit codes** — Proper exit codes for scripting (0 = success, 1 = error, 2 = formatting needed)
+- **Glob pattern support** — Format multiple files with patterns (e.g., `**/*.cmake`)
+- **Cross-platform** — Tested on Ubuntu, Windows, and macOS
+
+#### Documentation
+- **Comprehensive API documentation** — Full API reference for `@cc-format/core` with examples
+- **CLI usage guide** — Advanced usage examples including Docker, VS Code tasks, Makefile integration
+- **Monorepo architecture guide** — Package structure and relationship explanation
+- **Performance benchmarks** — CLI performance metrics and optimization tips
+- **Migration guide** — Step-by-step guide for upgrading to monorepo structure
+- **Cross-references** — Prominent links between CLI and VS Code extension READMEs
+- **Enhanced test dataset docs** — Contribution guidelines with file naming conventions
+
+#### CI/CD Enhancements
+- **Core package testing** — Validate core exports and API surface
+- **CLI cross-platform tests** — Automated testing on Ubuntu, Windows, macOS
+- **Enhanced release workflow** — Comprehensive release notes including CLI and core changes
+- **Manual trigger support** — Workflow dispatch for testing releases without publishing
+
+### Changed
+
+- **Project structure** — Migrated from flat structure to monorepo with `packages/` directory
+- **Build system** — Switch from `ts-node` to `tsx` for Node.js 24 ESM compatibility
+- **VS Code extension** — Now depends on `@cc-format/core@1.4.0` instead of local code
+- **Test imports** — All tests updated to use `@cc-format/core` package imports
+- **Configuration priority** — Clarified that project config (`.cc-format.jsonc`) takes precedence over VS Code settings
+
+### Fixed
+
+- **Package metadata** — Enhanced CLI package description and keywords (19 keywords for better npm discoverability)
+- **Configuration documentation** — Improved validation rules with structured examples
+- **Markdown syntax** — Fixed missing language specifiers in code blocks
+- **README accuracy** — Corrected configuration priority order in VS Code extension docs
+
+### Documentation
+
+- **Root README** — Monorepo overview with package comparison table
+- **Core package README** — Complete rewrite with API documentation (`formatCMake`, `parseOptions`, `loadConfig`, `validateContent`)
+- **CLI package README** — Advanced usage examples and integration guides
+- **VS Code extension README** — Enhanced troubleshooting and configuration guidance
+- **Test datasets README** — Detailed contribution guidelines and best practices
+- **Chinese documentation** — Synchronized all Chinese docs with English versions
+- **MIGRATION.md** — Guide for upgrading from v1.4.0 to v1.4.1
+- **MONOREPO.md** — Monorepo structure and development workflow documentation
+
+### Breaking Changes
+
+None. This is a backward-compatible release. Existing VS Code extension users will see no changes in functionality.
+
+### Migration Notes
+
+For VS Code extension users: No action required. The extension continues to work exactly as before.
+
+For developers wanting to use the CLI tool or core library:
+```bash
+# Install CLI tool globally
+npm install -g cc-format
+
+# Or use in your project
+npm install @cc-format/core
+```
+
+See `MIGRATION.md` for detailed upgrade instructions.
+
+### Test Coverage
+
+- 195 unit tests passing ✅
+- CLI integration tests on 3 platforms ✅
+- Idempotency tests on official CMake repository ✅
+
 ## [1.4.0] - 2025-12-23
 
 ### Added

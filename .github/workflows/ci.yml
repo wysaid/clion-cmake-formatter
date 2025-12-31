@@ -42,9 +42,16 @@ jobs:
       run: npm run test:unit
 
     # Test CLI tool functionality
-    - name: Test CLI tool
+    # Test core package functionality
+    - name: Test Core Package
       run: |
-        echo "Testing CLI tool..."
+        echo "Testing @cc-format/core package..."
+        node -e "const core = require('./packages/core/dist/index.js'); console.log('Core exports:', Object.keys(core));"
+
+    # Test CLI tool functionality
+    - name: Test CLI Package
+      run: |
+        echo "Testing cc-format CLI..."
         node packages/cli/dist/cli.js --version
         node packages/cli/dist/cli.js --help
         echo "set(MY_VAR value)" | node packages/cli/dist/cli.js --stdin

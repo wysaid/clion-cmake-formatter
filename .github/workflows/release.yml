@@ -1,7 +1,9 @@
 # Release workflow for publishing to VS Code Marketplace and creating GitHub Releases
 #
 # Triggers:
-# - Tag push (X.Y.Z or X.Y.Z-suffix): Full release - build, publish to Marketplace, create GitHub Release
+# - Tag push v?X.Y.Z: Stable release - publish to Marketplace as stable, create GitHub Release
+# - Tag push v?X.Y.Z-<suffix>: Pre-release - publish to Marketplace as pre-release, create GitHub Release
+# - Manual trigger (workflow_dispatch): Dry-run mode - build, test, upload VSIX artifact (no publishing)
 # - Master push: Dry-run mode - build, test, upload VSIX artifact (no publishing)
 #
 # Note: Master branch pushes will trigger both CI and Release workflows intentionally.
@@ -15,6 +17,12 @@ on:
       - '*'
     branches:
       - master
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to build (e.g., v1.4.1, 1.4.1-beta). Manual triggers will NOT publish.'
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -29,15 +37,27 @@ jobs:
     - name: Determine trigger type
       id: trigger_type
       run: |
-        if [[ "${{ github.ref }}" == refs/tags/* ]]; then
-          echo "is_tag=true" >> $GITHUB_OUTPUT
-          echo "is_dry_run=false" >> $GITHUB_OUTPUT
-          TAG=${GITHUB_REF#refs/tags/}
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
-          echo "Triggered by tag: $TAG"
-        else
+        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          # Manual trigger - always dry-run
           echo "is_tag=false" >> $GITHUB_OUTPUT
           echo "is_dry_run=true" >> $GITHUB_OUTPUT
+          echo "is_manual=true" >> $GITHUB_OUTPUT
+          TAG="${{ github.event.inputs.tag }}"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "Triggered manually with tag: $TAG (dry-run mode - will NOT publish)"
+        elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
+          # Tag push
+          echo "is_tag=true" >> $GITHUB_OUTPUT
+          echo "is_dry_run=false" >> $GITHUB_OUTPUT
+          echo "is_manual=false" >> $GITHUB_OUTPUT
+          TAG=${GITHUB_REF#refs/tags/}
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "Triggered by tag push: $TAG"
+        else
+          # Master branch push - always dry-run
+          echo "is_tag=false" >> $GITHUB_OUTPUT
+          echo "is_dry_run=true" >> $GITHUB_OUTPUT
+          echo "is_manual=false" >> $GITHUB_OUTPUT
           # Use sed instead of node to avoid dependency on Node.js before setup
           PACKAGE_VERSION=$(sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' package.json)
           echo "tag=$PACKAGE_VERSION" >> $GITHUB_OUTPUT
@@ -50,35 +70,54 @@ jobs:
       run: |
         TAG="${{ steps.trigger_type.outputs.tag }}"
         IS_DRY_RUN="${{ steps.trigger_type.outputs.is_dry_run }}"
-        
-        # Check if tag matches stable release pattern (e.g., 1.0.3)
-        if echo "$TAG" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+        IS_MANUAL="${{ steps.trigger_type.outputs.is_manual }}"
+
+        # Remove 'v' prefix if present for pattern matching
+        TAG_WITHOUT_V="${TAG#v}"
+
+        # Check if tag matches stable release pattern (e.g., v1.0.3, 1.0.3)
+        if echo "$TAG_WITHOUT_V" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
           echo "is_stable_release=true" >> $GITHUB_OUTPUT
           echo "is_prerelease=false" >> $GITHUB_OUTPUT
-          echo "should_publish=true" >> $GITHUB_OUTPUT
-          if [ "$IS_DRY_RUN" == "true" ]; then
-            echo "Dry-run: Tag is a stable release pattern: $TAG"
+
+          # Manual triggers never publish
+          if [ "$IS_MANUAL" == "true" ]; then
+            echo "should_publish=false" >> $GITHUB_OUTPUT
+            echo "Manual trigger: Tag matches stable release pattern but will NOT publish (dry-run): $TAG"
+          elif [ "$IS_DRY_RUN" == "true" ]; then
+            echo "should_publish=false" >> $GITHUB_OUTPUT
+            echo "Dry-run: Tag matches stable release pattern: $TAG"
           else
-            echo "Tag is a stable release: $TAG"
+            echo "should_publish=true" >> $GITHUB_OUTPUT
+            echo "Tag matches stable release pattern, will publish: $TAG"
           fi
-        # Check if tag matches pre-release pattern (e.g., 1.0.3-alpha, 1.0.3-beta, 1.0.3-rc.1)
-        elif echo "$TAG" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+-.+$'; then
+        # Check if tag matches pre-release pattern (e.g., v1.0.3-alpha, 1.0.3-beta, 1.0.3-rc.1)
+        elif echo "$TAG_WITHOUT_V" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+-.+$'; then
           echo "is_stable_release=false" >> $GITHUB_OUTPUT
           echo "is_prerelease=true" >> $GITHUB_OUTPUT
-          echo "should_publish=true" >> $GITHUB_OUTPUT
-          if [ "$IS_DRY_RUN" == "true" ]; then
-            echo "Dry-run: Tag is a pre-release pattern: $TAG"
+
+          # Manual triggers never publish
+          if [ "$IS_MANUAL" == "true" ]; then
+            echo "should_publish=false" >> $GITHUB_OUTPUT
+            echo "Manual trigger: Tag matches pre-release pattern but will NOT publish (dry-run): $TAG"
+          elif [ "$IS_DRY_RUN" == "true" ]; then
+            echo "should_publish=false" >> $GITHUB_OUTPUT
+            echo "Dry-run: Tag matches pre-release pattern: $TAG"
           else
-            echo "Tag is a pre-release: $TAG"
+            echo "should_publish=true" >> $GITHUB_OUTPUT
+            echo "Tag matches pre-release pattern, will publish: $TAG"
           fi
         else
           echo "is_stable_release=false" >> $GITHUB_OUTPUT
           echo "is_prerelease=false" >> $GITHUB_OUTPUT
           echo "should_publish=false" >> $GITHUB_OUTPUT
-          if [ "$IS_DRY_RUN" == "true" ]; then
+
+          if [ "$IS_MANUAL" == "true" ]; then
+            echo "Manual trigger: Tag does not match release patterns (dry-run): $TAG"
+          elif [ "$IS_DRY_RUN" == "true" ]; then
             echo "Dry-run: Tag does not match release patterns: $TAG"
           else
-            echo "Tag does not match release patterns: $TAG"
+            echo "Tag does not match release patterns, will NOT publish: $TAG"
           fi
           echo "Will only run build and test."
         fi
@@ -88,8 +127,10 @@ jobs:
       if: steps.validate_tag.outputs.should_publish == 'true'
       run: |
         TAG="${{ steps.trigger_type.outputs.tag }}"
-        # Extract the version number (e.g., 1.0.3 from 1.0.3 or 1.0.3-alpha)
-        VERSION=$(echo "$TAG" | grep -oE '^[0-9]+\.[0-9]+\.[0-9]+')
+        # Remove 'v' prefix if present, then extract the version number
+        # (e.g., 1.0.3 from v1.0.3, 1.0.3, v1.0.3-alpha, or 1.0.3-alpha)
+        TAG_WITHOUT_V="${TAG#v}"
+        VERSION=$(echo "$TAG_WITHOUT_V" | grep -oE '^[0-9]+\.[0-9]+\.[0-9]+')
         echo "version=$VERSION" >> $GITHUB_OUTPUT
         echo "Extracted version: $VERSION"
 
@@ -109,15 +150,15 @@ jobs:
       run: |
         TAG_VERSION="${{ steps.extract_version.outputs.version }}"
         PACKAGE_VERSION=$(node -p "require('./package.json').version")
-        
+
         echo "Tag version: $TAG_VERSION"
         echo "package.json version: $PACKAGE_VERSION"
-        
+
         if [ "$TAG_VERSION" != "$PACKAGE_VERSION" ]; then
           echo "Error: Tag version ($TAG_VERSION) does not match package.json version ($PACKAGE_VERSION)"
           exit 1
         fi
-        
+
         echo "Version check passed: $TAG_VERSION"
 
     - name: Compile TypeScript
@@ -139,15 +180,15 @@ jobs:
       run: |
         EXTENSION_ID="wysaid.clion-cmake-format"
         VERSION="${{ steps.extract_version.outputs.version }}"
-        
+
         echo "Checking if version $VERSION exists in VS Code Marketplace..."
-        
+
         # Query the marketplace API
         RESPONSE=$(curl -s -f "https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery" \
           -H "Content-Type: application/json" \
           -H "Accept: application/json;api-version=3.0-preview.1" \
           -d "{\"filters\":[{\"criteria\":[{\"filterType\":7,\"value\":\"$EXTENSION_ID\"}]}],\"flags\":914}" || echo "")
-        
+
         if [ -z "$RESPONSE" ]; then
           echo "⚠️ Warning: Could not query marketplace API"
           echo "exists=false" >> $GITHUB_OUTPUT
@@ -214,10 +255,106 @@ jobs:
         path: "*.vsix"
         retention-days: 30
 
+    # Generate comprehensive release notes including CLI and Core changes
+    - name: Generate Release Notes
+      if: steps.validate_tag.outputs.should_publish == 'true' && steps.trigger_type.outputs.is_dry_run == 'false'
+      id: release_notes
+      run: |
+        VERSION="${{ steps.extract_version.outputs.version }}"
+        TAG="${{ steps.trigger_type.outputs.tag }}"
+        IS_STABLE="${{ steps.validate_tag.outputs.is_stable_release }}"
+
+        if [ "$IS_STABLE" == "true" ]; then
+          echo "# 🎉 Release ${TAG}" > release_notes.md
+        else
+          echo "# 🚀 Pre-release ${TAG}" > release_notes.md
+        fi
+        echo "" >> release_notes.md
+
+        # Add VS Code extension info
+        echo "## 📦 VS Code Extension" >> release_notes.md
+        echo "" >> release_notes.md
+        echo "Install from [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=wysaid.clion-cmake-format) or download the VSIX file below." >> release_notes.md
+        echo "" >> release_notes.md
+
+        # Extract changelog from VS Code package
+        if [ -f packages/vscode/CHANGELOG.md ]; then
+          echo "### Changes" >> release_notes.md
+          # Extract the section for this version (from ## [VERSION] to next ## or EOF)
+          VSCODE_CHANGES=$(sed -n "/## \\[${VERSION}\\]/,/## \\[/p" packages/vscode/CHANGELOG.md | sed '$d')
+          if [ -n "$VSCODE_CHANGES" ]; then
+            echo "$VSCODE_CHANGES" >> release_notes.md
+          else
+            echo "" >> release_notes.md
+            echo "_No specific changes documented for this version._" >> release_notes.md
+          fi
+        fi
+
+        # Add CLI tool info
+        echo "" >> release_notes.md
+        echo "---" >> release_notes.md
+        echo "" >> release_notes.md
+        echo "## 🔧 CLI Tool" >> release_notes.md
+        echo "" >> release_notes.md
+        echo "The \`cc-format\` command-line tool is available on npm:" >> release_notes.md
+        echo "" >> release_notes.md
+        echo "\`\`\`bash" >> release_notes.md
+        echo "# Install globally" >> release_notes.md
+        echo "npm install -g cc-format@${VERSION}" >> release_notes.md
+        echo "" >> release_notes.md
+        echo "# Or use with npx" >> release_notes.md
+        echo "npx cc-format@${VERSION} --help" >> release_notes.md
+        echo "\`\`\`" >> release_notes.md
+        echo "" >> release_notes.md
+
+        # Extract CLI changelog
+        if [ -f packages/cli/CHANGELOG.md ]; then
+          echo "### Changes" >> release_notes.md
+          CLI_CHANGES=$(sed -n "/## \\[${VERSION}\\]/,/## \\[/p" packages/cli/CHANGELOG.md | sed '$d')
+          if [ -n "$CLI_CHANGES" ]; then
+            echo "$CLI_CHANGES" >> release_notes.md
+          else
+            echo "" >> release_notes.md
+            echo "_No specific changes documented for this version._" >> release_notes.md
+          fi
+        fi
+
+        # Add core library info
+        echo "" >> release_notes.md
+        echo "---" >> release_notes.md
+        echo "" >> release_notes.md
+        echo "## 📚 Core Library" >> release_notes.md
+        echo "" >> release_notes.md
+        echo "The \`@cc-format/core\` library is available on npm:" >> release_notes.md
+        echo "" >> release_notes.md
+        echo "\`\`\`bash" >> release_notes.md
+        echo "npm install @cc-format/core@${VERSION}" >> release_notes.md
+        echo "\`\`\`" >> release_notes.md
+        echo "" >> release_notes.md
+
+        # Extract core changelog
+        if [ -f packages/core/CHANGELOG.md ]; then
+          echo "### Changes" >> release_notes.md
+          CORE_CHANGES=$(sed -n "/## \\[${VERSION}\\]/,/## \\[/p" packages/core/CHANGELOG.md | sed '$d')
+          if [ -n "$CORE_CHANGES" ]; then
+            echo "$CORE_CHANGES" >> release_notes.md
+          else
+            echo "" >> release_notes.md
+            echo "_No specific changes documented for this version._" >> release_notes.md
+          fi
+        fi
+
+        echo "" >> release_notes.md
+        echo "---" >> release_notes.md
+        echo "" >> release_notes.md
+        echo "**Full Changelog**: https://github.com/wysaid/clion-cmake-format/commits/${TAG}" >> release_notes.md
+
+        cat release_notes.md
+
     - name: Create GitHub Release
       if: steps.validate_tag.outputs.should_publish == 'true' && steps.trigger_type.outputs.is_dry_run == 'false'
       uses: softprops/action-gh-release@v2
       with:
         files: "*.vsix"
+        body_path: release_notes.md
         prerelease: ${{ steps.validate_tag.outputs.is_prerelease }}
-        generate_release_notes: true

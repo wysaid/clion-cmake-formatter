@@ -243,7 +243,7 @@
         "clean": "rm -rf dist"
     },
     "dependencies": {
-        "@cc-format/core": "1.4.0"
+        "@cc-format/core": "1.4.1"
     },
     "devDependencies": {
         "@types/vscode": "^1.50.0",

@@ -4,14 +4,21 @@
 [![npm downloads](https://img.shields.io/npm/dm/cc-format.svg)](https://www.npmjs.com/package/cc-format)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/node/v/cc-format.svg)](https://nodejs.org/)
+[![VS Code Extension](https://img.shields.io/visual-studio-marketplace/v/wysaid.clion-cmake-format?label=VS%20Code%20Extension)](https://marketplace.visualstudio.com/items?itemName=wysaid.clion-cmake-format)
 
 **Professional CMake code formatter with CLion-compatible style**
+
+> 💡 **Looking for editor integration?** Check out the [VS Code extension](https://marketplace.visualstudio.com/items?itemName=wysaid.clion-cmake-format) for seamless formatting with format-on-save support!
 
 ## 📌 About This Project
 
 `cc-format` is a command-line tool that provides professional CMake code formatting with formatting rules that match JetBrains CLion's built-in CMake formatting style. This tool is part of the **CLion CMake Format** project.
 
-This CLI tool uses the same core formatting engine ([@cc-format/core](https://www.npmjs.com/package/@cc-format/core)) as the VS Code extension, ensuring **consistent formatting results** across all environments.
+**Perfect for:** CI/CD pipelines, pre-commit hooks, terminal workflows, and automated build systems.
+
+This CLI tool uses the same core formatting engine ([@cc-format/core](https://www.npmjs.com/package/@cc-format/core)) as the [VS Code extension](https://marketplace.visualstudio.com/items?itemName=wysaid.clion-cmake-format), ensuring **consistent formatting results** across all environments.
+
+💡 **Want editor integration?** Install the [**CLion CMake Format** VS Code extension](https://marketplace.visualstudio.com/items?itemName=wysaid.clion-cmake-format) for format-on-save support and visual configuration!
 
 ### Why Use cc-format?
 
@@ -202,7 +209,9 @@ Benchmark results on a typical CMake project:
 ## Related Packages
 
 - **[@cc-format/core](https://www.npmjs.com/package/@cc-format/core)** — Core formatting engine for integration into your own tools
-- **[clion-cmake-format](https://marketplace.visualstudio.com/items?itemName=wysaid.clion-cmake-format)** — VS Code extension for editor integration
+- **[clion-cmake-format](https://marketplace.visualstudio.com/items?itemName=wysaid.clion-cmake-format)** — VS Code extension for seamless editor integration with format-on-save
+  - Install in VS Code: `code --install-extension wysaid.clion-cmake-format`
+  - Perfect for developers who prefer GUI-based formatting and editor integration
 
 ## License
 

@@ -1,12 +1,22 @@
 # CLion CMake Format - VS Code Extension
 
+[![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/wysaid.clion-cmake-format)](https://marketplace.visualstudio.com/items?itemName=wysaid.clion-cmake-format)
+[![Visual Studio Marketplace Installs](https://img.shields.io/visual-studio-marketplace/i/wysaid.clion-cmake-format)](https://marketplace.visualstudio.com/items?itemName=wysaid.clion-cmake-format)
+[![npm package](https://img.shields.io/npm/v/cc-format?label=CLI%20tool)](https://www.npmjs.com/package/cc-format)
+
 **Professional CMake code formatter with CLion-compatible style for Visual Studio Code**
+
+> 💡 **Need command-line formatting?** Check out the [cc-format CLI tool](https://www.npmjs.com/package/cc-format) for CI/CD pipelines and terminal workflows!
 
 ## 📌 About This Project
 
 CLion CMake Format is a VS Code extension that provides professional CMake code formatting based on JetBrains CLion's built-in formatting style. This extension is part of the **CLion CMake Format** project, which offers consistent CMake formatting across different development tools and environments.
 
-This extension uses the same core formatting engine ([@cc-format/core](https://www.npmjs.com/package/@cc-format/core)) as the CLI tool, ensuring **consistent formatting results** whether you format files in your editor or via command line.
+**Perfect for:** Visual Studio Code users who want seamless editor integration with format-on-save, keyboard shortcuts, and visual configuration.
+
+This extension uses the same core formatting engine ([@cc-format/core](https://www.npmjs.com/package/@cc-format/core)) as the [cc-format CLI tool](https://www.npmjs.com/package/cc-format), ensuring **consistent formatting results** whether you format files in your editor or via command line.
+
+💡 **Need to format CMake files in CI/CD or terminal?** Install the [**cc-format** CLI tool](https://www.npmjs.com/package/cc-format) for command-line formatting, pre-commit hooks, and automated build systems!
 
 ### Why Use This Extension?
 
@@ -178,7 +188,9 @@ target_link_libraries(myapp PRIVATE pthread)
 ## Related Packages
 
 - **[@cc-format/core](https://www.npmjs.com/package/@cc-format/core)** — Core formatting engine for integration into your own tools
-- **[cc-format](https://www.npmjs.com/package/cc-format)** — Command-line interface for CI/CD and terminal usage
+- **[cc-format](https://www.npmjs.com/package/cc-format)** — Command-line interface for CI/CD pipelines, pre-commit hooks, and terminal usage
+  - Install globally: `npm install -g cc-format`
+  - Perfect for automated build systems, Git hooks, and developers who prefer terminal workflows
 
 ## Related Links
 

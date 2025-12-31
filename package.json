@@ -1,6 +1,6 @@
 {
     "name": "clion-cmake-format-monorepo",
-    "version": "1.4.0",
+    "version": "1.4.1",
     "private": true,
     "description": "Monorepo for CMake formatter with CLion-compatible style",
     "workspaces": [

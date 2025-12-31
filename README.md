@@ -11,11 +11,24 @@
 Available as:
 - 🔌 **VS Code Extension** — [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=wysaid.clion-cmake-format)
 - 💻 **CLI Tool** — [npm package](https://www.npmjs.com/package/cc-format)
+- 📦 **Core Library** — [@cc-format/core](https://www.npmjs.com/package/@cc-format/core) for developers
 
 > **Project Codename**: `cc-format` (CLion CMake Format)
 > **Why choose this formatter?** Precision, configurability, and zero hassle. If you value clean, maintainable CMake scripts, this is for you.
 
 English | [简体中文](README.zh-CN.md)
+
+## 📦 Monorepo Structure
+
+This project is organized as a **monorepo** containing three packages that work together to provide comprehensive CMake formatting solutions:
+
+| Package | Description | npm Package |
+|---------|-------------|-------------|
+| **[@cc-format/core](packages/core/)** | Core formatting engine with zero dependencies. Pure TypeScript parser and formatter that can be integrated into any JavaScript/TypeScript project | [@cc-format/core](https://www.npmjs.com/package/@cc-format/core) |
+| **[cc-format](packages/cli/)** | Command-line interface tool for terminal usage, CI/CD pipelines, and pre-commit hooks | [cc-format](https://www.npmjs.com/package/cc-format) |
+| **[clion-cmake-format](packages/vscode/)** | VS Code extension providing seamless editor integration with format-on-save support | [Marketplace](https://marketplace.visualstudio.com/items?itemName=wysaid.clion-cmake-format) |
+
+All three packages share the same core formatting engine, ensuring **consistent results** across different environments. Whether you format files in your editor, via command line, or programmatically in your own tools, the output is identical.
 
 ## ✨ Why This Extension?
 

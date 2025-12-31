@@ -11,10 +11,23 @@
 提供多种使用方式：
 - 🔌 **VS Code 扩展** — [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=wysaid.clion-cmake-format)
 - 💻 **命令行工具** — [npm 包](https://www.npmjs.com/package/cc-format)
+- 📦 **核心库** — [@cc-format/core](https://www.npmjs.com/package/@cc-format/core) 供开发者使用
 
 > **为什么选择这个格式化工具？** 精准、可配置、零麻烦。如果您重视简洁、可维护的 CMake 脚本，这就是您的选择。
 
 [English](README.md) | 简体中文
+
+## 📦 Monorepo 架构
+
+本项目采用 **monorepo** 架构组织，包含三个协同工作的包，提供全方位的 CMake 格式化解决方案：
+
+| 包 | 说明 | npm 包 |
+|---------|-------------|-------------|
+| **[@cc-format/core](packages/core/)** | 核心格式化引擎，零依赖。纯 TypeScript 解析器和格式化器，可集成到任何 JavaScript/TypeScript 项目中 | [@cc-format/core](https://www.npmjs.com/package/@cc-format/core) |
+| **[cc-format](packages/cli/)** | 命令行接口工具，用于终端使用、CI/CD 流水线和 pre-commit 钩子 | [cc-format](https://www.npmjs.com/package/cc-format) |
+| **[clion-cmake-format](packages/vscode/)** | VS Code 扩展，提供无缝编辑器集成，支持保存时自动格式化 | [Marketplace](https://marketplace.visualstudio.com/items?itemName=wysaid.clion-cmake-format) |
+
+三个包共享相同的核心格式化引擎，确保在不同环境中**结果一致**。无论您在编辑器中、通过命令行还是在自己的工具中以编程方式格式化文件，输出都是相同的。
 
 ## ✨ 为什么选择这个扩展？
 

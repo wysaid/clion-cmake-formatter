@@ -6,6 +6,8 @@
 
 CLion CMake Format is a VS Code extension that provides professional CMake code formatting based on JetBrains CLion's built-in formatting style. This extension is part of the **CLion CMake Format** project, which offers consistent CMake formatting across different development tools and environments.
 
+This extension uses the same core formatting engine ([@cc-format/core](https://www.npmjs.com/package/@cc-format/core)) as the CLI tool, ensuring **consistent formatting results** whether you format files in your editor or via command line.
+
 ### Why Use This Extension?
 
 - **⚡ Zero Dependencies** - Pure TypeScript implementation, no external tools required
@@ -88,11 +90,13 @@ You can also configure the formatter in VS Code settings (`.vscode/settings.json
 }
 ```
 
-Priority (highest to lowest):
-1. VS Code user settings
-2. Workspace settings
-3. Project config (`.cc-format.jsonc`)
+Configuration priority (highest to lowest):
+1. Project config (`.cc-format.jsonc` in workspace root)
+2. VS Code workspace settings (`.vscode/settings.json`)
+3. VS Code user settings
 4. Default options
+
+**Note:** Project-level `.cc-format.jsonc` files take precedence over VS Code settings to ensure team-wide consistency. To disable this behavior, set `"clionCMakeFormatter.enableProjectConfig": false`.
 
 ## Keyboard Shortcuts
 
@@ -148,18 +152,40 @@ target_link_libraries(myapp PRIVATE pthread)
 1. Check that the file is recognized as CMake (should show `cmake` in the bottom right)
 2. Verify VS Code has a formatter registered for CMake files
 3. Check the extension output panel for error messages
+4. Ensure the file extension is `.cmake` or the filename is `CMakeLists.txt`
 
 ### Configuration not being applied
 
-1. Ensure `.cc-format.jsonc` is in the project root (where you opened the folder in VS Code)
+1. Ensure `.cc-format.jsonc` is in the workspace root (where you opened the folder in VS Code)
 2. Check that `clionCMakeFormatter.enableProjectConfig` is `true` in settings
-3. Reload VS Code to refresh the configuration
+3. Reload VS Code (`Ctrl+Shift+P` → "Reload Window") to refresh the configuration
+4. Check for syntax errors in your `.cc-format.jsonc` file
+
+### Format on Save not working
+
+1. Verify `editor.formatOnSave` is `true` for CMake files:
+   ```json
+   {
+     "[cmake]": {
+       "editor.formatOnSave": true,
+       "editor.defaultFormatter": "wysaid.clion-cmake-format"
+     }
+   }
+   ```
+2. Check that no other CMake formatter extension is conflicting
+3. Try manually formatting (`Shift+Alt+F`) to verify the extension is working
+
+## Related Packages
+
+- **[@cc-format/core](https://www.npmjs.com/package/@cc-format/core)** — Core formatting engine for integration into your own tools
+- **[cc-format](https://www.npmjs.com/package/cc-format)** — Command-line interface for CI/CD and terminal usage
 
 ## Related Links
 
 - [GitHub Repository](https://github.com/wysaid/clion-cmake-format)
 - [Project Documentation](https://github.com/wysaid/clion-cmake-format/blob/main/README.md)
 - [Issue Tracker](https://github.com/wysaid/clion-cmake-format/issues)
+- [Discussions](https://github.com/wysaid/clion-cmake-format/discussions)
 
 ## License
 

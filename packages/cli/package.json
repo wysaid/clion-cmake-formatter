@@ -1,7 +1,7 @@
 {
     "name": "cc-format",
     "version": "1.4.0",
-    "description": "CMake formatter with CLion-compatible style - Command line tool",
+    "description": "Professional CMake formatter with CLion-compatible style - Fast, zero-dependency command line tool for CMakeLists.txt formatting",
     "main": "./dist/cli.js",
     "bin": {
         "cc-format": "./dist/cli.js"
@@ -19,11 +19,24 @@
     },
     "keywords": [
         "cmake",
+        "CMakeLists.txt",
         "formatter",
+        "formatting",
         "clion",
-        "cli",
-        "command-line",
-        "cmake-format"
+        "jetbrains",
+        "beautify",
+        "indent",
+        "indentation",
+        "code-style",
+        "cmake format",
+        "format cmake",
+        "cmake formatter",
+        "cmake beautifier",
+        "cmake-format",
+        "ccformat",
+        "cc-format",
+        "clion-cmake-format",
+        "gersemi"
     ],
     "files": [
         "dist/**/*.js",

@@ -2,13 +2,13 @@
 #
 # Publishing Rules:
 # 1. v?X.Y.Z: Stable release → Publish VS Code + CLI + Core to respective platforms, create GitHub Release
-# 2. v?X.Y.Z-<suffix>: Pre-release → Pre-publish VS Code + CLI + Core to respective platforms, create GitHub Release  
+# 2. v?X.Y.Z-<suffix>: Pre-release → Pre-publish VS Code + CLI + Core to respective platforms, create GitHub Release
 # 3. Manual trigger: Dry-run mode → Build, test, archive VSIX (no publishing)
 # 4. cli.X.Y.Z: CLI dry-run → Build, test, archive VSIX (no publishing)
 # 5. core.X.Y.Z: Core dry-run → Build, test, archive VSIX (no publishing)
 # 6. vsc.X.Y.Z: VS Code dry-run → Build, test, archive VSIX (no publishing)
 #
-# Note: 
+# Note:
 # - Master branch pushes trigger dry-run mode (archive only, 30 days retention)
 # - npm publishing requires NPM_STORE_TOKEN secret; if not configured, npm steps are skipped
 # - Package-specific tags (cli.*, core.*, vsc.*) only archive to Actions (90 days retention)
@@ -173,7 +173,7 @@ jobs:
       if: steps.validate_tag.outputs.should_publish == 'true' || steps.validate_tag.outputs.is_cli_tag == 'true' || steps.validate_tag.outputs.is_core_tag == 'true'
       run: |
         TAG="${{ steps.trigger_type.outputs.tag }}"
-        
+
         # Handle package-specific tags (cli.X.Y.Z, core.X.Y.Z, vsc.X.Y.Z)
         if echo "$TAG" | grep -qE '^(cli|core|vsc)\.[0-9]'; then
           # Extract version from package tag (e.g., cli.1.4.1 -> 1.4.1)
@@ -184,7 +184,7 @@ jobs:
           TAG_WITHOUT_V="${TAG#v}"
           VERSION=$(echo "$TAG_WITHOUT_V" | grep -oE '^[0-9]+\.[0-9]+\.[0-9]+')
         fi
-        
+
         echo "version=$VERSION" >> $GITHUB_OUTPUT
         echo "Extracted version: $VERSION"
 
@@ -206,7 +206,7 @@ jobs:
       if: (steps.validate_tag.outputs.should_publish == 'true' || steps.validate_tag.outputs.is_cli_tag == 'true' || steps.validate_tag.outputs.is_core_tag == 'true') && steps.trigger_type.outputs.is_tag == 'true'
       run: |
         TAG_VERSION="${{ steps.extract_version.outputs.version }}"
-        
+
         # Determine which package.json to check based on tag type
         if [ "${{ steps.validate_tag.outputs.is_cli_tag }}" == "true" ]; then
           PACKAGE_JSON="packages/cli/package.json"
@@ -218,7 +218,7 @@ jobs:
           PACKAGE_JSON="packages/vscode/package.json"
           PACKAGE_NAME="VS Code Extension"
         fi
-        
+
         PACKAGE_VERSION=$(node -p "require('./${PACKAGE_JSON}').version")
 
         echo "Tag version: $TAG_VERSION"
@@ -241,7 +241,7 @@ jobs:
       run: npm run test:unit
 
     - name: Build VSIX
-      run: npm run package
+      run: npm run package:vscode
 
     - name: Check if version exists in VS Code Marketplace
       id: check_marketplace
@@ -362,7 +362,7 @@ jobs:
       run: |
         # Configure npm to use the token
         echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
-        
+
         if [ "${{ steps.validate_tag.outputs.is_stable_release }}" == "true" ]; then
           echo "Publishing @cc-format/core as stable release..."
           npm publish --access public
@@ -370,7 +370,7 @@ jobs:
           echo "Publishing @cc-format/core as pre-release (next tag)..."
           npm publish --access public --tag next
         fi
-        
+
         echo "✓ @cc-format/core published successfully"
 
     - name: Publish CLI package to npm
@@ -381,7 +381,7 @@ jobs:
       run: |
         # Configure npm to use the token
         echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
-        
+
         if [ "${{ steps.validate_tag.outputs.is_stable_release }}" == "true" ]; then
           echo "Publishing cc-format as stable release..."
           npm publish --access public
@@ -389,7 +389,7 @@ jobs:
           echo "Publishing cc-format as pre-release (next tag)..."
           npm publish --access public --tag next
         fi
-        
+
         echo "✓ cc-format published successfully"
 
     - name: Skip npm publish (token not configured)

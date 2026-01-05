@@ -322,7 +322,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: clion-cmake-format-${{ steps.trigger_type.outputs.tag }}
-        path: "*.vsix"
+        path: "packages/vscode/*.vsix"
         retention-days: 30
 
     - name: Upload VSIX as artifact (CLI/Core tags)
@@ -330,7 +330,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: clion-cmake-format-${{ steps.trigger_type.outputs.tag }}
-        path: "*.vsix"
+        path: "packages/vscode/*.vsix"
         retention-days: 90
 
     - name: Upload VSIX as artifact (vsc.X.Y.Z tags - dry-run)
@@ -338,7 +338,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: clion-cmake-format-${{ steps.trigger_type.outputs.tag }}
-        path: "*.vsix"
+        path: "packages/vscode/*.vsix"
         retention-days: 90
 
     # Publish to npm (Core and CLI packages)
@@ -498,6 +498,6 @@ jobs:
       if: steps.validate_tag.outputs.should_publish == 'true' && steps.validate_tag.outputs.is_vscode_tag == 'true' && steps.trigger_type.outputs.is_dry_run == 'false'
       uses: softprops/action-gh-release@v2
       with:
-        files: "*.vsix"
+        files: "packages/vscode/*.vsix"
         body_path: release_notes.md
         prerelease: ${{ steps.validate_tag.outputs.is_prerelease }}

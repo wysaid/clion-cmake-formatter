@@ -241,6 +241,7 @@ select_release_type
 publish_package() {
     local target="$1"
     local SKIP_PUBLISH=false
+    local SKIP_TAG=false
 
     info "════════════════════════════════════════════════════════"
     info "Starting publish process for: ${target}"
@@ -450,11 +451,15 @@ publish_package() {
     if [ "$DRY_RUN" = false ]; then
         info "Checking if tag ${TAG_NAME} already exists on remote..."
         if git ls-remote --tags origin | grep -q "refs/tags/${TAG_NAME}$"; then
-            error "Tag ${TAG_NAME} already exists on remote"
-            error "Please update the version in ${PACKAGE_JSON} before publishing"
-
-            if [ "$FORCE_MODE" = true ]; then
-                if ask_yes_no "${YELLOW}[FORCE MODE]${NC} Tag exists. Delete remote tag and continue?"; then
+            warning "Tag ${TAG_NAME} already exists on remote"
+            
+            # Ask user if they want to skip tag creation
+            if ask_yes_no "Skip tag creation and continue with publishing?"; then
+                info "Skipping tag creation (tag already exists)"
+                SKIP_TAG=true
+            elif [ "$FORCE_MODE" = true ]; then
+                # Force mode: ask if user wants to delete and recreate
+                if ask_yes_no "${YELLOW}[FORCE MODE]${NC} Delete remote tag and continue?"; then
                     warning "Deleting remote tag ${TAG_NAME}..."
                     git push origin ":refs/tags/${TAG_NAME}" || true
                     git tag -d "${TAG_NAME}" 2>/dev/null || true
@@ -463,6 +468,8 @@ publish_package() {
                     return 1
                 fi
             else
+                error "Please update the version in ${PACKAGE_JSON} before publishing"
+                error "Or use -f/--force flag to delete the existing tag"
                 return 1
             fi
         else
@@ -710,18 +717,22 @@ publish_package() {
 
     # Step 7: Create and push tag (only if not dry run)
     if [ "$DRY_RUN" = false ]; then
-        info "Creating tag ${TAG_NAME}..."
-        git tag -a "${TAG_NAME}" -m "Release ${PACKAGE_NAME} version ${VERSION}$([ "$PRE_RELEASE" = "yes" ] && echo " (pre-release)" || echo "")"
-        success "Tag ${TAG_NAME} created"
-
-        if ask_yes_no "Push tag ${TAG_NAME} to remote?"; then
-            info "Pushing tag to remote..."
-            git push origin "${TAG_NAME}"
-            success "Tag pushed to remote"
+        if [ "$SKIP_TAG" = true ]; then
+            info "Skipping tag creation (tag already exists on remote)"
         else
-            warning "Tag not pushed to remote"
-            warning "You can push it later with: git push origin ${TAG_NAME}"
-            warning "Or delete it with: git tag -d ${TAG_NAME}"
+            info "Creating tag ${TAG_NAME}..."
+            git tag -a "${TAG_NAME}" -m "Release ${PACKAGE_NAME} version ${VERSION}$([ "$PRE_RELEASE" = "yes" ] && echo " (pre-release)" || echo "")"
+            success "Tag ${TAG_NAME} created"
+
+            if ask_yes_no "Push tag ${TAG_NAME} to remote?"; then
+                info "Pushing tag to remote..."
+                git push origin "${TAG_NAME}"
+                success "Tag pushed to remote"
+            else
+                warning "Tag not pushed to remote"
+                warning "You can push it later with: git push origin ${TAG_NAME}"
+                warning "Or delete it with: git tag -d ${TAG_NAME}"
+            fi
         fi
     else
         info "[DRY-RUN] Would create tag: ${TAG_NAME}"

@@ -346,6 +346,15 @@ publish_package() {
             if [ "$VERSION" = "$PUBLISHED_VERSION" ] && [ "$PRE_RELEASE" = "no" ]; then
                 # Skip version check in dry-run mode
                 if [ "$DRY_RUN" = false ]; then
+                    warning "Current version (${VERSION}) is already published on npm"
+                    
+                    # Ask user if they want to skip publishing and continue
+                    if ask_yes_no "Skip publishing ${PACKAGE_NAME} and continue with remaining steps?"; then
+                        info "Skipping ${target} package publication"
+                        return 0
+                    fi
+                    
+                    # User chose not to skip, show error
                     error "Current version (${VERSION}) is the same as published version (${PUBLISHED_VERSION})"
                     error "Please update the version in ${PACKAGE_JSON} before publishing"
                     error "You can use: ./scripts/bump-version.sh <new-version>"

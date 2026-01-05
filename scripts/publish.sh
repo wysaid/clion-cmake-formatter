@@ -697,21 +697,34 @@ publish_package() {
             info "[DRY-RUN] Would run: npm run package:vscode"
         fi
 
-        # Determine publish command
-        VSCE_COMMAND="vsce publish"
-        if [ "$PRE_RELEASE" = "yes" ]; then
-            VSCE_COMMAND="vsce publish --pre-release"
-            info "Publishing as pre-release version"
-        fi
-
+        # Find the generated .vsix file
+        VSIX_FILE=$(ls -t "${PACKAGE_DIR}"/*.vsix 2>/dev/null | head -1)
+        
         if [ "$DRY_RUN" = false ]; then
-            cd "$PACKAGE_DIR"
-            info "Running: ${VSCE_COMMAND}"
-            ${VSCE_COMMAND}
-            cd ../..
+            if [ -z "$VSIX_FILE" ]; then
+                error "No .vsix file found in ${PACKAGE_DIR}"
+                error "Package creation may have failed"
+                return 1
+            fi
+            
+            info "Found VSIX file: $(basename "$VSIX_FILE")"
+            
+            # Determine publish command - publish the .vsix file directly
+            if [ "$PRE_RELEASE" = "yes" ]; then
+                info "Publishing as pre-release version"
+                info "Running: vsce publish --pre-release --packagePath \"$VSIX_FILE\""
+                vsce publish --pre-release --packagePath "$VSIX_FILE"
+            else
+                info "Running: vsce publish --packagePath \"$VSIX_FILE\""
+                vsce publish --packagePath "$VSIX_FILE"
+            fi
             success "Extension published successfully!"
         else
-            info "[DRY-RUN] Would run: cd ${PACKAGE_DIR} && ${VSCE_COMMAND}"
+            if [ "$PRE_RELEASE" = "yes" ]; then
+                info "[DRY-RUN] Would run: vsce publish --pre-release --packagePath <vsix-file>"
+            else
+                info "[DRY-RUN] Would run: vsce publish --packagePath <vsix-file>"
+            fi
         fi
     fi
 

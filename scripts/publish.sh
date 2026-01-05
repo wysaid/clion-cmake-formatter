@@ -345,32 +345,27 @@ publish_package() {
 
             # Compare versions
             if [ "$VERSION" = "$PUBLISHED_VERSION" ] && [ "$PRE_RELEASE" = "no" ]; then
-                # Skip version check in dry-run mode
-                if [ "$DRY_RUN" = false ]; then
-                    warning "Current version (${VERSION}) is already published on npm"
-                    
-                    # Ask user if they want to skip publishing and continue
-                    if ask_yes_no "Skip publishing ${PACKAGE_NAME} and continue with remaining steps?"; then
-                        info "Skipping ${target} package publication"
-                        SKIP_PUBLISH=true
-                    else
-                        # User chose not to skip, show error
-                        error "Current version (${VERSION}) is the same as published version (${PUBLISHED_VERSION})"
-                        error "Please update the version in ${PACKAGE_JSON} before publishing"
-                        error "You can use: ./scripts/bump-version.sh <new-version>"
+                warning "Current version (${VERSION}) is already published on npm"
+                
+                # Ask user if they want to skip publishing and continue
+                if ask_yes_no "Skip publishing ${PACKAGE_NAME} and continue with remaining steps?"; then
+                    info "Skipping ${target} package publication"
+                    SKIP_PUBLISH=true
+                elif [ "$DRY_RUN" = false ]; then
+                    # User chose not to skip (only enforce in non-dry-run mode)
+                    error "Current version (${VERSION}) is the same as published version (${PUBLISHED_VERSION})"
+                    error "Please update the version in ${PACKAGE_JSON} before publishing"
+                    error "You can use: ./scripts/bump-version.sh <new-version>"
 
-                        if [ "$FORCE_MODE" = true ]; then
-                            if ask_yes_no "${YELLOW}[FORCE MODE]${NC} Ignore version check and continue?"; then
-                                warning "Continuing despite version mismatch"
-                            else
-                                return 1
-                            fi
+                    if [ "$FORCE_MODE" = true ]; then
+                        if ask_yes_no "${YELLOW}[FORCE MODE]${NC} Ignore version check and continue?"; then
+                            warning "Continuing despite version mismatch"
                         else
                             return 1
                         fi
+                    else
+                        return 1
                     fi
-                else
-                    warning "[DRY-RUN] Version check skipped: Current version (${VERSION}) matches published version"
                 fi
             fi
         fi

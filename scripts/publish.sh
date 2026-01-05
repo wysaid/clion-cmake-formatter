@@ -820,6 +820,60 @@ if [ "$PUBLISH_ALL" = true ]; then
 
     echo ""
     success "All packages published successfully!"
+    
+    # Create unified version tag (v{X}.{Y}.{Z}) after all packages are published
+    if [ "$DRY_RUN" = false ]; then
+        # Get version from root package.json
+        ROOT_VERSION=$(get_version "package.json")
+        VERSION_TAG="v${ROOT_VERSION}"
+        
+        echo ""
+        info "════════════════════════════════════════════════════════"
+        info "All packages have been published successfully!"
+        info "Version: ${ROOT_VERSION}"
+        info "════════════════════════════════════════════════════════"
+        echo ""
+        
+        # Check if version tag already exists
+        if git ls-remote --tags origin | grep -q "refs/tags/${VERSION_TAG}$"; then
+            warning "Version tag ${VERSION_TAG} already exists on remote"
+            if ask_yes_no "Delete and recreate version tag ${VERSION_TAG}?"; then
+                info "Deleting remote tag ${VERSION_TAG}..."
+                git push origin ":refs/tags/${VERSION_TAG}" || true
+                git tag -d "${VERSION_TAG}" 2>/dev/null || true
+                success "Remote tag deleted"
+            else
+                info "Skipping version tag creation"
+                exit 0
+            fi
+        fi
+        
+        # Ask user if they want to create the version tag
+        if ask_yes_no "Create unified version tag ${VERSION_TAG} for this release?"; then
+            info "Creating version tag ${VERSION_TAG}..."
+            git tag -a "${VERSION_TAG}" -m "Release version ${ROOT_VERSION}
+
+Published packages:
+- @cc-format/core@${ROOT_VERSION}
+- cc-format@${ROOT_VERSION}
+- clion-cmake-format@${ROOT_VERSION}"
+            success "Tag ${VERSION_TAG} created"
+            
+            if ask_yes_no "Push version tag ${VERSION_TAG} to remote?"; then
+                info "Pushing version tag to remote..."
+                git push origin "${VERSION_TAG}"
+                success "Version tag pushed to remote"
+                echo ""
+                success "Release ${ROOT_VERSION} is now complete!"
+            else
+                warning "Version tag not pushed to remote"
+                warning "You can push it later with: git push origin ${VERSION_TAG}"
+            fi
+        else
+            info "Version tag not created"
+        fi
+    fi
+    
     exit 0
 else
     # Publish single package

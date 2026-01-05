@@ -1,14 +1,24 @@
-# Release workflow for publishing to VS Code Marketplace and creating GitHub Releases
+# Release workflow for publishing to VS Code Marketplace, npm, and creating GitHub Releases
 #
-# Triggers:
-# - Tag push v?X.Y.Z: Stable release - publish to Marketplace as stable, create GitHub Release
-# - Tag push v?X.Y.Z-<suffix>: Pre-release - publish to Marketplace as pre-release, create GitHub Release
-# - Manual trigger (workflow_dispatch): Dry-run mode - build, test, upload VSIX artifact (no publishing)
-# - Master push: Dry-run mode - build, test, upload VSIX artifact (no publishing)
+# Publishing Rules:
+# 1. v?X.Y.Z: Stable release → Publish VS Code + CLI + Core to respective platforms, create GitHub Release
+# 2. v?X.Y.Z-<suffix>: Pre-release → Pre-publish VS Code + CLI + Core to respective platforms, create GitHub Release  
+# 3. Manual trigger: Dry-run mode → Build, test, archive VSIX (no publishing)
+# 4. cli.X.Y.Z: CLI dry-run → Build, test, archive VSIX (no publishing)
+# 5. core.X.Y.Z: Core dry-run → Build, test, archive VSIX (no publishing)
+# 6. vsc.X.Y.Z: VS Code dry-run → Build, test, archive VSIX (no publishing)
 #
-# Note: Master branch pushes will trigger both CI and Release workflows intentionally.
-# The Release workflow's dry-run mode validates the release pipeline and produces
-# downloadable VSIX artifacts with longer retention (30 days vs 7 days).
+# Note: 
+# - Master branch pushes trigger dry-run mode (archive only, 30 days retention)
+# - npm publishing requires NPM_STORE_TOKEN secret; if not configured, npm steps are skipped
+# - Package-specific tags (cli.*, core.*, vsc.*) only archive to Actions (90 days retention)
+#
+# Tag format examples:
+# - v1.4.1, 1.4.1 → Publish VS Code + npm (stable)
+# - v1.4.1-alpha, v1.4.1-rc → Publish VS Code + npm (pre-release)
+# - cli.1.4.1 → Archive only (dry-run)
+# - core.1.4.1 → Archive only (dry-run)
+# - vsc.1.4.1 → Archive only (dry-run)
 name: Release
 
 on:
@@ -72,65 +82,109 @@ jobs:
         IS_DRY_RUN="${{ steps.trigger_type.outputs.is_dry_run }}"
         IS_MANUAL="${{ steps.trigger_type.outputs.is_manual }}"
 
-        # Remove 'v' prefix if present for pattern matching
-        TAG_WITHOUT_V="${TAG#v}"
+        # Initialize outputs
+        echo "is_stable_release=false" >> $GITHUB_OUTPUT
+        echo "is_prerelease=false" >> $GITHUB_OUTPUT
+        echo "should_publish=false" >> $GITHUB_OUTPUT
+        echo "should_publish_npm=false" >> $GITHUB_OUTPUT
+        echo "is_cli_tag=false" >> $GITHUB_OUTPUT
+        echo "is_core_tag=false" >> $GITHUB_OUTPUT
+        echo "is_vscode_tag=false" >> $GITHUB_OUTPUT
 
-        # Check if tag matches stable release pattern (e.g., v1.0.3, 1.0.3)
-        if echo "$TAG_WITHOUT_V" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
-          echo "is_stable_release=true" >> $GITHUB_OUTPUT
-          echo "is_prerelease=false" >> $GITHUB_OUTPUT
-
-          # Manual triggers never publish
-          if [ "$IS_MANUAL" == "true" ]; then
-            echo "should_publish=false" >> $GITHUB_OUTPUT
-            echo "Manual trigger: Tag matches stable release pattern but will NOT publish (dry-run): $TAG"
-          elif [ "$IS_DRY_RUN" == "true" ]; then
-            echo "should_publish=false" >> $GITHUB_OUTPUT
-            echo "Dry-run: Tag matches stable release pattern: $TAG"
+        # Check for package-specific tags (cli.X.Y.Z, core.X.Y.Z, vsc.X.Y.Z)
+        if echo "$TAG" | grep -qE '^cli\.[0-9]+\.[0-9]+\.[0-9]+(-.*)?$'; then
+          echo "is_cli_tag=true" >> $GITHUB_OUTPUT
+          echo "CLI package tag detected: $TAG"
+          echo "Will build and archive CLI package + VSIX (no marketplace publish)"
+          # CLI tags never publish to marketplace, just archive
+        elif echo "$TAG" | grep -qE '^core\.[0-9]+\.[0-9]+\.[0-9]+(-.*)?$'; then
+          echo "is_core_tag=true" >> $GITHUB_OUTPUT
+          echo "Core package tag detected: $TAG"
+          echo "Will build and archive VSIX (no marketplace publish)"
+          # Core tags never publish to marketplace, just archive
+        elif echo "$TAG" | grep -qE '^vsc\.[0-9]+\.[0-9]+\.[0-9]+(-.*)?$'; then
+          echo "is_vscode_tag=true" >> $GITHUB_OUTPUT
+          # vsc.X.Y.Z tags are always dry-run (archive only, no publish)
+          echo "should_publish=false" >> $GITHUB_OUTPUT
+          echo "VS Code extension tag detected (dry-run): $TAG"
+          echo "Will build and archive VSIX (no marketplace publish)"
+          # Check if it's a pre-release for metadata purposes
+          if echo "$TAG" | grep -qE '^vsc\.[0-9]+\.[0-9]+\.[0-9]+-.+$'; then
+            echo "is_prerelease=true" >> $GITHUB_OUTPUT
           else
-            echo "should_publish=true" >> $GITHUB_OUTPUT
-            echo "Tag matches stable release pattern, will publish: $TAG"
-          fi
-        # Check if tag matches pre-release pattern (e.g., v1.0.3-alpha, 1.0.3-beta, 1.0.3-rc.1)
-        elif echo "$TAG_WITHOUT_V" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+-.+$'; then
-          echo "is_stable_release=false" >> $GITHUB_OUTPUT
-          echo "is_prerelease=true" >> $GITHUB_OUTPUT
-
-          # Manual triggers never publish
-          if [ "$IS_MANUAL" == "true" ]; then
-            echo "should_publish=false" >> $GITHUB_OUTPUT
-            echo "Manual trigger: Tag matches pre-release pattern but will NOT publish (dry-run): $TAG"
-          elif [ "$IS_DRY_RUN" == "true" ]; then
-            echo "should_publish=false" >> $GITHUB_OUTPUT
-            echo "Dry-run: Tag matches pre-release pattern: $TAG"
-          else
-            echo "should_publish=true" >> $GITHUB_OUTPUT
-            echo "Tag matches pre-release pattern, will publish: $TAG"
+            echo "is_stable_release=true" >> $GITHUB_OUTPUT
           fi
         else
-          echo "is_stable_release=false" >> $GITHUB_OUTPUT
-          echo "is_prerelease=false" >> $GITHUB_OUTPUT
-          echo "should_publish=false" >> $GITHUB_OUTPUT
+          # Remove 'v' prefix for legacy pattern matching
+          TAG_WITHOUT_V="${TAG#v}"
 
-          if [ "$IS_MANUAL" == "true" ]; then
-            echo "Manual trigger: Tag does not match release patterns (dry-run): $TAG"
-          elif [ "$IS_DRY_RUN" == "true" ]; then
-            echo "Dry-run: Tag does not match release patterns: $TAG"
+          # Check if tag matches stable release pattern (e.g., v1.0.3, 1.0.3)
+          if echo "$TAG_WITHOUT_V" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "is_stable_release=true" >> $GITHUB_OUTPUT
+            echo "is_vscode_tag=true" >> $GITHUB_OUTPUT
+
+            # Manual triggers never publish
+            if [ "$IS_MANUAL" == "true" ]; then
+              echo "should_publish=false" >> $GITHUB_OUTPUT
+              echo "should_publish_npm=false" >> $GITHUB_OUTPUT
+              echo "Manual trigger: Tag matches stable release pattern but will NOT publish (dry-run): $TAG"
+            elif [ "$IS_DRY_RUN" == "true" ]; then
+              echo "should_publish=false" >> $GITHUB_OUTPUT
+              echo "should_publish_npm=false" >> $GITHUB_OUTPUT
+              echo "Dry-run: Tag matches stable release pattern: $TAG"
+            else
+              echo "should_publish=true" >> $GITHUB_OUTPUT
+              echo "should_publish_npm=true" >> $GITHUB_OUTPUT
+              echo "Tag matches stable release pattern, will publish to VS Code Marketplace and npm: $TAG"
+            fi
+          # Check if tag matches pre-release pattern (e.g., v1.0.3-alpha, 1.0.3-beta, 1.0.3-rc.1)
+          elif echo "$TAG_WITHOUT_V" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+-.+$'; then
+            echo "is_prerelease=true" >> $GITHUB_OUTPUT
+            echo "is_vscode_tag=true" >> $GITHUB_OUTPUT
+
+            # Manual triggers never publish
+            if [ "$IS_MANUAL" == "true" ]; then
+              echo "should_publish=false" >> $GITHUB_OUTPUT
+              echo "should_publish_npm=false" >> $GITHUB_OUTPUT
+              echo "Manual trigger: Tag matches pre-release pattern but will NOT publish (dry-run): $TAG"
+            elif [ "$IS_DRY_RUN" == "true" ]; then
+              echo "should_publish=false" >> $GITHUB_OUTPUT
+              echo "should_publish_npm=false" >> $GITHUB_OUTPUT
+              echo "Dry-run: Tag matches pre-release pattern: $TAG"
+            else
+              echo "should_publish=true" >> $GITHUB_OUTPUT
+              echo "should_publish_npm=true" >> $GITHUB_OUTPUT
+              echo "Tag matches pre-release pattern, will publish to VS Code Marketplace and npm: $TAG"
+            fi
           else
-            echo "Tag does not match release patterns, will NOT publish: $TAG"
+            if [ "$IS_MANUAL" == "true" ]; then
+              echo "Manual trigger: Tag does not match release patterns (dry-run): $TAG"
+            elif [ "$IS_DRY_RUN" == "true" ]; then
+              echo "Dry-run: Tag does not match release patterns: $TAG"
+            else
+              echo "Tag does not match release patterns, will NOT publish: $TAG"
+            fi
+            echo "Will only run build and test."
           fi
-          echo "Will only run build and test."
         fi
 
     - name: Extract version from tag
       id: extract_version
-      if: steps.validate_tag.outputs.should_publish == 'true'
+      if: steps.validate_tag.outputs.should_publish == 'true' || steps.validate_tag.outputs.is_cli_tag == 'true' || steps.validate_tag.outputs.is_core_tag == 'true'
       run: |
         TAG="${{ steps.trigger_type.outputs.tag }}"
-        # Remove 'v' prefix if present, then extract the version number
-        # (e.g., 1.0.3 from v1.0.3, 1.0.3, v1.0.3-alpha, or 1.0.3-alpha)
-        TAG_WITHOUT_V="${TAG#v}"
-        VERSION=$(echo "$TAG_WITHOUT_V" | grep -oE '^[0-9]+\.[0-9]+\.[0-9]+')
+        
+        # Handle package-specific tags (cli.X.Y.Z, core.X.Y.Z, vsc.X.Y.Z)
+        if echo "$TAG" | grep -qE '^(cli|core|vsc)\.[0-9]'; then
+          # Extract version from package tag (e.g., cli.1.4.1 -> 1.4.1)
+          VERSION=$(echo "$TAG" | sed 's/^[^.]*\.//' | grep -oE '^[0-9]+\.[0-9]+\.[0-9]+')
+        else
+          # Remove 'v' prefix if present, then extract the version number
+          # (e.g., 1.0.3 from v1.0.3, 1.0.3, v1.0.3-alpha, or 1.0.3-alpha)
+          TAG_WITHOUT_V="${TAG#v}"
+          VERSION=$(echo "$TAG_WITHOUT_V" | grep -oE '^[0-9]+\.[0-9]+\.[0-9]+')
+        fi
+        
         echo "version=$VERSION" >> $GITHUB_OUTPUT
         echo "Extracted version: $VERSION"
 
@@ -145,17 +199,33 @@ jobs:
 
     # Version validation: Tag base version (e.g., 1.0.3 from 1.0.3-alpha) must match package.json version
     # This applies to both stable releases and pre-releases
+    # For VS Code extension tags, check vscode package.json
+    # For CLI tags, check cli package.json
+    # For core tags, check core package.json
     - name: Check version consistency with package.json
-      if: steps.validate_tag.outputs.should_publish == 'true' && steps.trigger_type.outputs.is_tag == 'true'
+      if: (steps.validate_tag.outputs.should_publish == 'true' || steps.validate_tag.outputs.is_cli_tag == 'true' || steps.validate_tag.outputs.is_core_tag == 'true') && steps.trigger_type.outputs.is_tag == 'true'
       run: |
         TAG_VERSION="${{ steps.extract_version.outputs.version }}"
-        PACKAGE_VERSION=$(node -p "require('./package.json').version")
+        
+        # Determine which package.json to check based on tag type
+        if [ "${{ steps.validate_tag.outputs.is_cli_tag }}" == "true" ]; then
+          PACKAGE_JSON="packages/cli/package.json"
+          PACKAGE_NAME="CLI"
+        elif [ "${{ steps.validate_tag.outputs.is_core_tag }}" == "true" ]; then
+          PACKAGE_JSON="packages/core/package.json"
+          PACKAGE_NAME="Core"
+        else
+          PACKAGE_JSON="packages/vscode/package.json"
+          PACKAGE_NAME="VS Code Extension"
+        fi
+        
+        PACKAGE_VERSION=$(node -p "require('./${PACKAGE_JSON}').version")
 
         echo "Tag version: $TAG_VERSION"
-        echo "package.json version: $PACKAGE_VERSION"
+        echo "${PACKAGE_NAME} package.json version: $PACKAGE_VERSION"
 
         if [ "$TAG_VERSION" != "$PACKAGE_VERSION" ]; then
-          echo "Error: Tag version ($TAG_VERSION) does not match package.json version ($PACKAGE_VERSION)"
+          echo "Error: Tag version ($TAG_VERSION) does not match ${PACKAGE_NAME} package.json version ($PACKAGE_VERSION)"
           exit 1
         fi
 
@@ -175,7 +245,7 @@ jobs:
 
     - name: Check if version exists in VS Code Marketplace
       id: check_marketplace
-      if: steps.validate_tag.outputs.should_publish == 'true'
+      if: steps.validate_tag.outputs.should_publish == 'true' && steps.validate_tag.outputs.is_vscode_tag == 'true'
       continue-on-error: true
       run: |
         EXTENSION_ID="wysaid.clion-cmake-format"
@@ -205,13 +275,13 @@ jobs:
         fi
 
     - name: Warn if version exists (dry-run)
-      if: steps.trigger_type.outputs.is_dry_run == 'true' && steps.validate_tag.outputs.should_publish == 'true' && steps.check_marketplace.outputs.exists == 'true'
+      if: steps.trigger_type.outputs.is_dry_run == 'true' && steps.validate_tag.outputs.should_publish == 'true' && steps.validate_tag.outputs.is_vscode_tag == 'true' && steps.check_marketplace.outputs.exists == 'true'
       run: |
         echo "::warning::Version ${{ steps.extract_version.outputs.version }} already exists in VS Code Marketplace. If you create a tag for this version, the marketplace publish will be skipped."
 
     - name: Publish to VS Code Marketplace
       id: publish_marketplace
-      if: steps.validate_tag.outputs.should_publish == 'true' && steps.trigger_type.outputs.is_dry_run == 'false' && steps.check_marketplace.outputs.exists == 'false'
+      if: steps.validate_tag.outputs.should_publish == 'true' && steps.validate_tag.outputs.is_vscode_tag == 'true' && steps.trigger_type.outputs.is_dry_run == 'false' && steps.check_marketplace.outputs.exists == 'false'
       continue-on-error: true
       env:
         VSCE_PAT: ${{ secrets.MS_STORE_TOKEN }}
@@ -229,12 +299,12 @@ jobs:
         exit $EXIT_CODE
 
     - name: Skip publish if version exists
-      if: steps.validate_tag.outputs.should_publish == 'true' && steps.trigger_type.outputs.is_dry_run == 'false' && steps.check_marketplace.outputs.exists == 'true'
+      if: steps.validate_tag.outputs.should_publish == 'true' && steps.validate_tag.outputs.is_vscode_tag == 'true' && steps.trigger_type.outputs.is_dry_run == 'false' && steps.check_marketplace.outputs.exists == 'true'
       run: |
         echo "::warning::Version ${{ steps.extract_version.outputs.version }} already exists in VS Code Marketplace. Skipping marketplace publish."
 
     - name: Check marketplace publish result
-      if: steps.validate_tag.outputs.should_publish == 'true' && steps.trigger_type.outputs.is_dry_run == 'false' && steps.publish_marketplace.outcome != 'skipped'
+      if: steps.validate_tag.outputs.should_publish == 'true' && steps.validate_tag.outputs.is_vscode_tag == 'true' && steps.trigger_type.outputs.is_dry_run == 'false' && steps.publish_marketplace.outcome != 'skipped'
       run: |
         if [ "${{ steps.publish_marketplace.outcome }}" == "failure" ]; then
           echo "::error::Failed to publish to VS Code Marketplace."
@@ -255,9 +325,82 @@ jobs:
         path: "*.vsix"
         retention-days: 30
 
+    - name: Upload VSIX as artifact (CLI/Core tags)
+      if: (steps.validate_tag.outputs.is_cli_tag == 'true' || steps.validate_tag.outputs.is_core_tag == 'true') && steps.trigger_type.outputs.is_dry_run == 'false'
+      uses: actions/upload-artifact@v4
+      with:
+        name: clion-cmake-format-${{ steps.trigger_type.outputs.tag }}
+        path: "*.vsix"
+        retention-days: 90
+
+    - name: Upload VSIX as artifact (vsc.X.Y.Z tags - dry-run)
+      if: steps.validate_tag.outputs.is_vscode_tag == 'true' && steps.validate_tag.outputs.should_publish == 'false' && steps.trigger_type.outputs.is_dry_run == 'false'
+      uses: actions/upload-artifact@v4
+      with:
+        name: clion-cmake-format-${{ steps.trigger_type.outputs.tag }}
+        path: "*.vsix"
+        retention-days: 90
+
+    # Publish to npm (Core and CLI packages)
+    - name: Check NPM token availability
+      id: check_npm_token
+      if: steps.validate_tag.outputs.should_publish_npm == 'true'
+      run: |
+        if [ -n "${{ secrets.NPM_STORE_TOKEN }}" ]; then
+          echo "npm_token_available=true" >> $GITHUB_OUTPUT
+          echo "✓ NPM_STORE_TOKEN is configured"
+        else
+          echo "npm_token_available=false" >> $GITHUB_OUTPUT
+          echo "⚠️ Warning: NPM_STORE_TOKEN is not configured, will skip npm publishing"
+        fi
+
+    - name: Publish Core package to npm
+      if: steps.validate_tag.outputs.should_publish_npm == 'true' && steps.check_npm_token.outputs.npm_token_available == 'true'
+      working-directory: packages/core
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_STORE_TOKEN }}
+      run: |
+        # Configure npm to use the token
+        echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
+        
+        if [ "${{ steps.validate_tag.outputs.is_stable_release }}" == "true" ]; then
+          echo "Publishing @cc-format/core as stable release..."
+          npm publish --access public
+        else
+          echo "Publishing @cc-format/core as pre-release (next tag)..."
+          npm publish --access public --tag next
+        fi
+        
+        echo "✓ @cc-format/core published successfully"
+
+    - name: Publish CLI package to npm
+      if: steps.validate_tag.outputs.should_publish_npm == 'true' && steps.check_npm_token.outputs.npm_token_available == 'true'
+      working-directory: packages/cli
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_STORE_TOKEN }}
+      run: |
+        # Configure npm to use the token
+        echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
+        
+        if [ "${{ steps.validate_tag.outputs.is_stable_release }}" == "true" ]; then
+          echo "Publishing cc-format as stable release..."
+          npm publish --access public
+        else
+          echo "Publishing cc-format as pre-release (next tag)..."
+          npm publish --access public --tag next
+        fi
+        
+        echo "✓ cc-format published successfully"
+
+    - name: Skip npm publish (token not configured)
+      if: steps.validate_tag.outputs.should_publish_npm == 'true' && steps.check_npm_token.outputs.npm_token_available == 'false'
+      run: |
+        echo "::warning::NPM_STORE_TOKEN is not configured. Skipping npm publishing for Core and CLI packages."
+        echo "To enable npm publishing, configure the NPM_STORE_TOKEN secret in repository settings."
+
     # Generate comprehensive release notes including CLI and Core changes
     - name: Generate Release Notes
-      if: steps.validate_tag.outputs.should_publish == 'true' && steps.trigger_type.outputs.is_dry_run == 'false'
+      if: steps.validate_tag.outputs.should_publish == 'true' && steps.validate_tag.outputs.is_vscode_tag == 'true' && steps.trigger_type.outputs.is_dry_run == 'false'
       id: release_notes
       run: |
         VERSION="${{ steps.extract_version.outputs.version }}"
@@ -352,7 +495,7 @@ jobs:
         cat release_notes.md
 
     - name: Create GitHub Release
-      if: steps.validate_tag.outputs.should_publish == 'true' && steps.trigger_type.outputs.is_dry_run == 'false'
+      if: steps.validate_tag.outputs.should_publish == 'true' && steps.validate_tag.outputs.is_vscode_tag == 'true' && steps.trigger_type.outputs.is_dry_run == 'false'
       uses: softprops/action-gh-release@v2
       with:
         files: "*.vsix"

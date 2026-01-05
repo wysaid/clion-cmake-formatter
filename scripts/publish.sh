@@ -655,7 +655,6 @@ publish_package() {
                 fi
             fi
         fi
-        fi
 
     elif [ "$target" = "vscode" ]; then
         # VS Code extension - publish to marketplace

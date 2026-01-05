@@ -53,10 +53,10 @@ For each file in this directory:
 
 ## Implementation
 
-- Test file: `test/well-formated.test.ts`
+- Test file: `test/well-formatted.test.ts`
 - Helper functions: `test/helpers.ts`
-  - `listWellFormatedFiles()` - Recursively scans all `.cmake` files
-  - `loadWellFormatedConfigForFile()` - Loads the style root configuration
+  - `listWellFormattedFiles()` - Recursively scans all `.cmake` files
+  - `loadWellFormattedConfigForFile()` - Loads the style root configuration
 
 ## Note on cmake-official Directory
 

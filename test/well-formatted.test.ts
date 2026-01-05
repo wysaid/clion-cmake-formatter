@@ -10,10 +10,10 @@ import * as os from 'os';
 import { formatCMake } from '@cc-format/core';
 import { parseConfigContent } from '@cc-format/core';
 import {
-    listWellFormatedStyles,
-    listWellFormatedFiles,
-    loadWellFormated,
-    loadWellFormatedConfigForFile
+    listWellFormattedStyles,
+    listWellFormattedFiles,
+    loadWellFormatted,
+    loadWellFormattedConfigForFile
 } from './helpers';
 
 /**
@@ -31,20 +31,20 @@ function normalizeLineEndings(text: string): string {
 }
 
 describe('Well-Formatted CMake Files', () => {
-    const styles = listWellFormatedStyles();
+    const styles = listWellFormattedStyles();
 
     styles.forEach(style => {
         describe(`Style: ${style}`, () => {
-            const files = listWellFormatedFiles(style);
+            const files = listWellFormattedFiles(style);
 
             files.forEach(file => {
                 it(`should keep '${file}' unchanged after formatting`, () => {
                     // Load the config for this specific file (may be in a subdirectory with its own config)
-                    const configContent = loadWellFormatedConfigForFile(style, file);
+                    const configContent = loadWellFormattedConfigForFile(style, file);
                     const configOptions = parseConfigContent(configContent);
                     assert.ok(configOptions !== null, `Config file for '${file}' should be valid`);
 
-                    const original = loadWellFormated(style, file);
+                    const original = loadWellFormatted(style, file);
                     const formatted = formatCMake(original, configOptions);
 
                     assert.strictEqual(
@@ -60,12 +60,12 @@ describe('Well-Formatted CMake Files', () => {
                 if (os.platform() === 'win32') {
                     it(`should handle CRLF line endings for '${file}'`, () => {
                         // Load the config for this specific file
-                        const configContent = loadWellFormatedConfigForFile(style, file);
+                        const configContent = loadWellFormattedConfigForFile(style, file);
                         const configOptions = parseConfigContent(configContent);
                         assert.ok(configOptions !== null, `Config file for '${file}' should be valid`);
 
                         // Load the well-formatted file (LF)
-                        const originalLF = loadWellFormated(style, file);
+                        const originalLF = loadWellFormatted(style, file);
 
                         // Convert to CRLF
                         const originalCRLF = convertToCRLF(originalLF);

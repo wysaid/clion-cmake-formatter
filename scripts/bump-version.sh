@@ -94,6 +94,13 @@ echo "Updating clion-cmake-format (VS Code)..."
 npm pkg set version="$NEW_VERSION" -w clion-cmake-format
 echo -e "${GREEN}✓${NC} Updated packages/vscode/package.json"
 
+# Update @cc-format/core dependency in CLI and VSCode packages
+echo ""
+echo "Updating @cc-format/core dependency references..."
+npm pkg set dependencies.@cc-format/core="$NEW_VERSION" -w cc-format
+npm pkg set dependencies.@cc-format/core="$NEW_VERSION" -w clion-cmake-format
+echo -e "${GREEN}✓${NC} Updated @cc-format/core dependency in CLI and VSCode"
+
 # Update lockfile
 echo ""
 echo "Updating package-lock.json..."

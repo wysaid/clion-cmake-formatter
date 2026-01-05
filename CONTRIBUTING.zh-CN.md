@@ -46,7 +46,7 @@ clion-cmake-format/
 │   ├── parser.test.ts      # 解析器单元测试
 │   ├── formatter.test.ts   # 格式化器单元测试
 │   ├── config.test.ts      # 配置单元测试
-│   ├── well-formated.test.ts  # 幂等性测试
+│   ├── well-formatted.test.ts  # 幂等性测试
 │   └── datasets/           # 测试数据
 │       ├── basic/          # 基本语法测试
 │       ├── cmake-official/ # CMake 仓库示例（20 个文件，6302 行）

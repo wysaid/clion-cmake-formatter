@@ -35,3 +35,4 @@ tmp/
 /.cc-format
 /packages/*/.cc-format.jsonc
 /packages/*/.cc-format
+*.local.json

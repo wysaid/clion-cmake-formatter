@@ -93,7 +93,7 @@ clion-cmake-format/
 │   ├── formatter.test.ts   # Formatter unit tests
 │   ├── config.test.ts      # Config unit tests
 │   ├── cli.test.ts         # CLI unit tests
-│   ├── well-formated.test.ts  # Idempotency tests
+│   ├── well-formatted.test.ts  # Idempotency tests
 │   └── datasets/           # Test fixtures
 │       ├── basic/          # Basic syntax tests
 │       ├── cmake-official/ # CMake repository samples (20 files, 6302 lines)

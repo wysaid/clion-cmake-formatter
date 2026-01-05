@@ -118,7 +118,7 @@ export function listDatasets(category: string, subcategory: string | null = null
 /**
  * Get the path to the well-formatted directory (well-formatted)
  */
-export function getWellFormatedPath(): string {
+export function getWellFormattedPath(): string {
     return path.join(__dirname, 'datasets', 'well-formatted');
 }
 
@@ -126,11 +126,11 @@ export function getWellFormatedPath(): string {
  * List all subdirectories in the well-formatted category (well-formatted)
  * Each subdirectory represents a different format style
  */
-export function listWellFormatedStyles(): string[] {
-    const wellFormatedPath = getWellFormatedPath();
+export function listWellFormattedStyles(): string[] {
+    const wellFormattedPath = getWellFormattedPath();
 
     try {
-        const entries = fs.readdirSync(wellFormatedPath, { withFileTypes: true });
+        const entries = fs.readdirSync(wellFormattedPath, { withFileTypes: true });
         return entries
             .filter(entry => entry.isDirectory())
             .map(entry => entry.name);
@@ -143,8 +143,8 @@ export function listWellFormatedStyles(): string[] {
  * List all cmake files in a well-formatted style directory (recursively)
  * @param style - The style directory name (e.g., 'default')
  */
-export function listWellFormatedFiles(style: string): string[] {
-    const stylePath = path.join(getWellFormatedPath(), style);
+export function listWellFormattedFiles(style: string): string[] {
+    const stylePath = path.join(getWellFormattedPath(), style);
 
     try {
         return listCMakeFilesRecursively(stylePath, stylePath);
@@ -191,9 +191,9 @@ function listCMakeFilesRecursively(dirPath: string, basePath: string): string[] 
  * @param style - The style directory name (e.g., 'default')
  * @param filename - The cmake filename (can be a relative path like 'cmake-official/file.cmake')
  */
-export function loadWellFormated(style: string, filename: string): string {
+export function loadWellFormatted(style: string, filename: string): string {
     // Support both simple filenames and relative paths with subdirectories
-    const filePath = path.join(getWellFormatedPath(), style, filename);
+    const filePath = path.join(getWellFormattedPath(), style, filename);
     try {
         return fs.readFileSync(filePath, 'utf-8');
     } catch (error) {
@@ -205,8 +205,8 @@ export function loadWellFormated(style: string, filename: string): string {
  * Load the .cc-format.jsonc config file for a well-formatted style
  * @param style - The style directory name (e.g., 'default')
  */
-export function loadWellFormatedConfig(style: string): string {
-    const configPath = path.join(getWellFormatedPath(), style, '.cc-format.jsonc');
+export function loadWellFormattedConfig(style: string): string {
+    const configPath = path.join(getWellFormattedPath(), style, '.cc-format.jsonc');
     try {
         return fs.readFileSync(configPath, 'utf-8');
     } catch (error) {
@@ -225,8 +225,8 @@ export function loadWellFormatedConfig(style: string): string {
  * @param filename - The cmake filename (can be a relative path like 'cmake-official/file.cmake')
  * @returns The content of the config file at the style root
  */
-export function loadWellFormatedConfigForFile(style: string, filename: string): string {
+export function loadWellFormattedConfigForFile(style: string, filename: string): string {
     // Always use the style root configuration
     // Subdirectories are not allowed to override the configuration
-    return loadWellFormatedConfig(style);
+    return loadWellFormattedConfig(style);
 }

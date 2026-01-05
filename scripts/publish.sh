@@ -344,18 +344,23 @@ publish_package() {
 
             # Compare versions
             if [ "$VERSION" = "$PUBLISHED_VERSION" ] && [ "$PRE_RELEASE" = "no" ]; then
-                error "Current version (${VERSION}) is the same as published version (${PUBLISHED_VERSION})"
-                error "Please update the version in ${PACKAGE_JSON} before publishing"
-                error "You can use: ./scripts/bump-version.sh <new-version>"
+                # Skip version check in dry-run mode
+                if [ "$DRY_RUN" = false ]; then
+                    error "Current version (${VERSION}) is the same as published version (${PUBLISHED_VERSION})"
+                    error "Please update the version in ${PACKAGE_JSON} before publishing"
+                    error "You can use: ./scripts/bump-version.sh <new-version>"
 
-                if [ "$FORCE_MODE" = true ]; then
-                    if ask_yes_no "${YELLOW}[FORCE MODE]${NC} Ignore version check and continue?"; then
-                        warning "Continuing despite version mismatch"
+                    if [ "$FORCE_MODE" = true ]; then
+                        if ask_yes_no "${YELLOW}[FORCE MODE]${NC} Ignore version check and continue?"; then
+                            warning "Continuing despite version mismatch"
+                        else
+                            return 1
+                        fi
                     else
                         return 1
                     fi
                 else
-                    return 1
+                    warning "[DRY-RUN] Version check skipped: Current version (${VERSION}) matches published version"
                 fi
             fi
         fi

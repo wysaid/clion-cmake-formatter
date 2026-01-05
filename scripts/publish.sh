@@ -297,17 +297,35 @@ publish_package() {
     # Step 1: Check if there are uncommitted changes
     info "Checking for uncommitted changes..."
     if ! git diff-index --quiet HEAD --; then
-        error "There are uncommitted changes in the repository"
-        error "Please commit or stash your changes before publishing"
-
-        if [ "$FORCE_MODE" = true ]; then
-            if ask_yes_no "${YELLOW}[FORCE MODE]${NC} Ignore uncommitted changes?"; then
-                warning "Continuing with uncommitted changes"
+        # Get list of modified files
+        MODIFIED_FILES=$(git diff-index --name-only HEAD --)
+        
+        # Check if only package-lock.json is modified
+        if [ "$(echo "$MODIFIED_FILES" | wc -l)" -eq 1 ] && echo "$MODIFIED_FILES" | grep -q "^package-lock.json$"; then
+            warning "Only package-lock.json has uncommitted changes"
+            if ask_yes_no "Skip package-lock.json and continue publishing?"; then
+                info "Continuing with package-lock.json changes"
             else
+                error "Please commit or stash package-lock.json before publishing"
                 return 1
             fi
         else
-            return 1
+            error "There are uncommitted changes in the repository"
+            error "Please commit or stash your changes before publishing"
+            echo ""
+            echo "Modified files:"
+            echo "$MODIFIED_FILES" | sed 's/^/  - /'
+            echo ""
+
+            if [ "$FORCE_MODE" = true ]; then
+                if ask_yes_no "${YELLOW}[FORCE MODE]${NC} Ignore uncommitted changes?"; then
+                    warning "Continuing with uncommitted changes"
+                else
+                    return 1
+                fi
+            else
+                return 1
+            fi
         fi
     else
         success "Working directory is clean"
@@ -482,6 +500,7 @@ publish_package() {
             error "Current branch is: ${CURRENT_BRANCH}"
             error "Please switch to ${DEFAULT_BRANCH} before publishing"
             error "Or use --pre-release flag to publish from a feature branch"
+            error "Or use -f/--force flag to force publish from non-default branch"
 
             if [ "$FORCE_MODE" = true ]; then
                 if ask_yes_no "${YELLOW}[FORCE MODE]${NC} Ignore branch check and publish stable from non-default branch?"; then

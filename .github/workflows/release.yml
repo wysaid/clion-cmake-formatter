@@ -170,7 +170,7 @@ jobs:
 
     - name: Extract version from tag
       id: extract_version
-      if: steps.validate_tag.outputs.should_publish == 'true' || steps.validate_tag.outputs.is_cli_tag == 'true' || steps.validate_tag.outputs.is_core_tag == 'true'
+      if: steps.validate_tag.outputs.should_publish == 'true' || steps.validate_tag.outputs.is_cli_tag == 'true' || steps.validate_tag.outputs.is_core_tag == 'true' || steps.validate_tag.outputs.is_vscode_tag == 'true'
       run: |
         TAG="${{ steps.trigger_type.outputs.tag }}"
 
@@ -203,7 +203,7 @@ jobs:
     # For CLI tags, check cli package.json
     # For core tags, check core package.json
     - name: Check version consistency with package.json
-      if: (steps.validate_tag.outputs.should_publish == 'true' || steps.validate_tag.outputs.is_cli_tag == 'true' || steps.validate_tag.outputs.is_core_tag == 'true') && steps.trigger_type.outputs.is_tag == 'true'
+      if: (steps.validate_tag.outputs.should_publish == 'true' || steps.validate_tag.outputs.is_cli_tag == 'true' || steps.validate_tag.outputs.is_core_tag == 'true' || steps.validate_tag.outputs.is_vscode_tag == 'true') && steps.trigger_type.outputs.is_tag == 'true'
       run: |
         TAG_VERSION="${{ steps.extract_version.outputs.version }}"
 
@@ -346,7 +346,7 @@ jobs:
       id: check_npm_token
       if: steps.validate_tag.outputs.should_publish_npm == 'true'
       run: |
-        if [ -n "${{ secrets.NPM_STORE_TOKEN }}" ]; then
+        if [ "${{ secrets.NPM_STORE_TOKEN }}" != "" ]; then
           echo "npm_token_available=true" >> $GITHUB_OUTPUT
           echo "✓ NPM_STORE_TOKEN is configured"
         else
@@ -356,13 +356,16 @@ jobs:
 
     - name: Publish Core package to npm
       if: steps.validate_tag.outputs.should_publish_npm == 'true' && steps.check_npm_token.outputs.npm_token_available == 'true'
-      working-directory: packages/core
+      continue-on-error: false
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_STORE_TOKEN }}
       run: |
-        # Configure npm to use the token
-        echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
+        # Build the Core package
+        echo "Building @cc-format/core..."
+        npm run build:core
 
+        # Publish using NODE_AUTH_TOKEN (npm uses it automatically)
+        cd packages/core
         if [ "${{ steps.validate_tag.outputs.is_stable_release }}" == "true" ]; then
           echo "Publishing @cc-format/core as stable release..."
           npm publish --access public
@@ -375,13 +378,16 @@ jobs:
 
     - name: Publish CLI package to npm
       if: steps.validate_tag.outputs.should_publish_npm == 'true' && steps.check_npm_token.outputs.npm_token_available == 'true'
-      working-directory: packages/cli
+      continue-on-error: false
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_STORE_TOKEN }}
       run: |
-        # Configure npm to use the token
-        echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
+        # Build the CLI package
+        echo "Building cc-format..."
+        npm run build:cli
 
+        # Publish using NODE_AUTH_TOKEN (npm uses it automatically)
+        cd packages/cli
         if [ "${{ steps.validate_tag.outputs.is_stable_release }}" == "true" ]; then
           echo "Publishing cc-format as stable release..."
           npm publish --access public

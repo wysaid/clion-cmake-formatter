@@ -240,6 +240,7 @@ select_release_type
 # Main publish function
 publish_package() {
     local target="$1"
+    local SKIP_PUBLISH=false
 
     info "════════════════════════════════════════════════════════"
     info "Starting publish process for: ${target}"
@@ -351,22 +352,22 @@ publish_package() {
                     # Ask user if they want to skip publishing and continue
                     if ask_yes_no "Skip publishing ${PACKAGE_NAME} and continue with remaining steps?"; then
                         info "Skipping ${target} package publication"
-                        return 0
-                    fi
-                    
-                    # User chose not to skip, show error
-                    error "Current version (${VERSION}) is the same as published version (${PUBLISHED_VERSION})"
-                    error "Please update the version in ${PACKAGE_JSON} before publishing"
-                    error "You can use: ./scripts/bump-version.sh <new-version>"
+                        SKIP_PUBLISH=true
+                    else
+                        # User chose not to skip, show error
+                        error "Current version (${VERSION}) is the same as published version (${PUBLISHED_VERSION})"
+                        error "Please update the version in ${PACKAGE_JSON} before publishing"
+                        error "You can use: ./scripts/bump-version.sh <new-version>"
 
-                    if [ "$FORCE_MODE" = true ]; then
-                        if ask_yes_no "${YELLOW}[FORCE MODE]${NC} Ignore version check and continue?"; then
-                            warning "Continuing despite version mismatch"
+                        if [ "$FORCE_MODE" = true ]; then
+                            if ask_yes_no "${YELLOW}[FORCE MODE]${NC} Ignore version check and continue?"; then
+                                warning "Continuing despite version mismatch"
+                            else
+                                return 1
+                            fi
                         else
                             return 1
                         fi
-                    else
-                        return 1
                     fi
                 else
                     warning "[DRY-RUN] Version check skipped: Current version (${VERSION}) matches published version"
@@ -602,7 +603,10 @@ publish_package() {
     fi
 
     # Step 6: Package and publish
-    if [ "$target" = "core" ]; then
+    # Skip publication if user chose to skip
+    if [ "$SKIP_PUBLISH" = true ]; then
+        info "Skipping publication step (already published)"
+    elif [ "$target" = "core" ]; then
         # Core package - publish to npm
         info "Preparing to publish @cc-format/core to npm..."
 
@@ -627,25 +631,30 @@ publish_package() {
 
     elif [ "$target" = "cli" ]; then
         # CLI tool - publish to npm
-        info "Preparing to publish CLI tool to npm..."
-
-        if [ "$DRY_RUN" = false ]; then
-            cd "$PACKAGE_DIR"
-            if [ "$PRE_RELEASE" = "yes" ]; then
-                info "Running: npm publish --access public --tag next"
-                npm publish --access public --tag next
-            else
-                info "Running: npm publish --access public"
-                npm publish --access public
-            fi
-            cd ../..
-            success "CLI tool published to npm!"
+        if [ "$SKIP_PUBLISH" = true ]; then
+            info "Skipping CLI publication step (already published)"
         else
-            if [ "$PRE_RELEASE" = "yes" ]; then
-                info "[DRY-RUN] Would run: cd ${PACKAGE_DIR} && npm publish --access public --tag next"
+            info "Preparing to publish CLI tool to npm..."
+
+            if [ "$DRY_RUN" = false ]; then
+                cd "$PACKAGE_DIR"
+                if [ "$PRE_RELEASE" = "yes" ]; then
+                    info "Running: npm publish --access public --tag next"
+                    npm publish --access public --tag next
+                else
+                    info "Running: npm publish --access public"
+                    npm publish --access public
+                fi
+                cd ../..
+                success "CLI tool published to npm!"
             else
-                info "[DRY-RUN] Would run: cd ${PACKAGE_DIR} && npm publish --access public"
+                if [ "$PRE_RELEASE" = "yes" ]; then
+                    info "[DRY-RUN] Would run: cd ${PACKAGE_DIR} && npm publish --access public --tag next"
+                else
+                    info "[DRY-RUN] Would run: cd ${PACKAGE_DIR} && npm publish --access public"
+                fi
             fi
+        fi
         fi
 
     elif [ "$target" = "vscode" ]; then

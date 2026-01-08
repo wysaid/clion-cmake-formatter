@@ -9,6 +9,7 @@
 **Professional CMake code formatting** — Format your `CMakeLists.txt` and `*.cmake` files with JetBrains CLion's proven formatting style. **Zero external dependencies** — no Python, cmake-format, or gersemi required. Pure TypeScript, lightning fast.
 
 Available as:
+
 - 🔌 **VS Code Extension** — [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=wysaid.clion-cmake-format)
 - 💻 **CLI Tool** — [npm package](https://www.npmjs.com/package/cc-format)
 - 📦 **Core Library** — [@cc-format/core](https://www.npmjs.com/package/@cc-format/core) for developers
@@ -33,13 +34,17 @@ All three packages share the same core formatting engine, ensuring **consistent 
 ## ✨ Why This Extension?
 
 ### 🎯 CLion-Quality Formatting
+
 Precisely replicates JetBrains CLion's CMake formatting — trusted by millions of professional developers worldwide. Get consistent, readable code across your entire team.
 
 ### ⚡ Zero Setup Required
+
 No Python installation. No pip packages. No configuration hell. Just install and format — it works out of the box.
 
 ### 🔧 Fully Customizable
+
 23 configuration options give you complete control:
+
 - **Indentation**: tabs, spaces, size, continuation
 - **Spacing**: before/inside parentheses for all command types
 - **Line Wrapping**: custom length, alignment rules
@@ -47,15 +52,18 @@ No Python installation. No pip packages. No configuration hell. Just install and
 - **And more**: blank lines, project configs, auto-watch
 
 ### 📁 Project-Level Config Files
+
 Use `.cc-format.jsonc` files to share formatting rules across your team. Supports automatic file watching — changes apply instantly.
 
 ### ✅ Battle-Tested Quality
+
 - **126+ unit tests** ensuring rock-solid reliability
 - **Idempotency validated** — formatting twice gives identical results
 - **CMake official tests** — 20 real-world files from CMake's own repository (6,302 lines)
 - **100% pass rate** ✅
 
 ### 🚀 Performance
+
 Pure TypeScript implementation. No spawning external processes. Fast, reliable, and efficient.
 
 ## 🚀 Quick Start
@@ -63,12 +71,14 @@ Pure TypeScript implementation. No spawning external processes. Fast, reliable, 
 ### 1️⃣ Install
 
 #### Option A: From VS Code Marketplace (Recommended)
+
 1. Open VS Code
 2. Press `Ctrl+Shift+X` (or `Cmd+Shift+X` on Mac)
 3. Search for **"CLion CMake Format"**
 4. Click **Install**
 
 ### Option B: From VSIX File
+
 1. Download `.vsix` from [Releases](https://github.com/wysaid/clion-cmake-format/releases)
 2. Open Extensions in VS Code (`Ctrl+Shift+X`)
 3. Click `...` → **Install from VSIX...**
@@ -76,10 +86,12 @@ Pure TypeScript implementation. No spawning external processes. Fast, reliable, 
 ### 2️⃣ Format Your Code
 
 ### Method 1: Keyboard Shortcut
+
 - Open any `CMakeLists.txt` or `*.cmake` file
 - Press `Shift+Alt+F` (Windows/Linux) or `Shift+Option+F` (Mac)
 
 ### Method 2: Context Menu
+
 - Right-click in the editor → **Format Document**
 
 ### Method 3: Format on Save (Recommended)
@@ -170,6 +182,7 @@ cc-format --init-global
 ```
 
 The global config file uses the same format as project config files. Settings priority:
+
 1. CLI options (highest)
 2. Project config (`.cc-format.jsonc` in project directory)
 3. Global config (`~/.config/cc-format/.cc-format.jsonc`)
@@ -196,6 +209,7 @@ cc-format --check $(git diff --cached --name-only --diff-filter=ACM | grep -E '\
 ### Example 1: Basic Formatting
 
 **Before:**
+
 ```cmake
 CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
 PROJECT(MyProject)
@@ -206,6 +220,7 @@ ENDIF()
 ```
 
 **After** (with `commandCase: "lowercase"`):
+
 ```cmake
 cmake_minimum_required(VERSION 3.10)
 project(MyProject)
@@ -223,6 +238,7 @@ endif ()
 ### Example 2: Complex Projects
 
 Works seamlessly with:
+
 - ✅ Multi-line commands with arguments
 - ✅ Nested `if`/`else`/`endif` blocks
 - ✅ `foreach` and `while` loops
@@ -234,6 +250,7 @@ Works seamlessly with:
 ## ⚙️ Configuration Options
 
 Customize formatting behavior via:
+
 1. **VS Code Settings** — Global or per-workspace
 2. **Project Config File** — `.cc-format.jsonc` in your project root (takes precedence)
 
@@ -386,11 +403,13 @@ When an invalid value is detected, the formatter automatically corrects it to th
   - Set to a large number (e.g., 1000) to keep all trailing blank lines
 
 **Example Warning Messages:**
+
 ```text
 tabSize value 0 is out of range [1, 16]. Using minimum value 1.
 lineLength value 10 is too small. Using minimum value 30.
 maxBlankLines value 25 is out of range [0, 20]. Using maximum value 20.
 ```
+
 ---
 
 ## 💡 Tips & Best Practices
@@ -430,7 +449,7 @@ include(FetchContent)                    # Standard command → lowercase
 FetchContent_Declare(mylib)              # Module command → case preserved
 FetchContent_MakeAvailable(mylib)        # Module command → case preserved
 
-include(ExternalProject)                 # Standard command → lowercase  
+include(ExternalProject)                 # Standard command → lowercase
 ExternalProject_Add(somelib)             # Module command → case preserved
 
 include(CheckCXXSourceCompiles)          # Standard command → lowercase
@@ -438,10 +457,15 @@ check_cxx_source_compiles(...)           # Lowercase by design → unchanged
 ```
 
 **Common module commands that preserve case**:
+
 - `FetchContent_*` (Declare, MakeAvailable, Populate, GetProperties)
 - `ExternalProject_*` (Add, Add_Step, Add_StepTargets)
-- `CheckCXXSourceCompiles`, `CheckCXXSourceRuns`
+- `GTest_*` (Add_Tests), `GMock_*` (Add_Tests)
+- `Qt5_*`, `Qt6_*` (Use_Modules, Add_Resources)
+- `CPM_*` (AddPackage)
 - And other PascalCase_PascalCase patterns from CMake modules
+
+**Note**: Some modules like `CheckCXXSourceCompiles` provide lowercase commands (e.g., `check_cxx_source_compiles`) which do not match the PascalCase_PascalCase pattern and are treated as standard commands subject to `commandCase` transformation.
 
 **Why?** CMake module authors use specific casing (e.g., `FetchContent_Declare`) to distinguish module commands from standard commands. CLion forces all commands to match the `commandCase` setting, which can make module commands less recognizable. This tool preserves their intended casing for better readability and consistency with CMake documentation.
 
@@ -458,7 +482,7 @@ foreach (item IN LISTS items)
 endforeach ()
 ```
 
-*CLion ignores spacing rules for `break`/`continue`, which can feel inconsistent.*
+_CLion ignores spacing rules for `break`/`continue`, which can feel inconsistent._
 
 ---
 
@@ -474,6 +498,7 @@ Want to contribute or customize the extension? Check out our **[Contributing Gui
 - 📝 Code style and PR guidelines
 
 **Quick Start for Development:**
+
 ```bash
 git clone https://github.com/wysaid/clion-cmake-format.git
 cd clion-cmake-format
@@ -501,6 +526,7 @@ Free for personal and commercial use.
 ## 🌟 Support This Project
 
 If this extension helped you, consider:
+
 - ⭐ **[Star on GitHub](https://github.com/wysaid/clion-cmake-format)**
 - ✍️ **[Leave a review](https://marketplace.visualstudio.com/items?itemName=wysaid.clion-cmake-format&ssr=false#review-details)**
 - 🐛 **[Report issues](https://github.com/wysaid/clion-cmake-format/issues)**

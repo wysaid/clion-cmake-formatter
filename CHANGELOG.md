@@ -8,7 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
-- **Module command case preservation** — Commands following the `PascalCase_PascalCase` pattern (e.g., `FetchContent_Declare`, `ExternalProject_Add`) now preserve their original case regardless of `commandCase` setting, maintaining their canonical naming as defined by CMake module authors. This includes commands from modules like `FetchContent` and `ExternalProject`, but not all-lowercase commands such as `check_cxx_source_compiles` from the `CheckCXXSourceCompiles` module. This is an intentional difference from CLion, which forces all commands to match the `commandCase` setting. See [README § Differences from CLion](README.md#differences-from-clion) for details. (fixes #26)
+
+- **Module command case preservation** — Commands following the `PascalCase_PascalCase` pattern (e.g., `FetchContent_Declare`, `ExternalProject_Add`) now preserve their original case regardless of `commandCase` setting, maintaining their canonical naming as defined by CMake module authors. Note that modules like `CheckCXXSourceCompiles` provide lowercase commands (e.g., `check_cxx_source_compiles`) which do not match the PascalCase pattern and are therefore treated as standard commands subject to `commandCase` transformation. This is an intentional difference from CLion, which forces all commands to match the `commandCase` setting. See [README § Differences from CLion](README.md#differences-from-clion) for details. (fixes #26)
 
 ## [1.4.1] - 2025-12-31
 
@@ -20,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 #### Monorepo Architecture
+
 - **`@cc-format/core` package** — Standalone formatting engine with programmatic API (published to npm)
 - **`cc-format` CLI package** — Command-line tool with rich features (published to npm)
 - **`clion-cmake-format` VS Code extension** — Uses core package as dependency
@@ -28,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Publishing scripts** — Automated scripts for publishing all packages
 
 #### CLI Tool Features
+
 - **`--stdin` mode** — Format CMake code from standard input (pipe support)
 - **`--write` mode** — Format files in-place with automatic backup
 - **`--check` mode** — Validate formatting without modifying files (CI-friendly)
@@ -39,6 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Cross-platform** — Tested on Ubuntu, Windows, and macOS
 
 #### Documentation
+
 - **Comprehensive API documentation** — Full API reference for `@cc-format/core` with examples
 - **CLI usage guide** — Advanced usage examples including Docker, VS Code tasks, Makefile integration
 - **Monorepo architecture guide** — Package structure and relationship explanation
@@ -48,6 +52,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Enhanced test dataset docs** — Contribution guidelines with file naming conventions
 
 #### CI/CD Enhancements
+
 - **Core package testing** — Validate core exports and API surface
 - **CLI cross-platform tests** — Automated testing on Ubuntu, Windows, macOS
 - **Enhanced release workflow** — Comprehensive release notes including CLI and core changes
@@ -88,6 +93,7 @@ None. This is a backward-compatible release. Existing VS Code extension users wi
 For VS Code extension users: No action required. The extension continues to work exactly as before.
 
 For developers wanting to use the CLI tool or core library:
+
 ```bash
 # Install CLI tool globally
 npm install -g cc-format

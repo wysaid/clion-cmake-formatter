@@ -9,6 +9,7 @@
 **专业级 CMake 代码格式化工具** — 使用 JetBrains CLion 成熟的格式化风格，格式化您的 `CMakeLists.txt` 和 `*.cmake` 文件。**零外部依赖** — 无需 Python、cmake-format 或 gersemi。纯 TypeScript 实现，极速快捷。
 
 提供多种使用方式：
+
 - 🔌 **VS Code 扩展** — [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=wysaid.clion-cmake-format)
 - 💻 **命令行工具** — [npm 包](https://www.npmjs.com/package/cc-format)
 - 📦 **核心库** — [@cc-format/core](https://www.npmjs.com/package/@cc-format/core) 供开发者使用
@@ -32,13 +33,17 @@
 ## ✨ 为什么选择这个扩展？
 
 ### 🎯 CLion 品质格式化
+
 精确复刻 JetBrains CLion 的 CMake 格式化 — 全球数百万专业开发者信赖的工具。让您的整个团队获得一致、可读的代码。
 
 ### ⚡ 零配置开箱即用
+
 无需安装 Python。无需 pip 包。无需配置困扰。只需安装即可格式化 — 开箱即用。
 
 ### 🔧 完全可自定义
+
 23 个配置选项让您完全掌控：
+
 - **缩进**：制表符、空格、大小、续行
 - **空格**：所有命令类型的括号前后空格
 - **换行**：自定义长度、对齐规则
@@ -46,15 +51,18 @@
 - **更多**：空行、项目配置、自动监听
 
 ### 📁 项目级配置文件
+
 使用 `.cc-format.jsonc` 文件在团队间共享格式化规则。支持自动文件监听 — 更改立即生效。
 
 ### ✅ 经过充分测试
+
 - **126+ 单元测试** 确保坚如磐石的可靠性
 - **幂等性验证** — 格式化两次产生相同结果
 - **CMake 官方测试** — CMake 仓库中的 20 个真实文件（6,302 行）
 - **100% 通过率** ✅
 
 ### 🚀 性能卓越
+
 纯 TypeScript 实现。无需生成外部进程。快速、可靠、高效。
 
 ## 🚀 快速开始
@@ -62,12 +70,14 @@
 ### 1️⃣ 安装
 
 ### 方式 A：从 VS Code 市场安装（推荐）
+
 1. 打开 VS Code
 2. 按 `Ctrl+Shift+X`（Mac 用户按 `Cmd+Shift+X`）
 3. 搜索 **"CLion CMake Format"**
 4. 点击 **安装**
 
 ### 方式 B：从 VSIX 文件安装
+
 1. 从 [Releases](https://github.com/wysaid/clion-cmake-format/releases) 下载 `.vsix` 文件
 2. 在 VS Code 中打开扩展面板（`Ctrl+Shift+X`）
 3. 点击 `...` → **从 VSIX 安装...**
@@ -75,10 +85,12 @@
 ### 2️⃣ 格式化代码
 
 ### 方法 1：键盘快捷键
+
 - 打开任何 `CMakeLists.txt` 或 `*.cmake` 文件
 - 按 `Shift+Alt+F`（Windows/Linux）或 `Shift+Option+F`（Mac）
 
 ### 方法 2：右键菜单
+
 - 在编辑器中右键 → **格式化文档**
 
 ### 方法 3：保存时格式化（推荐）
@@ -169,6 +181,7 @@ cc-format --init-global
 ```
 
 全局配置文件使用与项目配置相同的格式。配置优先级：
+
 1. CLI 选项（最高）
 2. 项目配置（项目目录下的 `.cc-format.jsonc`）
 3. 全局配置（`~/.config/cc-format/.cc-format.jsonc`）
@@ -195,6 +208,7 @@ cc-format --check $(git diff --cached --name-only --diff-filter=ACM | grep -E '\
 ### 示例 1：基本格式化
 
 **格式化前：**
+
 ```cmake
 CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
 PROJECT(MyProject)
@@ -205,6 +219,7 @@ ENDIF()
 ```
 
 **格式化后**（使用 `commandCase: "lowercase"`）：
+
 ```cmake
 cmake_minimum_required(VERSION 3.10)
 project(MyProject)
@@ -222,6 +237,7 @@ endif ()
 ### 示例 2：复杂项目
 
 无缝支持：
+
 - ✅ 带参数的多行命令
 - ✅ 嵌套 `if`/`else`/`endif` 块
 - ✅ `foreach` 和 `while` 循环
@@ -233,6 +249,7 @@ endif ()
 ## ⚙️ 配置选项
 
 通过以下方式自定义格式化行为：
+
 1. **VS Code 设置** — 全局或工作区级别
 2. **项目配置文件** — 项目根目录的 `.cc-format.jsonc`（优先级更高）
 
@@ -385,6 +402,7 @@ endif ()
   - 设置为较大的数字（如 1000）可保留所有尾部空行
 
 **警告消息示例：**
+
 ```text
 tabSize value 0 is out of range [1, 16]. Using minimum value 1.
 lineLength value 10 is too small. Using minimum value 30.
@@ -438,10 +456,15 @@ check_cxx_source_compiles(...)           # 设计上就是小写 → 不变
 ```
 
 **常见的保持大小写的模块命令**：
+
 - `FetchContent_*`（Declare、MakeAvailable、Populate、GetProperties）
 - `ExternalProject_*`（Add、Add_Step、Add_StepTargets）
-- `CheckCXXSourceCompiles`、`CheckCXXSourceRuns`
+- `GTest_*`（Add_Tests）、`GMock_*`（Add_Tests）
+- `Qt5_*`、`Qt6_*`（Use_Modules、Add_Resources）
+- `CPM_*`（AddPackage）
 - 以及其他来自 CMake 模块的 PascalCase_PascalCase 模式命令
+
+**注意**：某些模块如 `CheckCXXSourceCompiles` 提供的是小写命令（例如 `check_cxx_source_compiles`），这些命令不符合 PascalCase_PascalCase 模式，因此会按照 `commandCase` 设置进行转换。
 
 **为什么？** CMake 模块作者使用特定的大小写（例如 `FetchContent_Declare`）来区分模块命令和标准命令。CLion 强制所有命令匹配 `commandCase` 设置，这可能会使模块命令不易识别。本工具保持它们的预期大小写，以提高可读性并与 CMake 文档保持一致。
 
@@ -458,7 +481,7 @@ foreach (item IN LISTS items)
 endforeach ()
 ```
 
-*CLion 对 `break`/`continue` 忽略空格规则，可能会感觉不一致。*
+_CLion 对 `break`/`continue` 忽略空格规则，可能会感觉不一致。_
 
 ---
 
@@ -474,6 +497,7 @@ endforeach ()
 - 📝 代码风格和 PR 指南
 
 **开发快速开始：**
+
 ```bash
 git clone https://github.com/wysaid/clion-cmake-format.git
 cd clion-cmake-format
@@ -501,6 +525,7 @@ npm install && npm run compile && npm run test:unit
 ## 🌟 支持本项目
 
 如果这个扩展帮助了您，请考虑：
+
 - ⭐ **[在 GitHub 上点赞](https://github.com/wysaid/clion-cmake-format)**
 - ✍️ **[留下评价](https://marketplace.visualstudio.com/items?itemName=wysaid.clion-cmake-format&ssr=false#review-details)**
 - 🐛 **[报告问题](https://github.com/wysaid/clion-cmake-format/issues)**

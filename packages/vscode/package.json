@@ -237,11 +237,12 @@
         }
     },
     "scripts": {
-        "vscode:prepublish": "npm run build",
-        "build": "webpack --mode production",
+        "vscode:prepublish": "pnpm run build",
+        "build": "pnpm run type-check && webpack --mode production",
         "build:dev": "webpack --mode development",
         "watch": "webpack --mode development --watch",
-        "clean": "rm -rf dist"
+        "clean": "rm -rf dist",
+        "type-check": "tsc --noEmit"
     },
     "devDependencies": {
         "@types/vscode": "^1.50.0",

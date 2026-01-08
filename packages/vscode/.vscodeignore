@@ -30,7 +30,7 @@ tsconfig.json
 
 # Dependencies (webpack bundles everything, no node_modules needed)
 node_modules/**
-package-lock.json
+pnpm-lock.yaml
 
 # IDE files
 .vscode/**

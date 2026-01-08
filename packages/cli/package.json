@@ -48,7 +48,7 @@
     "scripts": {
         "build": "tsc",
         "clean": "rm -rf dist",
-        "prepublishOnly": "npm run build"
+        "prepublishOnly": "pnpm run build"
     },
     "dependencies": {
         "@cc-format/core": "workspace:*",

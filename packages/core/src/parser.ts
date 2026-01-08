@@ -550,12 +550,18 @@ export class CMakeParser {
             const startLine = token.line + 1;
             this.advance();
 
+            // Skip whitespace to check for blank lines
+            // (blank lines may contain only whitespace)
+            this.skipWhitespace();
+
             // Check if it's a blank line (consecutive newlines)
             if (!this.isAtEnd() && this.peek().type === TokenType.Newline) {
                 let count = 0;
                 while (!this.isAtEnd() && this.peek().type === TokenType.Newline) {
                     count++;
                     this.advance();
+                    // Skip whitespace after each newline
+                    this.skipWhitespace();
                 }
                 return {
                     type: NodeType.BlankLine,

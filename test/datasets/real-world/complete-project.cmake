@@ -6,13 +6,13 @@ SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Source files
 SET(SOURCES
-    src/main.cpp
-    src/utils.cpp
-    src/parser.cpp
+        src/main.cpp
+        src/utils.cpp
+        src/parser.cpp
 )
 
 ADD_EXECUTABLE(myapp ${SOURCES})
 
-IF(WIN32)
+IF (WIN32)
     TARGET_LINK_LIBRARIES(myapp ws2_32)
-ENDIF()
+ENDIF ()

@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Module command case preservation** — Commands like `FetchContent_Declare`, `ExternalProject_Add`, `CheckCXXSourceCompiles` now preserve their original case regardless of `commandCase` setting, following CMake module naming conventions (fixes #26)
+
 ## [1.4.1] - 2025-12-31
 
 ### 🎉 Major Changes

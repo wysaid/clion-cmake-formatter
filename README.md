@@ -243,7 +243,7 @@ Customize formatting behavior via:
 |--------|---------|-------------|
 | `indentSize` | `4` | Spaces per indentation level (1-16) |
 | `useTabs` | `false` | Use tabs instead of spaces |
-| `commandCase` | `"unchanged"` | Command case: `unchanged` / `lowercase` / `uppercase` |
+| `commandCase` | `"unchanged"` | Command case: `unchanged` / `lowercase` / `uppercase`<br>⚠️ Module commands (e.g., `FetchContent_Declare`, `ExternalProject_Add`) always preserve their case |
 | `lineLength` | `0` | Max line length (0 = unlimited, min 30 if set) |
 | `maxBlankLines` | `2` | Maximum consecutive blank lines (0-20) |
 | `maxTrailingBlankLines` | `0` | Maximum blank lines at end of file (0-1) |

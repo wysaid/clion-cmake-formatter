@@ -242,7 +242,7 @@ endif ()
 |------|--------|------|
 | `indentSize` | `4` | 每个缩进级别的空格数（1-16） |
 | `useTabs` | `false` | 使用制表符代替空格 |
-| `commandCase` | `"unchanged"` | 命令大小写：`unchanged` / `lowercase` / `uppercase` |
+| `commandCase` | `"unchanged"` | 命令大小写：`unchanged` / `lowercase` / `uppercase`<br>⚠️ 模块命令（如 `FetchContent_Declare`、`ExternalProject_Add`）总是保持原有大小写 |
 | `lineLength` | `0` | 最大行长度（0 = 不限制，设置时最小 30） |
 | `maxBlankLines` | `2` | 最大连续空行数（0-20） |
 | `maxTrailingBlankLines` | `1` | 文件末尾最大空行数（>= 0） |

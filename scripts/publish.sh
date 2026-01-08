@@ -19,14 +19,66 @@ if ! command -v pnpm &>/dev/null; then
     echo -e "${RED}ERROR: This project requires pnpm!${NC}"
     echo ""
     echo "This monorepo has been migrated to pnpm for better dependency management."
-    echo "Please install pnpm first:"
-    echo ""
-    echo "  npm install -g pnpm"
-    echo "  # or"
-    echo "  curl -fsSL https://get.pnpm.io/install.sh | sh -"
-    echo ""
-    echo "Then run: pnpm install"
-    exit 1
+    
+    # Check if npm is available
+    if command -v npm &>/dev/null; then
+        echo -e "${YELLOW}npm is available on your system.${NC}"
+        echo ""
+        
+        # Ask user if they want to install pnpm
+        read -p "Do you want to install pnpm now using npm? (y/n): " install_pnpm
+        case $install_pnpm in
+            [Yy]*)
+                echo ""
+                echo -e "${BLUE}Installing pnpm globally...${NC}"
+                if npm install -g pnpm; then
+                    echo ""
+                    echo -e "${GREEN}✓ pnpm installed successfully!${NC}"
+                    echo ""
+                    
+                    # Verify pnpm is now available
+                    if command -v pnpm &>/dev/null; then
+                        echo -e "${GREEN}✓ pnpm is ready to use${NC}"
+                        echo "Continuing with publish script..."
+                        echo ""
+                    else
+                        echo -e "${YELLOW}Warning: pnpm installed but not found in PATH${NC}"
+                        echo "You may need to restart your terminal or run:"
+                        echo "  source ~/.bashrc  # or ~/.zshrc"
+                        echo ""
+                        echo "Then run this script again."
+                        exit 1
+                    fi
+                else
+                    echo ""
+                    echo -e "${RED}Failed to install pnpm${NC}"
+                    echo "Please try installing manually:"
+                    echo "  npm install -g pnpm"
+                    echo "  # or"
+                    echo "  curl -fsSL https://get.pnpm.io/install.sh | sh -"
+                    exit 1
+                fi
+                ;;
+            *)
+                echo ""
+                echo "Please install pnpm first:"
+                echo "  npm install -g pnpm"
+                echo "  # or"
+                echo "  curl -fsSL https://get.pnpm.io/install.sh | sh -"
+                echo ""
+                echo "Then run: pnpm install"
+                exit 1
+                ;;
+        esac
+    else
+        echo "Please install pnpm first:"
+        echo "  npm install -g pnpm"
+        echo "  # or"
+        echo "  curl -fsSL https://get.pnpm.io/install.sh | sh -"
+        echo ""
+        echo "Then run: pnpm install"
+        exit 1
+    fi
 fi
 
 # Parse command line arguments
@@ -146,13 +198,24 @@ ask_yes_no() {
 # Get the version from package.json
 get_version() {
     local package_path="$1"
-    if command -v node >/dev/null 2>&1; then
-        # Use absolute path to ensure it works regardless of current directory
-        node -p "require('$PWD/${package_path}').version"
-    else
-        # Fallback to grep/sed if node is not available
-        grep -o '"version": *"[^"]*"' "$package_path" | sed 's/"version": *"\(.*\)"/\1/'
+    # Try different methods to read version
+    if [ -f "$package_path" ]; then
+        # Method 1: Use grep/sed (works on all platforms)
+        version=$(grep -o '"version": *"[^"]*"' "$package_path" 2>/dev/null | sed 's/"version": *"\(.*\)"/\1/')
+        if [ -n "$version" ]; then
+            echo "$version"
+            return 0
+        fi
+        
+        # Method 2: Try with node if available (fallback)
+        if command -v node >/dev/null 2>&1; then
+            # Use relative path with node
+            node -e "try { console.log(require('./${package_path}').version) } catch(e) { process.exit(1) }" 2>/dev/null && return 0
+        fi
     fi
+    
+    error "Failed to get version from $package_path"
+    return 1
 }
 
 # Get published version from npm
@@ -610,12 +673,23 @@ publish_package() {
     fi
 
     # Step 4: Build all packages
-    info "Installing dependencies..."
-    if [ "$DRY_RUN" = false ]; then
-        pnpm install
-        success "Dependencies installed"
+    # Check if node_modules exists, if not, install dependencies automatically
+    if [ ! -d "node_modules" ] && [ ! -d "packages/core/node_modules" ]; then
+        warning "node_modules not found, installing dependencies automatically..."
+        if [ "$DRY_RUN" = false ]; then
+            pnpm install
+            success "Dependencies installed"
+        else
+            info "[DRY-RUN] Would run: pnpm install"
+        fi
     else
-        info "[DRY-RUN] Would run: pnpm install"
+        info "Dependencies already installed, verifying..."
+        if [ "$DRY_RUN" = false ]; then
+            pnpm install
+            success "Dependencies verified"
+        else
+            info "[DRY-RUN] Would run: pnpm install"
+        fi
     fi
 
     info "Building all packages..."

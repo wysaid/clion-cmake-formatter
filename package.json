@@ -4,7 +4,12 @@
     "private": true,
     "description": "Monorepo for CMake formatter with CLion-compatible style",
     "packageManager": "pnpm@9.15.4",
+    "engines": {
+        "node": ">=18",
+        "pnpm": ">=9.0.0"
+    },
     "scripts": {
+        "preinstall": "node scripts/check-pnpm.js",
         "build": "pnpm --filter @cc-format/core build && pnpm --filter cc-format build && pnpm --filter clion-cmake-format build",
         "build:core": "pnpm --filter @cc-format/core build",
         "build:cli": "pnpm --filter cc-format build",

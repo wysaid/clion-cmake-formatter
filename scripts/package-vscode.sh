@@ -65,6 +65,9 @@ const pkg = require('./package.json');
 // Remove vscode:prepublish script to avoid running it again
 delete pkg.scripts['vscode:prepublish'];
 
+// Remove workspace dependencies since they're bundled by webpack
+delete pkg.dependencies;
+
 fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
 console.log('✓ Cleaned package.json for packaging');
 "

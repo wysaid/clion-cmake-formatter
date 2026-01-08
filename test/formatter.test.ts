@@ -55,6 +55,168 @@ describe('CMakeFormatter', () => {
 
             assert.strictEqual(output.trim(), 'PROJECT(MyProject)');
         });
+
+        it('should preserve module command case with lowercase setting', () => {
+            const input = `include(FetchContent)
+FetchContent_Declare(mylib)
+FetchContent_MakeAvailable(mylib)
+ExternalProject_Add(somelib)
+GTest_Add_Tests(mytest)
+CPM_AddPackage(pkg)
+Qt5_Use_Modules(myapp)`;
+
+            const output = formatCMake(input, { commandCase: 'lowercase' });
+
+            // Module commands should preserve their case
+            assert.ok(output.includes('FetchContent_Declare'),
+                'FetchContent_Declare should preserve case');
+            assert.ok(output.includes('FetchContent_MakeAvailable'),
+                'FetchContent_MakeAvailable should preserve case');
+            assert.ok(output.includes('ExternalProject_Add'),
+                'ExternalProject_Add should preserve case');
+            assert.ok(output.includes('GTest_Add_Tests'),
+                'GTest_Add_Tests should preserve case');
+            assert.ok(output.includes('CPM_AddPackage'),
+                'CPM_AddPackage should preserve case');
+            assert.ok(output.includes('Qt5_Use_Modules'),
+                'Qt5_Use_Modules should preserve case');
+
+            // Standard command should be lowercase
+            assert.ok(output.includes('include('),
+                'include should be lowercase');
+        });
+
+        it('should preserve module command case with uppercase setting', () => {
+            const input = `include(FetchContent)
+FetchContent_Declare(mylib)`;
+
+            const output = formatCMake(input, { commandCase: 'uppercase' });
+
+            // Module command should preserve its case
+            assert.ok(output.includes('FetchContent_Declare'),
+                'FetchContent_Declare should preserve case');
+            // Standard command should be uppercase
+            assert.ok(output.includes('INCLUDE('),
+                'INCLUDE should be uppercase');
+        });
+
+        it('should transform all-caps commands even with underscores', () => {
+            const input = `ADD_EXECUTABLE(myapp main.cpp)
+ADD_LIBRARY(mylib lib.cpp)`;
+
+            const output = formatCMake(input, { commandCase: 'lowercase' });
+
+            // These are standard commands in all-caps, should be transformed
+            assert.ok(output.includes('add_executable('), 'add_executable should be lowercase');
+            assert.ok(output.includes('add_library('), 'add_library should be lowercase');
+        });
+
+        it('should NOT preserve commands with underscore followed by lowercase', () => {
+            // Commands like SWIG_add_library, CPack_add_component have underscore followed by lowercase
+            // These should be treated as standard commands, not module commands
+            const input = `SWIG_add_library(mylib TYPE SHARED)
+CPack_add_component(mycomp)`;
+
+            const output = formatCMake(input, { commandCase: 'lowercase' });
+
+            // These should be transformed to lowercase since underscore is followed by lowercase
+            assert.ok(output.includes('swig_add_library('),
+                'SWIG_add_library should be transformed to lowercase');
+            assert.ok(output.includes('cpack_add_component('),
+                'CPack_add_component should be transformed to lowercase');
+        });
+
+        it('should preserve module commands with numbers in name', () => {
+            // Commands like Qt5_Use_Modules should be preserved
+            const input = `Qt5_Use_Modules(myapp Core Gui)
+Qt6_Add_Resources(myapp resources.qrc)`;
+
+            const output = formatCMake(input, { commandCase: 'lowercase' });
+
+            assert.ok(output.includes('Qt5_Use_Modules'),
+                'Qt5_Use_Modules should preserve case');
+            assert.ok(output.includes('Qt6_Add_Resources'),
+                'Qt6_Add_Resources should preserve case');
+        });
+
+        it('should preserve multi-underscore module commands', () => {
+            const input = `ExternalProject_Add_Step(proj step1)
+ExternalProject_Add_StepTargets(proj step1)`;
+
+            const output = formatCMake(input, { commandCase: 'lowercase' });
+
+            assert.ok(output.includes('ExternalProject_Add_Step'),
+                'ExternalProject_Add_Step should preserve case');
+            assert.ok(output.includes('ExternalProject_Add_StepTargets'),
+                'ExternalProject_Add_StepTargets should preserve case');
+        });
+
+        it('should NOT preserve commands that do not match module pattern (no underscore)', () => {
+            // CheckCXXSourceCompiles lacks an underscore, so it should be treated as a standard command
+            const input = 'CheckCXXSourceCompiles(VAR src)';
+            const output = formatCMake(input, { commandCase: 'lowercase' });
+
+            assert.strictEqual(output.trim(), 'checkcxxsourcecompiles(VAR src)');
+        });
+
+        it('should NOT preserve commands starting with lowercase', () => {
+            // pkg_check_modules starts with lowercase, so it should be treated as standard
+            const input = 'pkg_check_modules(GTK3 REQUIRED gtk+-3.0)';
+            const output = formatCMake(input, { commandCase: 'uppercase' });
+
+            assert.strictEqual(output.trim(), 'PKG_CHECK_MODULES(GTK3 REQUIRED gtk+-3.0)');
+        });
+
+        it('should handle comprehensive module command dataset (lowercase config)', () => {
+            const input = loadEdgeCase('module-commands');
+            const output = formatCMake(input, { commandCase: 'lowercase' });
+
+            // PascalCase module commands should be preserved
+            assert.ok(output.includes('FetchContent_Declare'), 'FetchContent_Declare preserved');
+            assert.ok(output.includes('FetchContent_MakeAvailable'), 'FetchContent_MakeAvailable preserved');
+            assert.ok(output.includes('ExternalProject_Add'), 'ExternalProject_Add preserved');
+            assert.ok(output.includes('ExternalProject_Add_Step'), 'ExternalProject_Add_Step preserved');
+            assert.ok(output.includes('ExternalProject_Add_StepTargets'), 'ExternalProject_Add_StepTargets preserved');
+            assert.ok(output.includes('GTest_Add_Tests'), 'GTest_Add_Tests preserved');
+            assert.ok(output.includes('GMock_Add_Tests'), 'GMock_Add_Tests preserved');
+            assert.ok(output.includes('Qt5_Use_Modules'), 'Qt5_Use_Modules preserved');
+            assert.ok(output.includes('Qt6_Add_Resources'), 'Qt6_Add_Resources preserved');
+            assert.ok(output.includes('CPM_AddPackage'), 'CPM_AddPackage preserved');
+
+            // Lowercase module-provided commands should remain lowercase (subject to commandCase)
+            assert.ok(output.includes('check_cxx_source_compiles('),
+                'check_cxx_source_compiles should remain lowercase');
+
+            // Commands with underscore followed by lowercase should be transformed
+            assert.ok(output.includes('swig_add_library('), 'swig_add_library should be lowercase');
+            assert.ok(output.includes('cpack_add_component('), 'cpack_add_component should be lowercase');
+
+            // Standard commands should follow configuration
+            assert.ok(output.includes('include('), 'include should be lowercase');
+            assert.ok(output.includes('set('), 'set should be lowercase');
+            assert.ok(output.includes('message('), 'message should be lowercase');
+        });
+
+        it('should transform lowercase module commands when commandCase is uppercase', () => {
+            const input = loadEdgeCase('module-commands');
+            const output = formatCMake(input, { commandCase: 'uppercase' });
+
+            // PascalCase module commands still preserve their case
+            assert.ok(output.includes('FetchContent_Declare'), 'FetchContent_Declare preserved');
+            assert.ok(output.includes('ExternalProject_Add'), 'ExternalProject_Add preserved');
+
+            // Standard commands should be uppercased
+            assert.ok(output.includes('INCLUDE('), 'INCLUDE should be uppercase');
+            assert.ok(output.includes('SET('), 'SET should be uppercase');
+
+            // Lowercase module-provided commands are treated as standard commands
+            assert.ok(output.includes('CHECK_CXX_SOURCE_COMPILES('),
+                'check_cxx_source_compiles should be uppercased under uppercase setting');
+
+            // Commands with underscore followed by lowercase should be transformed
+            assert.ok(output.includes('SWIG_ADD_LIBRARY('), 'SWIG_add_library should be uppercased');
+            assert.ok(output.includes('CPACK_ADD_COMPONENT('), 'CPack_add_component should be uppercased');
+        });
     });
 
     describe('Indentation', () => {
@@ -475,7 +637,7 @@ describe('Trailing Newline Tests', () => {
     it('should not add trailing newline when input has none', () => {
         const input = 'set(VAR value)'; // No trailing newline
         const output = formatCMake(input, { maxTrailingBlankLines: 0 });
-        
+
         // Should not add a trailing newline
         assert.strictEqual(output, 'set(VAR value)', 'Should not add trailing newline when input has none');
     });
@@ -483,7 +645,7 @@ describe('Trailing Newline Tests', () => {
     it('should preserve single trailing newline when maxTrailingBlankLines is 0', () => {
         const input = 'set(VAR value)\n'; // One trailing newline
         const output = formatCMake(input, { maxTrailingBlankLines: 0 });
-        
+
         // Should keep the single trailing newline
         assert.strictEqual(output, 'set(VAR value)\n', 'Should preserve single trailing newline');
     });
@@ -491,7 +653,7 @@ describe('Trailing Newline Tests', () => {
     it('should remove extra trailing blank lines when maxTrailingBlankLines is 0', () => {
         const input = 'set(VAR value)\n\n\n'; // Multiple trailing newlines
         const output = formatCMake(input, { maxTrailingBlankLines: 0 });
-        
+
         // Should only keep one trailing newline
         assert.strictEqual(output, 'set(VAR value)\n', 'Should remove extra trailing newlines');
     });
@@ -499,7 +661,7 @@ describe('Trailing Newline Tests', () => {
     it('should allow up to maxTrailingBlankLines blank lines at end', () => {
         const input = 'set(VAR value)\n\n\n'; // 2 trailing blank lines (3 newlines total)
         const output = formatCMake(input, { maxTrailingBlankLines: 2 });
-        
+
         // Should keep 2 blank lines (3 newlines total)
         assert.strictEqual(output, 'set(VAR value)\n\n\n', 'Should preserve up to maxTrailingBlankLines');
     });
@@ -507,14 +669,14 @@ describe('Trailing Newline Tests', () => {
     it('should not add trailing newline to empty file', () => {
         const input = ''; // Empty file
         const output = formatCMake(input, { maxTrailingBlankLines: 0 });
-        
+
         assert.strictEqual(output, '', 'Should not add trailing newline to empty file');
     });
 
     it('should respect maxTrailingBlankLines with default value 1', () => {
         const input = 'set(VAR value)\n\n\n\n'; // 3 trailing blank lines
         const output = formatCMake(input); // default maxTrailingBlankLines = 1
-        
+
         // Should limit to 1 blank line (2 newlines total)
         assert.strictEqual(output, 'set(VAR value)\n\n', 'Should limit to default maxTrailingBlankLines=1');
     });
@@ -522,7 +684,7 @@ describe('Trailing Newline Tests', () => {
     it('should not add newline when formatting single command without trailing newline', () => {
         const input = 'if(WIN32)\n    set(VAR value)\nendif()'; // No trailing newline
         const output = formatCMake(input, { maxTrailingBlankLines: 0 });
-        
+
         // Should not add trailing newline
         assert.strictEqual(output.endsWith('\n'), false, 'Should not add trailing newline to multi-line input');
     });
@@ -530,7 +692,7 @@ describe('Trailing Newline Tests', () => {
     it('should preserve trailing newline in multi-line input', () => {
         const input = 'if(WIN32)\n    set(VAR value)\nendif()\n'; // Has trailing newline
         const output = formatCMake(input, { maxTrailingBlankLines: 0 });
-        
+
         // Should preserve trailing newline
         assert.strictEqual(output, 'if (WIN32)\n    set(VAR value)\nendif ()\n', 'Should preserve trailing newline in multi-line input');
     });

@@ -36,3 +36,5 @@ tmp/
 /packages/*/.cc-format.jsonc
 /packages/*/.cc-format
 *.local.json
+
+dev-docs/

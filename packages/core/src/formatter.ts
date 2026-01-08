@@ -132,6 +132,7 @@ export class CMakeFormatter {
     private options: FormatterOptions;
     private indentLevel: number = 0;
     private inputEndsWithNewline: boolean = false;
+    private static readonly moduleCommandPattern = /^[A-Z][A-Za-z0-9]+_[A-Z]/;
 
     constructor(options: Partial<FormatterOptions> = {}) {
         this.options = { ...DEFAULT_OPTIONS, ...options };
@@ -230,7 +231,7 @@ export class CMakeFormatter {
         // 1. Input ended with newline, OR
         // 2. There are trailing blank lines to add
         const hasTrailingNewline = this.inputEndsWithNewline || trailingBlankLines > 0;
-        
+
         if (hasTrailingNewline && !result.endsWith('\n')) {
             result += '\n';
         }
@@ -281,9 +282,65 @@ export class CMakeFormatter {
     }
 
     /**
+     * Check if a command name is a module command that should preserve its case.
+     *
+     * **Rationale**: Unlike CLion which forces all commands to lowercase/uppercase,
+     * this tool preserves the case of CMake module commands to maintain their
+     * canonical naming as defined by module authors.
+     *
+     * **Pattern**: ModuleName_CommandName where both parts are in PascalCase
+     *
+     * **Common Examples**:
+     * - FetchContent_Declare, FetchContent_MakeAvailable, FetchContent_Populate
+     * - ExternalProject_Add, ExternalProject_Add_Step
+     * - (Note: modules like CheckCXXSourceCompiles define lowercase commands such as
+     *   check_cxx_source_compiles/check_cxx_source_runs; these do not match this
+     *   PascalCase pattern and are therefore treated as standard commands.)
+     *
+     * **Exclusions**:
+     * - All-caps commands (ADD_EXECUTABLE, SET_PROPERTY) - treated as standard commands
+     * - Lowercase with underscores (check_function_exists, check_cxx_source_compiles) - treated as standard commands
+     *
+     * @param name The command name to check
+     * @returns true if the command should preserve its case
+     */
+    private isModuleCommand(name: string): boolean {
+        // Module commands have the pattern: PascalCaseWord_PascalCaseWord
+        // - Must contain underscore
+        // - Must have lowercase letters (not all caps)
+        // - First part starts with uppercase
+        // - After underscore, next char is uppercase
+        if (!name.includes('_')) {
+            return false;
+        }
+
+        // Exclude all-caps commands (like ADD_EXECUTABLE)
+        if (name === name.toUpperCase()) {
+            return false;
+        }
+
+        // Check for PascalCase pattern: starts with capital, followed by letters/digits, underscore, then capital
+        // This matches: FetchContent_Declare, GTest_Add_Tests, CPM_AddPackage, Qt5_Use_Modules, Qt6_Add_Resources
+        // But NOT: SWIG_add_library, CPack_add_component (underscore followed by lowercase)
+        return CMakeFormatter.moduleCommandPattern.test(name);
+    }
+
+    /**
      * Apply command case transformation
+     *
+     * **Special Handling**: Module commands (e.g., FetchContent_Declare) preserve
+     * their original case regardless of the commandCase setting to maintain their
+     * canonical naming convention.
+     *
+     * @param name The command name to transform
+     * @returns The transformed command name
      */
     private transformCommandCase(name: string): string {
+        // Module commands should preserve their case regardless of the commandCase setting
+        if (this.isModuleCommand(name)) {
+            return name;
+        }
+
         switch (this.options.commandCase) {
             case 'lowercase':
                 return name.toLowerCase();
@@ -703,7 +760,7 @@ export class CMakeFormatter {
      */
     private reformatNestedParenArg(arg: ArgumentInfo, commandIndent: string, continuationIndent: string): string {
         const value = arg.value;
-        
+
         // Only process if it contains newlines and looks like nested parens
         if (!value.includes('\n')) {
             return value;
@@ -763,7 +820,7 @@ export class CMakeFormatter {
                 // Add up to maxBlankLines from the count in this node
                 const remaining = Math.max(0, maxBlankLines - consecutiveBlankLines);
                 const linesToAdd = Math.min(blankNode.count, remaining);
-                
+
                 for (let j = 0; j < linesToAdd; j++) {
                     lines.push(this.options.keepIndentOnEmptyLines ? this.getIndent() : '');
                 }

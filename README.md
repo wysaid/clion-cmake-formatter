@@ -418,7 +418,34 @@ maxBlankLines value 25 is out of range [0, 20]. Using maximum value 20.
 
 ### Differences from CLion
 
-This extension aims for CLion compatibility with **one intentional enhancement**:
+This extension aims for CLion compatibility with **two intentional enhancements**:
+
+#### 1. Module Command Case Preservation
+
+**Module commands preserve their canonical PascalCase naming**, regardless of the `commandCase` setting:
+
+```cmake
+# With commandCase: "lowercase"
+include(FetchContent)                    # Standard command → lowercase
+FetchContent_Declare(mylib)              # Module command → case preserved
+FetchContent_MakeAvailable(mylib)        # Module command → case preserved
+
+include(ExternalProject)                 # Standard command → lowercase  
+ExternalProject_Add(somelib)             # Module command → case preserved
+
+include(CheckCXXSourceCompiles)          # Standard command → lowercase
+check_cxx_source_compiles(...)           # Lowercase by design → unchanged
+```
+
+**Common module commands that preserve case**:
+- `FetchContent_*` (Declare, MakeAvailable, Populate, GetProperties)
+- `ExternalProject_*` (Add, Add_Step, Add_StepTargets)
+- `CheckCXXSourceCompiles`, `CheckCXXSourceRuns`
+- And other PascalCase_PascalCase patterns from CMake modules
+
+**Why?** CMake module authors use specific casing (e.g., `FetchContent_Declare`) to distinguish module commands from standard commands. CLion forces all commands to match the `commandCase` setting, which can make module commands less recognizable. This tool preserves their intended casing for better readability and consistency with CMake documentation.
+
+#### 2. Loop Control Commands
 
 **Loop Control Commands** (`break`/`continue`) follow their parent loop's spacing rules, providing more consistent formatting:
 

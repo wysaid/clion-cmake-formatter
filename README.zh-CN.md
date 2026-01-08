@@ -418,7 +418,34 @@ maxBlankLines value 25 is out of range [0, 20]. Using maximum value 20.
 
 ### 与 CLion 的差异
 
-本扩展旨在兼容 CLion，但有**一个有意的增强**：
+本扩展旨在兼容 CLion，但有**两个有意的增强**：
+
+#### 1. 模块命令大小写保持
+
+**模块命令保持其规范的 PascalCase 命名**，不受 `commandCase` 设置的影响：
+
+```cmake
+# 当 commandCase: "lowercase" 时
+include(FetchContent)                    # 标准命令 → 小写
+FetchContent_Declare(mylib)              # 模块命令 → 保持原大小写
+FetchContent_MakeAvailable(mylib)        # 模块命令 → 保持原大小写
+
+include(ExternalProject)                 # 标准命令 → 小写
+ExternalProject_Add(somelib)             # 模块命令 → 保持原大小写
+
+include(CheckCXXSourceCompiles)          # 标准命令 → 小写
+check_cxx_source_compiles(...)           # 设计上就是小写 → 不变
+```
+
+**常见的保持大小写的模块命令**：
+- `FetchContent_*`（Declare、MakeAvailable、Populate、GetProperties）
+- `ExternalProject_*`（Add、Add_Step、Add_StepTargets）
+- `CheckCXXSourceCompiles`、`CheckCXXSourceRuns`
+- 以及其他来自 CMake 模块的 PascalCase_PascalCase 模式命令
+
+**为什么？** CMake 模块作者使用特定的大小写（例如 `FetchContent_Declare`）来区分模块命令和标准命令。CLion 强制所有命令匹配 `commandCase` 设置，这可能会使模块命令不易识别。本工具保持它们的预期大小写，以提高可读性并与 CMake 文档保持一致。
+
+#### 2. 循环控制命令
 
 **循环控制命令**（`break`/`continue`）遵循其父循环的空格规则，提供更一致的格式化：
 

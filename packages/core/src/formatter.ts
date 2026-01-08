@@ -282,10 +282,25 @@ export class CMakeFormatter {
 
     /**
      * Check if a command name is a module command that should preserve its case.
-     * Module commands typically follow the pattern: ModuleName_CommandName
-     * where both parts are in PascalCase (e.g., FetchContent_Declare).
-     * This excludes all-caps commands like ADD_EXECUTABLE.
-     * Examples: FetchContent_Declare, ExternalProject_Add, CheckCXXSourceCompiles
+     * 
+     * **Rationale**: Unlike CLion which forces all commands to lowercase/uppercase,
+     * this tool preserves the case of CMake module commands to maintain their
+     * canonical naming as defined by module authors.
+     * 
+     * **Pattern**: ModuleName_CommandName where both parts are in PascalCase
+     * 
+     * **Common Examples**:
+     * - FetchContent_Declare, FetchContent_MakeAvailable, FetchContent_Populate
+     * - ExternalProject_Add, ExternalProject_Add_Step
+     * - CheckCXXSourceCompiles, CheckCXXSourceRuns
+     * - CMakePackageConfigHelpers commands (configure_package_config_file is lowercase by design)
+     * 
+     * **Exclusions**: 
+     * - All-caps commands (ADD_EXECUTABLE, SET_PROPERTY) - treated as standard commands
+     * - Lowercase with underscores (check_function_exists) - treated as standard commands
+     * 
+     * @param name The command name to check
+     * @returns true if the command should preserve its case
      */
     private isModuleCommand(name: string): boolean {
         // Module commands have the pattern: PascalCaseWord_PascalCaseWord
@@ -309,7 +324,13 @@ export class CMakeFormatter {
 
     /**
      * Apply command case transformation
-     * Module commands (e.g., FetchContent_Declare) preserve their original case
+     * 
+     * **Special Handling**: Module commands (e.g., FetchContent_Declare) preserve 
+     * their original case regardless of the commandCase setting to maintain their
+     * canonical naming convention.
+     * 
+     * @param name The command name to transform
+     * @returns The transformed command name
      */
     private transformCommandCase(name: string): string {
         // Module commands should preserve their case regardless of the commandCase setting

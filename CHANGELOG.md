@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
-- **Module command case preservation** — Commands like `FetchContent_Declare`, `ExternalProject_Add`, `CheckCXXSourceCompiles` now preserve their original case regardless of `commandCase` setting, following CMake module naming conventions (fixes #26)
+- **Module command case preservation** — Commands following the `PascalCase_PascalCase` pattern (e.g., `FetchContent_Declare`, `ExternalProject_Add`, `CheckCXXSourceCompiles`) now preserve their original case regardless of `commandCase` setting, maintaining their canonical naming as defined by CMake module authors. This is an intentional difference from CLion, which forces all commands to match the `commandCase` setting. See [README § Differences from CLion](README.md#differences-from-clion) for details. (fixes #26)
 
 ## [1.4.1] - 2025-12-31
 

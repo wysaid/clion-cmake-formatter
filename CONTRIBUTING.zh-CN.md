@@ -134,7 +134,7 @@ pnpm run test:unit # 运行所有测试
 
 ```bash
 # 需要安装 CLion
-npm run test:clion
+pnpm run test:clion
 ```
 
 此测试使用 CLion 和本插件分别格式化文件，然后比较结果。详情请参阅 [docs/CLION_INTEGRATION_TESTING.md](docs/CLION_INTEGRATION_TESTING.md)（英文）。
@@ -203,8 +203,8 @@ npx mocha --require ts-node/register test/parser.test.ts
 
 1. **Fork 仓库** 并创建功能分支
 2. **为您的更改添加测试**
-3. **确保所有测试通过**: `npm run test:unit`
-4. **确保代码质量**: `npm run lint`
+3. **确保所有测试通过**: `pnpm run test:unit`
+4. **确保代码质量**: `pnpm run lint`
 5. **编写清晰的 PR 描述**，说明：
    - 它解决了什么问题？
    - 有哪些更改？

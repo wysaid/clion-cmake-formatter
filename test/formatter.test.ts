@@ -150,6 +150,22 @@ ExternalProject_Add_StepTargets(proj step1)`;
             assert.ok(output.includes('ExternalProject_Add_StepTargets'),
                 'ExternalProject_Add_StepTargets should preserve case');
         });
+
+        it('should NOT preserve commands that do not match module pattern (no underscore)', () => {
+            // CheckCXXSourceCompiles lacks an underscore, so it should be treated as a standard command
+            const input = 'CheckCXXSourceCompiles(VAR src)';
+            const output = formatCMake(input, { commandCase: 'lowercase' });
+
+            assert.strictEqual(output.trim(), 'checkcxxsourcecompiles(VAR src)');
+        });
+
+        it('should NOT preserve commands starting with lowercase', () => {
+            // pkg_check_modules starts with lowercase, so it should be treated as standard
+            const input = 'pkg_check_modules(GTK3 REQUIRED gtk+-3.0)';
+            const output = formatCMake(input, { commandCase: 'uppercase' });
+
+            assert.strictEqual(output.trim(), 'PKG_CHECK_MODULES(GTK3 REQUIRED gtk+-3.0)');
+        });
     });
 
     describe('Indentation', () => {

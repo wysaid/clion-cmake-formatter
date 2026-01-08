@@ -10,15 +10,13 @@ TEMP_DIR=$(mktemp -d)
 echo "Packaging VS Code extension..."
 echo "Temporary directory: $TEMP_DIR"
 
-# Build first
-echo "Building packages..."
-cd "$SCRIPT_DIR/.."
+# Build with webpack (bundles all dependencies into extension.js)
+echo "Building VS Code extension with webpack..."
+cd "$VSCODE_DIR"
 npm run build
 
 # Copy necessary files to temp directory
-mkdir -p "$TEMP_DIR/node_modules/@cc-format/core"
-cp -r "$SCRIPT_DIR/../packages/core/dist" "$TEMP_DIR/node_modules/@cc-format/core/"
-cp "$SCRIPT_DIR/../packages/core/package.json" "$TEMP_DIR/node_modules/@cc-format/core/"
+cd "$SCRIPT_DIR/.."
 cp -r "$VSCODE_DIR/dist" "$TEMP_DIR/"
 cp -r "$VSCODE_DIR/resources" "$TEMP_DIR/"
 cp "$VSCODE_DIR/package.json" "$TEMP_DIR/"
@@ -40,6 +38,7 @@ cp "$VSCODE_DIR/.vscodeignore" "$TEMP_DIR/.vscodeignore" 2>/dev/null || (
     cat >"$TEMP_DIR/.vscodeignore" <<'EOF'
 src/**
 test/**
+webpack.config.js
 tsconfig.json
 .npmignore
 .git/**
@@ -58,8 +57,17 @@ EOF
 
 cd "$TEMP_DIR"
 
-# Remove prepublish script to avoid running it in temp dir
-node -e "const pkg=require('./package.json'); delete pkg.scripts['vscode:prepublish']; require('fs').writeFileSync('package.json', JSON.stringify(pkg, null, 2));"
+# Clean up package.json for vsce
+node -e "
+const fs = require('fs');
+const pkg = require('./package.json');
+
+// Remove vscode:prepublish script to avoid running it again
+delete pkg.scripts['vscode:prepublish'];
+
+fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
+console.log('✓ Cleaned package.json for packaging');
+"
 
 npx --yes @vscode/vsce package
 

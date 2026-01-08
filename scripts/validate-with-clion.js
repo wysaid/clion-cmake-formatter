@@ -653,12 +653,12 @@ You can restore files with:
         console.log('\n💾 Saving CLion output...');
         for (const testFile of testFiles) {
             const relativePath = path.relative(workingDir, testFile);
-            const clionPath = path.join(clionOutputDir, relativePath);
-            const clionDirPath = path.dirname(clionPath);
+            const clionOutputPath = path.join(clionOutputDir, relativePath);
+            const clionDirPath = path.dirname(clionOutputPath);
             if (!fs.existsSync(clionDirPath)) {
                 fs.mkdirSync(clionDirPath, { recursive: true });
             }
-            fs.copyFileSync(testFile, clionPath);
+            fs.copyFileSync(testFile, clionOutputPath);
         }
         console.log('✅ CLion output saved');
     }
@@ -683,10 +683,10 @@ You can restore files with:
             // Compare mode: compare plugin output with CLion output from comparison directories
             try {
                 const pluginPath = path.join(pluginOutputDir, relativePath);
-                const clionPath = path.join(clionOutputDir, relativePath);
+                const clionOutputPath = path.join(clionOutputDir, relativePath);
 
                 const pluginContent = fs.readFileSync(pluginPath, 'utf-8');
-                const clionContent = fs.readFileSync(clionPath, 'utf-8');
+                const clionContent = fs.readFileSync(clionOutputPath, 'utf-8');
 
                 if (areContentsEquivalent(pluginContent, clionContent)) {
                     console.log('✅ MATCH');
@@ -696,7 +696,7 @@ You can restore files with:
                     try {
                         const originalPath = path.join(originalDir, relativePath);
                         fs.unlinkSync(pluginPath);
-                        fs.unlinkSync(clionPath);
+                        fs.unlinkSync(clionOutputPath);
                         fs.unlinkSync(originalPath);
                     } catch (e) {
                         // Ignore deletion errors
@@ -815,9 +815,9 @@ You can restore files with:
             if (testRunDir) {
                 console.log('\n   📂 Test results saved to:');
                 console.log(`      ${testRunDir}/`);
-                console.log(`      ├── original/ - 原始文件`);
-                console.log(`      ├── plugin/   - 插件格式化结果 (Result B)`);
-                console.log(`      └── clion/    - CLion 格式化结果 (Result A)`);
+                console.log(`      ├── original/ - Original files`);
+                console.log(`      ├── plugin/   - Plugin formatted output (Result B)`);
+                console.log(`      └── clion/    - CLion formatted output (Result A)`);
                 console.log('\n   💡 Compare files with:');
                 console.log(`      code --diff "${testRunDir}/plugin/file.cmake" "${testRunDir}/clion/file.cmake"`);
                 console.log(`      diff -u "${testRunDir}/plugin/file.cmake" "${testRunDir}/clion/file.cmake"`);

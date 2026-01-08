@@ -230,7 +230,7 @@ export class CMakeFormatter {
         // 1. Input ended with newline, OR
         // 2. There are trailing blank lines to add
         const hasTrailingNewline = this.inputEndsWithNewline || trailingBlankLines > 0;
-        
+
         if (hasTrailingNewline && !result.endsWith('\n')) {
             result += '\n';
         }
@@ -281,9 +281,42 @@ export class CMakeFormatter {
     }
 
     /**
+     * Check if a command name is a module command that should preserve its case.
+     * Module commands typically follow the pattern: ModuleName_CommandName
+     * where both parts are in PascalCase (e.g., FetchContent_Declare).
+     * This excludes all-caps commands like ADD_EXECUTABLE.
+     * Examples: FetchContent_Declare, ExternalProject_Add, CheckCXXSourceCompiles
+     */
+    private isModuleCommand(name: string): boolean {
+        // Module commands have the pattern: PascalCaseWord_PascalCaseWord
+        // - Must contain underscore
+        // - Must have lowercase letters (not all caps)
+        // - First part starts with uppercase
+        // - After underscore, next char is uppercase
+        if (!name.includes('_')) {
+            return false;
+        }
+
+        // Exclude all-caps commands (like ADD_EXECUTABLE)
+        if (name === name.toUpperCase()) {
+            return false;
+        }
+
+        // Check for PascalCase pattern: starts with capital, has lowercase, underscore, then capital
+        const moduleCommandPattern = /^[A-Z][a-z]+.*_[A-Z]/;
+        return moduleCommandPattern.test(name);
+    }
+
+    /**
      * Apply command case transformation
+     * Module commands (e.g., FetchContent_Declare) preserve their original case
      */
     private transformCommandCase(name: string): string {
+        // Module commands should preserve their case regardless of the commandCase setting
+        if (this.isModuleCommand(name)) {
+            return name;
+        }
+
         switch (this.options.commandCase) {
             case 'lowercase':
                 return name.toLowerCase();
@@ -703,7 +736,7 @@ export class CMakeFormatter {
      */
     private reformatNestedParenArg(arg: ArgumentInfo, commandIndent: string, continuationIndent: string): string {
         const value = arg.value;
-        
+
         // Only process if it contains newlines and looks like nested parens
         if (!value.includes('\n')) {
             return value;
@@ -763,7 +796,7 @@ export class CMakeFormatter {
                 // Add up to maxBlankLines from the count in this node
                 const remaining = Math.max(0, maxBlankLines - consecutiveBlankLines);
                 const linesToAdd = Math.min(blankNode.count, remaining);
-                
+
                 for (let j = 0; j < linesToAdd; j++) {
                     lines.push(this.options.keepIndentOnEmptyLines ? this.getIndent() : '');
                 }

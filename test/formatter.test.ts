@@ -55,6 +55,52 @@ describe('CMakeFormatter', () => {
 
             assert.strictEqual(output.trim(), 'PROJECT(MyProject)');
         });
+
+        it('should preserve module command case with lowercase setting', () => {
+            const input = `include(FetchContent)
+FetchContent_Declare(mylib)
+FetchContent_MakeAvailable(mylib)
+ExternalProject_Add(somelib)`;
+
+            const output = formatCMake(input, { commandCase: 'lowercase' });
+
+            // Module commands should preserve their case
+            assert.ok(output.includes('FetchContent_Declare'),
+                'FetchContent_Declare should preserve case');
+            assert.ok(output.includes('FetchContent_MakeAvailable'),
+                'FetchContent_MakeAvailable should preserve case');
+            assert.ok(output.includes('ExternalProject_Add'),
+                'ExternalProject_Add should preserve case');
+
+            // Standard command should be lowercase
+            assert.ok(output.includes('include('),
+                'include should be lowercase');
+        });
+
+        it('should preserve module command case with uppercase setting', () => {
+            const input = `include(FetchContent)
+FetchContent_Declare(mylib)`;
+
+            const output = formatCMake(input, { commandCase: 'uppercase' });
+
+            // Module command should preserve its case
+            assert.ok(output.includes('FetchContent_Declare'),
+                'FetchContent_Declare should preserve case');
+            // Standard command should be uppercase
+            assert.ok(output.includes('INCLUDE('),
+                'INCLUDE should be uppercase');
+        });
+
+        it('should transform all-caps commands even with underscores', () => {
+            const input = `ADD_EXECUTABLE(myapp main.cpp)
+ADD_LIBRARY(mylib lib.cpp)`;
+
+            const output = formatCMake(input, { commandCase: 'lowercase' });
+
+            // These are standard commands in all-caps, should be transformed
+            assert.ok(output.includes('add_executable('), 'add_executable should be lowercase');
+            assert.ok(output.includes('add_library('), 'add_library should be lowercase');
+        });
     });
 
     describe('Indentation', () => {

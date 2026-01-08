@@ -1,4 +1,4 @@
-# Test case for module commands with lowercase commandCase setting
+# Test case for module commands with uppercase commandCase setting
 # Module commands should preserve their PascalCase naming
 
 # FetchContent module commands (preserve case)
@@ -60,11 +60,11 @@ WRITE_BASIC_PACKAGE_VERSION_FILE(
 INCLUDE(CheckCXXSourceCompiles)
 CHECK_CXX_SOURCE_COMPILES("int main() { return 0; }" HAVE_MAIN)
 
-# Commands with underscore followed by lowercase (should be lowercase)
+# Commands with underscore followed by lowercase (should be uppercase)
 SWIG_ADD_LIBRARY(mylib TYPE SHARED)
 CPACK_ADD_COMPONENT(mycomp)
 
-# Standard commands should be lowercase
+# Standard commands should be uppercase
 SET(MY_VAR "value")
 MESSAGE(STATUS "Hello from module commands test")
 PROJECT(MyProject VERSION 1.0.0)

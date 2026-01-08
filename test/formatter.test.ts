@@ -166,6 +166,57 @@ ExternalProject_Add_StepTargets(proj step1)`;
 
             assert.strictEqual(output.trim(), 'PKG_CHECK_MODULES(GTK3 REQUIRED gtk+-3.0)');
         });
+
+        it('should handle comprehensive module command dataset (lowercase config)', () => {
+            const input = loadEdgeCase('module-commands');
+            const output = formatCMake(input, { commandCase: 'lowercase' });
+
+            // PascalCase module commands should be preserved
+            assert.ok(output.includes('FetchContent_Declare'), 'FetchContent_Declare preserved');
+            assert.ok(output.includes('FetchContent_MakeAvailable'), 'FetchContent_MakeAvailable preserved');
+            assert.ok(output.includes('ExternalProject_Add'), 'ExternalProject_Add preserved');
+            assert.ok(output.includes('ExternalProject_Add_Step'), 'ExternalProject_Add_Step preserved');
+            assert.ok(output.includes('ExternalProject_Add_StepTargets'), 'ExternalProject_Add_StepTargets preserved');
+            assert.ok(output.includes('GTest_Add_Tests'), 'GTest_Add_Tests preserved');
+            assert.ok(output.includes('GMock_Add_Tests'), 'GMock_Add_Tests preserved');
+            assert.ok(output.includes('Qt5_Use_Modules'), 'Qt5_Use_Modules preserved');
+            assert.ok(output.includes('Qt6_Add_Resources'), 'Qt6_Add_Resources preserved');
+            assert.ok(output.includes('CPM_AddPackage'), 'CPM_AddPackage preserved');
+
+            // Lowercase module-provided commands should remain lowercase (subject to commandCase)
+            assert.ok(output.includes('check_cxx_source_compiles('),
+                'check_cxx_source_compiles should remain lowercase');
+
+            // Commands with underscore followed by lowercase should be transformed
+            assert.ok(output.includes('swig_add_library('), 'swig_add_library should be lowercase');
+            assert.ok(output.includes('cpack_add_component('), 'cpack_add_component should be lowercase');
+
+            // Standard commands should follow configuration
+            assert.ok(output.includes('include('), 'include should be lowercase');
+            assert.ok(output.includes('set('), 'set should be lowercase');
+            assert.ok(output.includes('message('), 'message should be lowercase');
+        });
+
+        it('should transform lowercase module commands when commandCase is uppercase', () => {
+            const input = loadEdgeCase('module-commands');
+            const output = formatCMake(input, { commandCase: 'uppercase' });
+
+            // PascalCase module commands still preserve their case
+            assert.ok(output.includes('FetchContent_Declare'), 'FetchContent_Declare preserved');
+            assert.ok(output.includes('ExternalProject_Add'), 'ExternalProject_Add preserved');
+
+            // Standard commands should be uppercased
+            assert.ok(output.includes('INCLUDE('), 'INCLUDE should be uppercase');
+            assert.ok(output.includes('SET('), 'SET should be uppercase');
+
+            // Lowercase module-provided commands are treated as standard commands
+            assert.ok(output.includes('CHECK_CXX_SOURCE_COMPILES('),
+                'check_cxx_source_compiles should be uppercased under uppercase setting');
+
+            // Commands with underscore followed by lowercase should be transformed
+            assert.ok(output.includes('SWIG_ADD_LIBRARY('), 'SWIG_add_library should be uppercased');
+            assert.ok(output.includes('CPACK_ADD_COMPONENT('), 'CPack_add_component should be uppercased');
+        });
     });
 
     describe('Indentation', () => {

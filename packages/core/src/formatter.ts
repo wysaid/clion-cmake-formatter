@@ -128,12 +128,11 @@ const COMMAND_DEFINITION_COMMANDS = ['function', 'endfunction', 'macro', 'endmac
 /**
  * CMake Formatter class
  */
-const MODULE_COMMAND_PATTERN = /^[A-Z][A-Za-z0-9]+_[A-Z]/;
-
 export class CMakeFormatter {
     private options: FormatterOptions;
     private indentLevel: number = 0;
     private inputEndsWithNewline: boolean = false;
+    private static readonly moduleCommandPattern = /^[A-Z][A-Za-z0-9]+_[A-Z]/;
 
     constructor(options: Partial<FormatterOptions> = {}) {
         this.options = { ...DEFAULT_OPTIONS, ...options };
@@ -323,7 +322,7 @@ export class CMakeFormatter {
         // Check for PascalCase pattern: starts with capital, followed by letters/digits, underscore, then capital
         // This matches: FetchContent_Declare, GTest_Add_Tests, CPM_AddPackage, Qt5_Use_Modules, Qt6_Add_Resources
         // But NOT: SWIG_add_library, CPack_add_component (underscore followed by lowercase)
-        return MODULE_COMMAND_PATTERN.test(name);
+        return CMakeFormatter.moduleCommandPattern.test(name);
     }
 
     /**

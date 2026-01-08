@@ -48,7 +48,7 @@ After running the comparison test with differences, you can inspect the results:
 
 **Directory Structure:**
 
-```
+```text
 test/datasets/real-world/test-error-results/
 ├── plugin/    - 插件格式化结果 (Result B)
 ├── clion/     - CLion 格式化结果 (Result A)

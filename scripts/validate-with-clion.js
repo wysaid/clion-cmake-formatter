@@ -88,7 +88,7 @@ for (let i = 0; i < args.length; i++) {
             }
             options.testDirs.push(args[++i]);
             break;
-        case '--mode':
+        case '--mode': {
             if (i + 1 >= args.length || args[i + 1].startsWith('-')) {
                 console.error('Error: --mode requires a value');
                 process.exit(1);
@@ -100,6 +100,7 @@ for (let i = 0; i < args.length; i++) {
             }
             options.mode = mode;
             break;
+        }
         case '--file':
             if (i + 1 >= args.length || args[i + 1].startsWith('-')) {
                 console.error('Error: --file requires a value');

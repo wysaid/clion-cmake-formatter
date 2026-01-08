@@ -292,12 +292,13 @@ export class CMakeFormatter {
      * **Common Examples**:
      * - FetchContent_Declare, FetchContent_MakeAvailable, FetchContent_Populate
      * - ExternalProject_Add, ExternalProject_Add_Step
-     * - CheckCXXSourceCompiles, CheckCXXSourceRuns
-     * - CMakePackageConfigHelpers commands (configure_package_config_file is lowercase by design)
+     * - (Note: modules like CheckCXXSourceCompiles define lowercase commands such as
+     *   check_cxx_source_compiles/check_cxx_source_runs; these do not match this
+     *   PascalCase pattern and are therefore treated as standard commands.)
      * 
      * **Exclusions**: 
      * - All-caps commands (ADD_EXECUTABLE, SET_PROPERTY) - treated as standard commands
-     * - Lowercase with underscores (check_function_exists) - treated as standard commands
+     * - Lowercase with underscores (check_function_exists, check_cxx_source_compiles) - treated as standard commands
      * 
      * @param name The command name to check
      * @returns true if the command should preserve its case

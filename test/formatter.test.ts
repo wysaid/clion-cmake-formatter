@@ -60,7 +60,10 @@ describe('CMakeFormatter', () => {
             const input = `include(FetchContent)
 FetchContent_Declare(mylib)
 FetchContent_MakeAvailable(mylib)
-ExternalProject_Add(somelib)`;
+ExternalProject_Add(somelib)
+GTest_Add_Tests(mytest)
+CPM_AddPackage(pkg)
+Qt5_Use_Modules(myapp)`;
 
             const output = formatCMake(input, { commandCase: 'lowercase' });
 
@@ -71,6 +74,12 @@ ExternalProject_Add(somelib)`;
                 'FetchContent_MakeAvailable should preserve case');
             assert.ok(output.includes('ExternalProject_Add'),
                 'ExternalProject_Add should preserve case');
+            assert.ok(output.includes('GTest_Add_Tests'),
+                'GTest_Add_Tests should preserve case');
+            assert.ok(output.includes('CPM_AddPackage'),
+                'CPM_AddPackage should preserve case');
+            assert.ok(output.includes('Qt5_Use_Modules'),
+                'Qt5_Use_Modules should preserve case');
 
             // Standard command should be lowercase
             assert.ok(output.includes('include('),
@@ -100,6 +109,46 @@ ADD_LIBRARY(mylib lib.cpp)`;
             // These are standard commands in all-caps, should be transformed
             assert.ok(output.includes('add_executable('), 'add_executable should be lowercase');
             assert.ok(output.includes('add_library('), 'add_library should be lowercase');
+        });
+
+        it('should NOT preserve commands with underscore followed by lowercase', () => {
+            // Commands like SWIG_add_library, CPack_add_component have underscore followed by lowercase
+            // These should be treated as standard commands, not module commands
+            const input = `SWIG_add_library(mylib TYPE SHARED)
+CPack_add_component(mycomp)`;
+
+            const output = formatCMake(input, { commandCase: 'lowercase' });
+
+            // These should be transformed to lowercase since underscore is followed by lowercase
+            assert.ok(output.includes('swig_add_library('),
+                'SWIG_add_library should be transformed to lowercase');
+            assert.ok(output.includes('cpack_add_component('),
+                'CPack_add_component should be transformed to lowercase');
+        });
+
+        it('should preserve module commands with numbers in name', () => {
+            // Commands like Qt5_Use_Modules should be preserved
+            const input = `Qt5_Use_Modules(myapp Core Gui)
+Qt6_Add_Resources(myapp resources.qrc)`;
+
+            const output = formatCMake(input, { commandCase: 'lowercase' });
+
+            assert.ok(output.includes('Qt5_Use_Modules'),
+                'Qt5_Use_Modules should preserve case');
+            assert.ok(output.includes('Qt6_Add_Resources'),
+                'Qt6_Add_Resources should preserve case');
+        });
+
+        it('should preserve multi-underscore module commands', () => {
+            const input = `ExternalProject_Add_Step(proj step1)
+ExternalProject_Add_StepTargets(proj step1)`;
+
+            const output = formatCMake(input, { commandCase: 'lowercase' });
+
+            assert.ok(output.includes('ExternalProject_Add_Step'),
+                'ExternalProject_Add_Step should preserve case');
+            assert.ok(output.includes('ExternalProject_Add_StepTargets'),
+                'ExternalProject_Add_StepTargets should preserve case');
         });
     });
 

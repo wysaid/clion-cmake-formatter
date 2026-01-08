@@ -29,6 +29,18 @@ ExternalProject_Add_Step(
         COMMAND ${CMAKE_COMMAND} -E echo "Custom step"
 )
 
+# GTest/GMock module commands (preserve case)
+include(GoogleTest)
+GTest_Add_Tests(TARGET mytest)
+GMock_Add_Tests(TARGET mocktest)
+
+# Qt module commands (preserve case)
+Qt5_Use_Modules(myapp Core Gui)
+Qt6_Add_Resources(myapp resources.qrc)
+
+# CPM package manager (preserve case)
+CPM_AddPackage(NAME fmt VERSION 9.1.0)
+
 # CMakePackageConfigHelpers module (lowercase command by design)
 include(CMakePackageConfigHelpers)
 
@@ -47,6 +59,10 @@ write_basic_package_version_file(
 # CheckCXXSourceCompiles module (lowercase command by design)
 include(CheckCXXSourceCompiles)
 check_cxx_source_compiles("int main() { return 0; }" HAVE_MAIN)
+
+# Commands with underscore followed by lowercase (should be lowercase)
+swig_add_library(mylib TYPE SHARED)
+cpack_add_component(mycomp)
 
 # Standard commands should be lowercase
 set(MY_VAR "value")

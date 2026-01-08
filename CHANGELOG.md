@@ -7,9 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.2] - 2026-01-08
+
 ### Fixed
 
 - **Module command case preservation** — Commands following the `PascalCase_PascalCase` pattern (e.g., `FetchContent_Declare`, `ExternalProject_Add`) now preserve their original case regardless of `commandCase` setting, maintaining their canonical naming as defined by CMake module authors. Note that modules like `CheckCXXSourceCompiles` provide lowercase commands (e.g., `check_cxx_source_compiles`) which do not match the PascalCase pattern and are therefore treated as standard commands subject to `commandCase` transformation. This is an intentional difference from CLion, which forces all commands to match the `commandCase` setting. See [README § Differences from CLion](README.md#differences-from-clion) for details. (fixes #26)
+- **Blank line preservation** — Fixed parser to correctly preserve blank lines containing whitespace characters, ensuring consistent formatting with CLion
+- **Module command pattern detection** — Enhanced regex pattern to support module commands with digits in names (e.g., `Qt5_Use_Modules`, `Qt6_Add_Resources`)
+
+### Added
+
+- **Webpack bundling for VS Code extension** — Migrated to webpack for single-file bundling, reducing VSIX size from 148KB to 139KB and improving extension loading performance
+- **Enhanced CLion comparison testing** — Improved testing infrastructure with isolated test directories and automatic cleanup of matched files
+- **Comprehensive module command tests** — Added extensive test coverage for module command edge cases including GTest, GMock, Qt5/Qt6, CPM commands
+
+### Changed
+
+- **Publishing workflow** — Added unified version tag creation (`v{X}.{Y}.{Z}`) after publishing all packages with `--all` flag
+- **Performance optimization** — Extracted module command pattern as constant to avoid regex recompilation on each check
 
 ## [1.4.1] - 2025-12-31
 

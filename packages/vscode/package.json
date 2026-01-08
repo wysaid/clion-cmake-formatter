@@ -2,7 +2,7 @@
     "name": "clion-cmake-format",
     "displayName": "%displayName%",
     "description": "%description%",
-    "version": "1.4.1",
+    "version": "1.4.2",
     "publisher": "wysaid",
     "license": "MIT",
     "icon": "logo.png",
@@ -258,5 +258,8 @@
     "bugs": {
         "url": "https://github.com/wysaid/clion-cmake-format/issues"
     },
-    "homepage": "https://github.com/wysaid/clion-cmake-format#readme"
+    "homepage": "https://github.com/wysaid/clion-cmake-format#readme",
+    "dependencies": {
+        "@cc-format/core": "1.4.2"
+    }
 }

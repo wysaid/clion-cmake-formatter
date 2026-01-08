@@ -282,24 +282,24 @@ export class CMakeFormatter {
 
     /**
      * Check if a command name is a module command that should preserve its case.
-     * 
+     *
      * **Rationale**: Unlike CLion which forces all commands to lowercase/uppercase,
      * this tool preserves the case of CMake module commands to maintain their
      * canonical naming as defined by module authors.
-     * 
+     *
      * **Pattern**: ModuleName_CommandName where both parts are in PascalCase
-     * 
+     *
      * **Common Examples**:
      * - FetchContent_Declare, FetchContent_MakeAvailable, FetchContent_Populate
      * - ExternalProject_Add, ExternalProject_Add_Step
      * - (Note: modules like CheckCXXSourceCompiles define lowercase commands such as
      *   check_cxx_source_compiles/check_cxx_source_runs; these do not match this
      *   PascalCase pattern and are therefore treated as standard commands.)
-     * 
-     * **Exclusions**: 
+     *
+     * **Exclusions**:
      * - All-caps commands (ADD_EXECUTABLE, SET_PROPERTY) - treated as standard commands
      * - Lowercase with underscores (check_function_exists, check_cxx_source_compiles) - treated as standard commands
-     * 
+     *
      * @param name The command name to check
      * @returns true if the command should preserve its case
      */
@@ -327,11 +327,11 @@ export class CMakeFormatter {
 
     /**
      * Apply command case transformation
-     * 
-     * **Special Handling**: Module commands (e.g., FetchContent_Declare) preserve 
+     *
+     * **Special Handling**: Module commands (e.g., FetchContent_Declare) preserve
      * their original case regardless of the commandCase setting to maintain their
      * canonical naming convention.
-     * 
+     *
      * @param name The command name to transform
      * @returns The transformed command name
      */

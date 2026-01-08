@@ -9,29 +9,39 @@
 ### 前置要求
 
 - Node.js 18+
-- npm
+- **pnpm 9+**（本项目使用 pnpm 进行 monorepo 管理）
 
 ### 开始
 
 ```bash
 git clone https://github.com/wysaid/clion-cmake-format.git
 cd clion-cmake-format
-npm install
-npm run compile
-npm run test:unit
+
+# 如果还没有安装 pnpm，先安装
+npm install -g pnpm
+
+# 安装依赖并构建
+pnpm install
+pnpm run compile
+pnpm run test:unit
 ```
+
+**为什么使用 pnpm？** 本 monorepo 需要 pnpm 来正确管理 workspace 依赖。pnpm 确保：
+- 本地包始终使用最新的本地代码（而不是 npm registry 版本）
+- 更快的安装速度和更高的磁盘空间效率
+- 严格的依赖隔离，防止幻影依赖
 
 ## 📜 可用脚本
 
 | 脚本 | 描述 |
 |------|------|
-| `npm run compile` | 编译 TypeScript 到 JavaScript |
-| `npm run watch` | 监听模式编译（自动重新编译） |
-| `npm run lint` | 运行 ESLint 检查代码质量 |
-| `npm run test:unit` | 运行所有单元测试（提交前必须通过） |
-| `npm run test:clion` | 与 CLion 对比格式化（需要安装 CLion） |
-| `npm run test:cmake-official` | 在 CMake 官方文件上测试幂等性 |
-| `npm run package` | 打包扩展为 `.vsix` 文件 |
+| `pnpm run compile` | 编译 TypeScript 到 JavaScript |
+| `pnpm run watch` | 监听模式编译（自动重新编译） |
+| `pnpm run lint` | 运行 ESLint 检查代码质量 |
+| `pnpm run test:unit` | 运行所有单元测试（提交前必须通过） |
+| `pnpm run test:clion` | 与 CLion 对比格式化（需要安装 CLion） |
+| `pnpm run test:cmake-official` | 在 CMake 官方文件上测试幂等性 |
+| `pnpm run package` | 打包扩展为 `.vsix` 文件 |
 
 ## 📂 项目结构
 
@@ -86,8 +96,8 @@ clion-cmake-format/
 提交前始终运行这些命令：
 
 ```bash
-npm run lint      # 检查代码质量
-npm run test:unit # 运行所有测试
+pnpm run lint      # 检查代码质量
+pnpm run test:unit # 运行所有测试
 ```
 
 所有测试必须通过（要求 100% 通过率）。
@@ -124,7 +134,7 @@ npm run test:unit # 运行所有测试
 
 ```bash
 # 需要安装 CLion
-npm run test:clion
+pnpm run test:clion
 ```
 
 此测试使用 CLion 和本插件分别格式化文件，然后比较结果。详情请参阅 [docs/CLION_INTEGRATION_TESTING.md](docs/CLION_INTEGRATION_TESTING.md)（英文）。
@@ -163,7 +173,7 @@ npm run test:clion
 - **分号**: 必需
 - **行长度**: ~120 字符（软限制）
 
-运行 `npm run lint` 检查风格违规。
+运行 `pnpm run lint` 检查风格违规。
 
 ## 🧪 测试开发
 
@@ -183,7 +193,7 @@ describe('Parser', () => {
 
 ```bash
 # 运行所有测试
-npm run test:unit
+pnpm run test:unit
 
 # 运行特定测试文件（使用 ts-node）
 npx mocha --require ts-node/register test/parser.test.ts
@@ -193,8 +203,8 @@ npx mocha --require ts-node/register test/parser.test.ts
 
 1. **Fork 仓库** 并创建功能分支
 2. **为您的更改添加测试**
-3. **确保所有测试通过**: `npm run test:unit`
-4. **确保代码质量**: `npm run lint`
+3. **确保所有测试通过**: `pnpm run test:unit`
+4. **确保代码质量**: `pnpm run lint`
 5. **编写清晰的 PR 描述**，说明：
    - 它解决了什么问题？
    - 有哪些更改？

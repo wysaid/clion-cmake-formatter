@@ -188,14 +188,17 @@ jobs:
         echo "version=$VERSION" >> $GITHUB_OUTPUT
         echo "Extracted version: $VERSION"
 
+    - name: Install pnpm
+      uses: pnpm/action-setup@v4
+
     - name: Use Node.js
       uses: actions/setup-node@v4
       with:
         node-version: 22.x
-        cache: 'npm'
+        cache: 'pnpm'
 
     - name: Install dependencies
-      run: npm ci
+      run: pnpm install --frozen-lockfile
 
     # Version validation: Tag base version (e.g., 1.0.3 from 1.0.3-alpha) must match package.json version
     # This applies to both stable releases and pre-releases
@@ -232,16 +235,16 @@ jobs:
         echo "Version check passed: $TAG_VERSION"
 
     - name: Compile TypeScript
-      run: npm run compile
+      run: pnpm run compile
 
     - name: Run Linter
-      run: npm run lint
+      run: pnpm run lint
 
     - name: Run Tests
-      run: npm run test:unit
+      run: pnpm run test:unit
 
     - name: Build VSIX
-      run: npm run package:vscode
+      run: pnpm run package:vscode
 
     - name: Check if version exists in VS Code Marketplace
       id: check_marketplace
@@ -362,16 +365,16 @@ jobs:
       run: |
         # Build the Core package
         echo "Building @cc-format/core..."
-        npm run build:core
+        pnpm run build:core
 
-        # Publish using NODE_AUTH_TOKEN (npm uses it automatically)
+        # Publish using NODE_AUTH_TOKEN (pnpm uses it automatically)
         cd packages/core
         if [ "${{ steps.validate_tag.outputs.is_stable_release }}" == "true" ]; then
           echo "Publishing @cc-format/core as stable release..."
-          npm publish --access public
+          pnpm publish --access public --no-git-checks
         else
           echo "Publishing @cc-format/core as pre-release (next tag)..."
-          npm publish --access public --tag next
+          pnpm publish --access public --tag next --no-git-checks
         fi
 
         echo "✓ @cc-format/core published successfully"
@@ -384,16 +387,16 @@ jobs:
       run: |
         # Build the CLI package
         echo "Building cc-format..."
-        npm run build:cli
+        pnpm run build:cli
 
-        # Publish using NODE_AUTH_TOKEN (npm uses it automatically)
+        # Publish using NODE_AUTH_TOKEN (pnpm uses it automatically)
         cd packages/cli
         if [ "${{ steps.validate_tag.outputs.is_stable_release }}" == "true" ]; then
           echo "Publishing cc-format as stable release..."
-          npm publish --access public
+          pnpm publish --access public --no-git-checks
         else
           echo "Publishing cc-format as pre-release (next tag)..."
-          npm publish --access public --tag next
+          pnpm publish --access public --tag next --no-git-checks
         fi
 
         echo "✓ cc-format published successfully"

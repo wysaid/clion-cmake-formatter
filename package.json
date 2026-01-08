@@ -1,19 +1,22 @@
 {
     "name": "clion-cmake-format-monorepo",
-    "version": "1.4.1",
+    "version": "1.4.2",
     "private": true,
     "description": "Monorepo for CMake formatter with CLion-compatible style",
-    "workspaces": [
-        "packages/*"
-    ],
+    "packageManager": "pnpm@9.15.4",
+    "engines": {
+        "node": ">=18",
+        "pnpm": ">=9.0.0"
+    },
     "scripts": {
-        "build": "npm run build:core && npm run build:cli && npm run build:vscode",
-        "build:core": "npm run build -w @cc-format/core",
-        "build:cli": "npm run build -w cc-format",
-        "build:vscode": "npm run build -w clion-cmake-format",
-        "clean": "npm run clean --workspaces --if-present && rm -rf dist",
-        "compile": "npm run build",
-        "watch": "npm run watch -w clion-cmake-format",
+        "preinstall": "node scripts/check-pnpm.js",
+        "build": "pnpm --filter @cc-format/core build && pnpm --filter cc-format build && pnpm --filter clion-cmake-format build",
+        "build:core": "pnpm --filter @cc-format/core build",
+        "build:cli": "pnpm --filter cc-format build",
+        "build:vscode": "pnpm --filter clion-cmake-format build",
+        "clean": "pnpm --recursive run clean && rm -rf dist",
+        "compile": "pnpm run build",
+        "watch": "pnpm --filter clion-cmake-format run watch",
         "lint": "eslint 'packages/*/src/**/*.ts'",
         "test": "mocha 'test/**/*.test.ts' --exclude 'test/integration/**'",
         "test:unit": "mocha 'test/**/*.test.ts' --exclude 'test/integration/**'",
@@ -21,8 +24,8 @@
         "test:all": "mocha 'test/**/*.test.ts'",
         "test:clion": "node scripts/validate-with-clion.js",
         "package:vscode": "bash scripts/package-vscode.sh",
-        "publish:core": "npm publish -w @cc-format/core",
-        "publish:cli": "npm publish -w cc-format",
+        "publish:core": "cd packages/core && pnpm publish",
+        "publish:cli": "cd packages/cli && pnpm publish",
         "publish:vscode": "cd packages/vscode && vsce publish",
         "verify-symlinks": "bash scripts/verify-symlinks.sh"
     },
@@ -43,9 +46,5 @@
         "type": "git",
         "url": "https://github.com/wysaid/clion-cmake-format"
     },
-    "license": "MIT",
-    "engines": {
-        "node": ">=18",
-        "npm": ">=9"
-    }
+    "license": "MIT"
 }

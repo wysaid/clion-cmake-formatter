@@ -2,8 +2,8 @@
 src/**
 test/**
 
-# Exclude test dist files
-dist/test/**
+# Webpack config
+webpack.config.js
 
 # Build files
 tsconfig.json
@@ -28,9 +28,9 @@ tsconfig.json
 # GitHub workflows (not needed in extension)
 .github/**
 
-# Dependencies
+# Dependencies (webpack bundles everything, no node_modules needed)
 node_modules/**
-package-lock.json
+pnpm-lock.yaml
 
 # IDE files
 .vscode/**

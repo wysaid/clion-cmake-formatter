@@ -38,3 +38,4 @@ tmp/
 *.local.json
 
 dev-docs/
+package-lock.json

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Publish script for clion-cmake-format monorepo
-# Supports publishing core package, CLI tool (npm) and VS Code extension (marketplace)
+# Supports publishing core package, CLI tool (pnpm) and VS Code extension (marketplace)
 
 set -e
 
@@ -13,6 +13,21 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
+
+# Check if using pnpm
+if ! command -v pnpm &>/dev/null; then
+    echo -e "${RED}ERROR: This project requires pnpm!${NC}"
+    echo ""
+    echo "This monorepo has been migrated to pnpm for better dependency management."
+    echo "Please install pnpm first:"
+    echo ""
+    echo "  npm install -g pnpm"
+    echo "  # or"
+    echo "  curl -fsSL https://get.pnpm.io/install.sh | sh -"
+    echo ""
+    echo "Then run: pnpm install"
+    exit 1
+fi
 
 # Parse command line arguments
 DRY_RUN=false
@@ -234,9 +249,6 @@ fi
 # Ask for release type
 select_release_type
 
-# Ask for release type
-select_release_type
-
 # Main publish function
 publish_package() {
     local target="$1"
@@ -300,14 +312,14 @@ publish_package() {
     if ! git diff-index --quiet HEAD --; then
         # Get list of modified files
         MODIFIED_FILES=$(git diff-index --name-only HEAD --)
-        
-        # Check if only package-lock.json is modified
-        if [ "$(echo "$MODIFIED_FILES" | wc -l)" -eq 1 ] && echo "$MODIFIED_FILES" | grep -q "^package-lock.json$"; then
-            warning "Only package-lock.json has uncommitted changes"
-            if ask_yes_no "Skip package-lock.json and continue publishing?"; then
-                info "Continuing with package-lock.json changes"
+
+        # Check if only pnpm-lock.yaml is modified
+        if [ "$(echo "$MODIFIED_FILES" | wc -l)" -eq 1 ] && echo "$MODIFIED_FILES" | grep -q "^pnpm-lock.yaml$"; then
+            warning "Only pnpm-lock.yaml has uncommitted changes"
+            if ask_yes_no "Skip pnpm-lock.yaml and continue publishing?"; then
+                info "Continuing with pnpm-lock.yaml changes"
             else
-                error "Please commit or stash package-lock.json before publishing"
+                error "Please commit or stash pnpm-lock.yaml before publishing"
                 return 1
             fi
         else
@@ -365,7 +377,7 @@ publish_package() {
             # Compare versions
             if [ "$VERSION" = "$PUBLISHED_VERSION" ] && [ "$PRE_RELEASE" = "no" ]; then
                 warning "Current version (${VERSION}) is already published on npm"
-                
+
                 # Ask user if they want to skip publishing and continue
                 if ask_yes_no "Skip publishing ${PACKAGE_NAME} and continue with remaining steps?"; then
                     info "Skipping ${target} package publication"
@@ -452,7 +464,7 @@ publish_package() {
         info "Checking if tag ${TAG_NAME} already exists on remote..."
         if git ls-remote --tags origin | grep -q "refs/tags/${TAG_NAME}$"; then
             warning "Tag ${TAG_NAME} already exists on remote"
-            
+
             # Ask user if they want to skip tag creation
             if ask_yes_no "Skip tag creation and continue with publishing?"; then
                 info "Skipping tag creation (tag already exists)"
@@ -600,27 +612,27 @@ publish_package() {
     # Step 4: Build all packages
     info "Installing dependencies..."
     if [ "$DRY_RUN" = false ]; then
-        npm install
+        pnpm install
         success "Dependencies installed"
     else
-        info "[DRY-RUN] Would run: npm install"
+        info "[DRY-RUN] Would run: pnpm install"
     fi
 
     info "Building all packages..."
     if [ "$DRY_RUN" = false ]; then
-        npm run build
+        pnpm run build
         success "Build completed"
     else
-        info "[DRY-RUN] Would run: npm run build"
+        info "[DRY-RUN] Would run: pnpm run build"
     fi
 
     # Step 5: Run tests
     info "Running tests..."
     if [ "$DRY_RUN" = false ]; then
-        npm run test:unit
+        pnpm run test:unit
         success "All tests passed"
     else
-        info "[DRY-RUN] Would run: npm run test:unit"
+        info "[DRY-RUN] Would run: pnpm run test:unit"
     fi
 
     # Step 6: Package and publish
@@ -634,19 +646,19 @@ publish_package() {
         if [ "$DRY_RUN" = false ]; then
             cd "$PACKAGE_DIR"
             if [ "$PRE_RELEASE" = "yes" ]; then
-                info "Running: npm publish --access public --tag next"
-                npm publish --access public --tag next
+                info "Running: pnpm publish --access public --tag next --no-git-checks"
+                pnpm publish --access public --tag next --no-git-checks
             else
-                info "Running: npm publish --access public"
-                npm publish --access public
+                info "Running: pnpm publish --access public --no-git-checks"
+                pnpm publish --access public --no-git-checks
             fi
             cd ../..
             success "@cc-format/core published to npm!"
         else
             if [ "$PRE_RELEASE" = "yes" ]; then
-                info "[DRY-RUN] Would run: cd ${PACKAGE_DIR} && npm publish --access public --tag next"
+                info "[DRY-RUN] Would run: cd ${PACKAGE_DIR} && pnpm publish --access public --tag next --no-git-checks"
             else
-                info "[DRY-RUN] Would run: cd ${PACKAGE_DIR} && npm publish --access public"
+                info "[DRY-RUN] Would run: cd ${PACKAGE_DIR} && pnpm publish --access public --no-git-checks"
             fi
         fi
 
@@ -660,19 +672,19 @@ publish_package() {
             if [ "$DRY_RUN" = false ]; then
                 cd "$PACKAGE_DIR"
                 if [ "$PRE_RELEASE" = "yes" ]; then
-                    info "Running: npm publish --access public --tag next"
-                    npm publish --access public --tag next
+                    info "Running: pnpm publish --access public --tag next --no-git-checks"
+                    pnpm publish --access public --tag next --no-git-checks
                 else
-                    info "Running: npm publish --access public"
-                    npm publish --access public
+                    info "Running: pnpm publish --access public --no-git-checks"
+                    pnpm publish --access public --no-git-checks
                 fi
                 cd ../..
                 success "CLI tool published to npm!"
             else
                 if [ "$PRE_RELEASE" = "yes" ]; then
-                    info "[DRY-RUN] Would run: cd ${PACKAGE_DIR} && npm publish --access public --tag next"
+                    info "[DRY-RUN] Would run: cd ${PACKAGE_DIR} && pnpm publish --access public --tag next --no-git-checks"
                 else
-                    info "[DRY-RUN] Would run: cd ${PACKAGE_DIR} && npm publish --access public"
+                    info "[DRY-RUN] Would run: cd ${PACKAGE_DIR} && pnpm publish --access public --no-git-checks"
                 fi
             fi
         fi
@@ -691,24 +703,24 @@ publish_package() {
         # Build VSIX package
         info "Building VSIX package..."
         if [ "$DRY_RUN" = false ]; then
-            npm run package:vscode
+            pnpm run package:vscode
             success "VSIX package created"
         else
-            info "[DRY-RUN] Would run: npm run package:vscode"
+            info "[DRY-RUN] Would run: pnpm run package:vscode"
         fi
 
         # Find the generated .vsix file
         VSIX_FILE=$(ls -t "${PACKAGE_DIR}"/*.vsix 2>/dev/null | head -1)
-        
+
         if [ "$DRY_RUN" = false ]; then
             if [ -z "$VSIX_FILE" ]; then
                 error "No .vsix file found in ${PACKAGE_DIR}"
                 error "Package creation may have failed"
                 return 1
             fi
-            
+
             info "Found VSIX file: $(basename "$VSIX_FILE")"
-            
+
             # Determine publish command - publish the .vsix file directly
             if [ "$PRE_RELEASE" = "yes" ]; then
                 info "Publishing as pre-release version"
@@ -820,20 +832,20 @@ if [ "$PUBLISH_ALL" = true ]; then
 
     echo ""
     success "All packages published successfully!"
-    
+
     # Create unified version tag (v{X}.{Y}.{Z}) after all packages are published
     if [ "$DRY_RUN" = false ]; then
         # Get version from root package.json
         ROOT_VERSION=$(get_version "package.json")
         VERSION_TAG="v${ROOT_VERSION}"
-        
+
         echo ""
         info "════════════════════════════════════════════════════════"
         info "All packages have been published successfully!"
         info "Version: ${ROOT_VERSION}"
         info "════════════════════════════════════════════════════════"
         echo ""
-        
+
         # Check if version tag already exists
         if git ls-remote --tags origin | grep -q "refs/tags/${VERSION_TAG}$"; then
             warning "Version tag ${VERSION_TAG} already exists on remote"
@@ -847,7 +859,7 @@ if [ "$PUBLISH_ALL" = true ]; then
                 exit 0
             fi
         fi
-        
+
         # Ask user if they want to create the version tag
         if ask_yes_no "Create unified version tag ${VERSION_TAG} for this release?"; then
             info "Creating version tag ${VERSION_TAG}..."
@@ -858,7 +870,7 @@ Published packages:
 - cc-format@${ROOT_VERSION}
 - clion-cmake-format@${ROOT_VERSION}"
             success "Tag ${VERSION_TAG} created"
-            
+
             if ask_yes_no "Push version tag ${VERSION_TAG} to remote?"; then
                 info "Pushing version tag to remote..."
                 git push origin "${VERSION_TAG}"
@@ -873,7 +885,7 @@ Published packages:
             info "Version tag not created"
         fi
     fi
-    
+
     exit 0
 else
     # Publish single package

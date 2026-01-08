@@ -143,8 +143,8 @@ The project includes a `.vscode/launch.json` configuration:
 Always run these commands before committing:
 
 ```bash
-npm run lint      # Check code quality
-npm run test:unit # Run all tests
+pnpm run lint      # Check code quality
+pnpm run test:unit # Run all tests
 ```
 
 All tests must pass (100% pass rate required).
@@ -181,7 +181,7 @@ To ensure compatibility with CLion's native formatter, you can run comparison te
 
 ```bash
 # Requires CLion installed
-npm run test:clion
+pnpm run test:clion
 ```
 
 This test formats files using both CLion and this plugin, then compares the results. See [docs/CLION_INTEGRATION_TESTING.md](docs/CLION_INTEGRATION_TESTING.md) for details.
@@ -220,7 +220,7 @@ Follow the existing code style:
 - **Semicolons**: Required
 - **Line Length**: ~120 characters (soft limit)
 
-Run `npm run lint` to check for style violations.
+Run `pnpm run lint` to check for style violations.
 
 ## 🧪 Test Development
 
@@ -240,7 +240,7 @@ describe('Parser', () => {
 
 ```bash
 # Run all tests
-npm run test:unit
+pnpm run test:unit
 
 # Run specific test file (with ts-node)
 npx mocha --require ts-node/register test/parser.test.ts
@@ -250,8 +250,8 @@ npx mocha --require ts-node/register test/parser.test.ts
 
 1. **Fork the repository** and create a feature branch
 2. **Add tests** for your changes
-3. **Ensure all tests pass**: `npm run test:unit`
-4. **Ensure code quality**: `npm run lint`
+3. **Ensure all tests pass**: `pnpm run test:unit`
+4. **Ensure code quality**: `pnpm run lint`
 5. **Write a clear PR description** explaining:
    - What problem does it solve?
    - What are the changes?

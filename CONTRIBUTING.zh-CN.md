@@ -173,7 +173,7 @@ npm run test:clion
 - **分号**: 必需
 - **行长度**: ~120 字符（软限制）
 
-运行 `npm run lint` 检查风格违规。
+运行 `pnpm run lint` 检查风格违规。
 
 ## 🧪 测试开发
 
@@ -193,7 +193,7 @@ describe('Parser', () => {
 
 ```bash
 # 运行所有测试
-npm run test:unit
+pnpm run test:unit
 
 # 运行特定测试文件（使用 ts-node）
 npx mocha --require ts-node/register test/parser.test.ts

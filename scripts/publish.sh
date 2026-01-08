@@ -249,9 +249,6 @@ fi
 # Ask for release type
 select_release_type
 
-# Ask for release type
-select_release_type
-
 # Main publish function
 publish_package() {
     local target="$1"
@@ -316,13 +313,13 @@ publish_package() {
         # Get list of modified files
         MODIFIED_FILES=$(git diff-index --name-only HEAD --)
 
-        # Check if only package-lock.json is modified
-        if [ "$(echo "$MODIFIED_FILES" | wc -l)" -eq 1 ] && echo "$MODIFIED_FILES" | grep -q "^package-lock.json$"; then
-            warning "Only package-lock.json has uncommitted changes"
-            if ask_yes_no "Skip package-lock.json and continue publishing?"; then
-                info "Continuing with package-lock.json changes"
+        # Check if only pnpm-lock.yaml is modified
+        if [ "$(echo "$MODIFIED_FILES" | wc -l)" -eq 1 ] && echo "$MODIFIED_FILES" | grep -q "^pnpm-lock.yaml$"; then
+            warning "Only pnpm-lock.yaml has uncommitted changes"
+            if ask_yes_no "Skip pnpm-lock.yaml and continue publishing?"; then
+                info "Continuing with pnpm-lock.yaml changes"
             else
-                error "Please commit or stash package-lock.json before publishing"
+                error "Please commit or stash pnpm-lock.yaml before publishing"
                 return 1
             fi
         else

@@ -50,9 +50,9 @@ After running the comparison test with differences, you can inspect the results:
 
 ```text
 test/datasets/real-world/test-error-results/
-├── plugin/    - 插件格式化结果 (Result B)
-├── clion/     - CLion 格式化结果 (Result A)
-└── original/  - 原始文件备份
+├── plugin/    - Plugin formatting result (Result B)
+├── clion/     - CLion formatting result (Result A)
+└── original/  - Original file backup
 ```
 
 **Comparison Commands:**

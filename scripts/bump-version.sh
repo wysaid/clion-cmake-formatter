@@ -103,9 +103,9 @@ echo -e "${GREEN}✓${NC} Updated @cc-format/core dependency in CLI and VSCode"
 
 # Update lockfile
 echo ""
-echo "Updating package-lock.json..."
-npm install --package-lock-only
-echo -e "${GREEN}✓${NC} Updated package-lock.json"
+echo "Updating pnpm-lock.yaml..."
+pnpm install
+echo -e "${GREEN}✓${NC} Updated pnpm-lock.yaml"
 
 echo ""
 echo -e "${GREEN}Version bump completed!${NC}"
@@ -117,11 +117,11 @@ echo "  - package.json"
 echo "  - packages/core/package.json"
 echo "  - packages/cli/package.json"
 echo "  - packages/vscode/package.json"
-echo "  - package-lock.json"
+echo "  - pnpm-lock.yaml"
 echo ""
 echo "Next steps:"
 echo "  1. Update CHANGELOG.md with new version and changes"
 echo "  2. Review changes: git diff"
-echo "  3. Run tests: npm run test:unit"
+echo "  3. Run tests: pnpm run test:unit"
 echo "  4. Commit: git add . && git commit -m \"chore: bump version to ${NEW_VERSION}\""
 echo "  5. Publish: ./scripts/publish.sh --cli  (or --vsc)"

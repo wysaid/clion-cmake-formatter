@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Publish script for clion-cmake-format monorepo
-# Supports publishing core package, CLI tool (npm) and VS Code extension (marketplace)
+# Supports publishing core package, CLI tool (pnpm) and VS Code extension (marketplace)
 
 set -e
 
@@ -13,6 +13,21 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
+
+# Check if using pnpm
+if ! command -v pnpm &> /dev/null; then
+    echo -e "${RED}ERROR: This project requires pnpm!${NC}"
+    echo ""
+    echo "This monorepo has been migrated to pnpm for better dependency management."
+    echo "Please install pnpm first:"
+    echo ""
+    echo "  npm install -g pnpm"
+    echo "  # or"
+    echo "  curl -fsSL https://get.pnpm.io/install.sh | sh -"
+    echo ""
+    echo "Then run: pnpm install"
+    exit 1
+fi
 
 # Parse command line arguments
 DRY_RUN=false
@@ -600,27 +615,27 @@ publish_package() {
     # Step 4: Build all packages
     info "Installing dependencies..."
     if [ "$DRY_RUN" = false ]; then
-        npm install
+        pnpm install
         success "Dependencies installed"
     else
-        info "[DRY-RUN] Would run: npm install"
+        info "[DRY-RUN] Would run: pnpm install"
     fi
 
     info "Building all packages..."
     if [ "$DRY_RUN" = false ]; then
-        npm run build
+        pnpm run build
         success "Build completed"
     else
-        info "[DRY-RUN] Would run: npm run build"
+        info "[DRY-RUN] Would run: pnpm run build"
     fi
 
     # Step 5: Run tests
     info "Running tests..."
     if [ "$DRY_RUN" = false ]; then
-        npm run test:unit
+        pnpm run test:unit
         success "All tests passed"
     else
-        info "[DRY-RUN] Would run: npm run test:unit"
+        info "[DRY-RUN] Would run: pnpm run test:unit"
     fi
 
     # Step 6: Package and publish
@@ -634,19 +649,19 @@ publish_package() {
         if [ "$DRY_RUN" = false ]; then
             cd "$PACKAGE_DIR"
             if [ "$PRE_RELEASE" = "yes" ]; then
-                info "Running: npm publish --access public --tag next"
-                npm publish --access public --tag next
+                info "Running: pnpm publish --access public --tag next --no-git-checks"
+                pnpm publish --access public --tag next --no-git-checks
             else
-                info "Running: npm publish --access public"
-                npm publish --access public
+                info "Running: pnpm publish --access public --no-git-checks"
+                pnpm publish --access public --no-git-checks
             fi
             cd ../..
             success "@cc-format/core published to npm!"
         else
             if [ "$PRE_RELEASE" = "yes" ]; then
-                info "[DRY-RUN] Would run: cd ${PACKAGE_DIR} && npm publish --access public --tag next"
+                info "[DRY-RUN] Would run: cd ${PACKAGE_DIR} && pnpm publish --access public --tag next --no-git-checks"
             else
-                info "[DRY-RUN] Would run: cd ${PACKAGE_DIR} && npm publish --access public"
+                info "[DRY-RUN] Would run: cd ${PACKAGE_DIR} && pnpm publish --access public --no-git-checks"
             fi
         fi
 
@@ -660,19 +675,19 @@ publish_package() {
             if [ "$DRY_RUN" = false ]; then
                 cd "$PACKAGE_DIR"
                 if [ "$PRE_RELEASE" = "yes" ]; then
-                    info "Running: npm publish --access public --tag next"
-                    npm publish --access public --tag next
+                    info "Running: pnpm publish --access public --tag next --no-git-checks"
+                    pnpm publish --access public --tag next --no-git-checks
                 else
-                    info "Running: npm publish --access public"
-                    npm publish --access public
+                    info "Running: pnpm publish --access public --no-git-checks"
+                    pnpm publish --access public --no-git-checks
                 fi
                 cd ../..
                 success "CLI tool published to npm!"
             else
                 if [ "$PRE_RELEASE" = "yes" ]; then
-                    info "[DRY-RUN] Would run: cd ${PACKAGE_DIR} && npm publish --access public --tag next"
+                    info "[DRY-RUN] Would run: cd ${PACKAGE_DIR} && pnpm publish --access public --tag next --no-git-checks"
                 else
-                    info "[DRY-RUN] Would run: cd ${PACKAGE_DIR} && npm publish --access public"
+                    info "[DRY-RUN] Would run: cd ${PACKAGE_DIR} && pnpm publish --access public --no-git-checks"
                 fi
             fi
         fi
@@ -691,10 +706,10 @@ publish_package() {
         # Build VSIX package
         info "Building VSIX package..."
         if [ "$DRY_RUN" = false ]; then
-            npm run package:vscode
+            pnpm run package:vscode
             success "VSIX package created"
         else
-            info "[DRY-RUN] Would run: npm run package:vscode"
+            info "[DRY-RUN] Would run: pnpm run package:vscode"
         fi
 
         # Find the generated .vsix file

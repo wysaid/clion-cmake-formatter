@@ -9,7 +9,7 @@ Thank you for your interest in contributing! This document provides guidelines f
 ### Prerequisites
 
 - Node.js 18+
-- npm
+- **pnpm 9+** (this project uses pnpm for monorepo management)
 - Git 2.x+ with symlinks support
 
 ### Getting Started
@@ -17,10 +17,20 @@ Thank you for your interest in contributing! This document provides guidelines f
 ```bash
 git clone https://github.com/wysaid/clion-cmake-format.git
 cd clion-cmake-format
-npm install
-npm run compile
-npm run test:unit
+
+# Install pnpm if you haven't already
+npm install -g pnpm
+
+# Install dependencies and build
+pnpm install
+pnpm run compile
+pnpm run test:unit
 ```
+
+**Why pnpm?** This monorepo requires pnpm for proper workspace dependency management. pnpm ensures:
+- Local packages always use the latest local code (not npm registry versions)
+- Faster installs with better disk space efficiency
+- Strict dependency isolation preventing phantom dependencies
 
 ### Windows Development Setup
 
@@ -53,21 +63,21 @@ If symlinks are not working, you'll see errors when building or running tests. R
 
 | Script | Description |
 |--------|-------------|
-| `npm run build` | Build all packages (core + cli + vscode) |
-| `npm run build:core` | Build @cc-format/core package |
-| `npm run build:cli` | Build cc-format CLI package |
-| `npm run build:vscode` | Build VS Code extension |
-| `npm run compile` | Alias for `npm run build` |
-| `npm run watch` | Watch mode compilation (auto-recompile on changes) |
-| `npm run lint` | Run ESLint to check code quality |
-| `npm run test:unit` | Run all unit tests (must pass before commit) |
-| `npm run test:clion` | Compare formatting with CLion (requires CLion installed) |
-| `npm run package:vscode` | Package VS Code extension as `.vsix` file |
-| `npm run verify-symlinks` | Verify that all symlinks are valid |
+| `pnpm run build` | Build all packages (core + cli + vscode) |
+| `pnpm run build:core` | Build @cc-format/core package |
+| `pnpm run build:cli` | Build cc-format CLI package |
+| `pnpm run build:vscode` | Build VS Code extension |
+| `pnpm run compile` | Alias for `pnpm run build` |
+| `pnpm run watch` | Watch mode compilation (auto-recompile on changes) |
+| `pnpm run lint` | Run ESLint to check code quality |
+| `pnpm run test:unit` | Run all unit tests (must pass before commit) |
+| `pnpm run test:clion` | Compare formatting with CLion (requires CLion installed) |
+| `pnpm run package:vscode` | Package VS Code extension as `.vsix` file |
+| `pnpm run verify-symlinks` | Verify that all symlinks are valid |
 
 ## 📂 Project Structure
 
-This is a **monorepo** using npm workspaces:
+This is a **monorepo** using pnpm workspaces:
 
 ```
 clion-cmake-format/

@@ -13,7 +13,7 @@ echo "Temporary directory: $TEMP_DIR"
 # Build with webpack (bundles all dependencies into extension.js)
 echo "Building VS Code extension with webpack..."
 cd "$VSCODE_DIR"
-npm run build
+pnpm run build
 
 # Copy necessary files to temp directory
 cd "$SCRIPT_DIR/.."

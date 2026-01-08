@@ -9,29 +9,39 @@
 ### 前置要求
 
 - Node.js 18+
-- npm
+- **pnpm 9+**（本项目使用 pnpm 进行 monorepo 管理）
 
 ### 开始
 
 ```bash
 git clone https://github.com/wysaid/clion-cmake-format.git
 cd clion-cmake-format
-npm install
-npm run compile
-npm run test:unit
+
+# 如果还没有安装 pnpm，先安装
+npm install -g pnpm
+
+# 安装依赖并构建
+pnpm install
+pnpm run compile
+pnpm run test:unit
 ```
+
+**为什么使用 pnpm？** 本 monorepo 需要 pnpm 来正确管理 workspace 依赖。pnpm 确保：
+- 本地包始终使用最新的本地代码（而不是 npm registry 版本）
+- 更快的安装速度和更高的磁盘空间效率
+- 严格的依赖隔离，防止幻影依赖
 
 ## 📜 可用脚本
 
 | 脚本 | 描述 |
 |------|------|
-| `npm run compile` | 编译 TypeScript 到 JavaScript |
-| `npm run watch` | 监听模式编译（自动重新编译） |
-| `npm run lint` | 运行 ESLint 检查代码质量 |
-| `npm run test:unit` | 运行所有单元测试（提交前必须通过） |
-| `npm run test:clion` | 与 CLion 对比格式化（需要安装 CLion） |
-| `npm run test:cmake-official` | 在 CMake 官方文件上测试幂等性 |
-| `npm run package` | 打包扩展为 `.vsix` 文件 |
+| `pnpm run compile` | 编译 TypeScript 到 JavaScript |
+| `pnpm run watch` | 监听模式编译（自动重新编译） |
+| `pnpm run lint` | 运行 ESLint 检查代码质量 |
+| `pnpm run test:unit` | 运行所有单元测试（提交前必须通过） |
+| `pnpm run test:clion` | 与 CLion 对比格式化（需要安装 CLion） |
+| `pnpm run test:cmake-official` | 在 CMake 官方文件上测试幂等性 |
+| `pnpm run package` | 打包扩展为 `.vsix` 文件 |
 
 ## 📂 项目结构
 
@@ -86,8 +96,8 @@ clion-cmake-format/
 提交前始终运行这些命令：
 
 ```bash
-npm run lint      # 检查代码质量
-npm run test:unit # 运行所有测试
+pnpm run lint      # 检查代码质量
+pnpm run test:unit # 运行所有测试
 ```
 
 所有测试必须通过（要求 100% 通过率）。

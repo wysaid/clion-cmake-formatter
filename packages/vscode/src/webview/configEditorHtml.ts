@@ -567,8 +567,8 @@ function getStyles(): string {
             display: none;
         }
 
-        /* Hide tabs container when only one tab is visible (global settings) */
-        .preview-tabs:has(.tab-btn:only-of-type) {
+        /* Hide tabs container when only one tab is intended (global settings) */
+        .preview-panel.single-tab .preview-tabs {
             display: none;
         }
 
@@ -921,6 +921,9 @@ function getScript(): string {
 
                 // Update header
                 if (isGlobal) {
+                    if (previewPanel) {
+                        previewPanel.classList.add('single-tab');
+                    }
                     configTypeBadge.textContent = 'Global Settings';
                     configTypeBadge.className = 'badge global';
                     filePathEl.textContent = '';
@@ -941,6 +944,9 @@ function getScript(): string {
                         cmakePreview.classList.add('active');
                     }
                 } else {
+                    if (previewPanel) {
+                        previewPanel.classList.remove('single-tab');
+                    }
                     configTypeBadge.textContent = 'File Config';
                     configTypeBadge.className = 'badge file';
                     filePathEl.textContent = data.filePath || '';
@@ -1168,7 +1174,7 @@ function getScript(): string {
 
                 // Build result with non-overlapping matches
                 let result = '';
-                pos = 0;
+                let pos = 0;
 
                 matches.forEach(match => {
                     if (match.start >= pos) {

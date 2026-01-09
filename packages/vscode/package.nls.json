@@ -30,6 +30,10 @@
     "config.enableProjectConfig.description": "Enable reading project-level configuration from .cc-format.jsonc files. When disabled, only VS Code settings are used.",
     "command.formatDocument": "CLion CMake Format: Format Document",
     "command.createConfig": "CLion CMake Format: Create Default Config File",
+    "command.openVisualEditor": "CLion CMake Format: Open Visual Config Editor",
+    "command.openGlobalSettings": "CLion CMake Format: Open Global Settings",
+    "command.switchToTextEditor": "Switch to Text Editor",
+    "customEditor.displayName": "cc-format Configuration Editor",
     "formatting.noChanges": "No changes: content is already well-formatted",
     "formatting.formatted": "File formatted successfully"
 }

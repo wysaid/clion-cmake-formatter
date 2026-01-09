@@ -37,9 +37,7 @@
         "code quality",
         "auto-format"
     ],
-    "activationEvents": [
-        "onLanguage:cmake"
-    ],
+    "activationEvents": [],
     "main": "./dist/extension.js",
     "contributes": {
         "languages": [
@@ -70,6 +68,36 @@
             {
                 "command": "clion-cmake-format.createConfig",
                 "title": "%command.createConfig%"
+            },
+            {
+                "command": "clion-cmake-format.openVisualEditor",
+                "title": "%command.openVisualEditor%"
+            },
+            {
+                "command": "clion-cmake-format.openGlobalSettings",
+                "title": "%command.openGlobalSettings%"
+            },
+            {
+                "command": "clion-cmake-format.switchToTextEditor",
+                "title": "%command.switchToTextEditor%"
+            }
+        ],
+        "customEditors": [
+            {
+                "viewType": "clionCMakeFormat.configEditor",
+                "displayName": "%customEditor.displayName%",
+                "selector": [
+                    {
+                        "filenamePattern": "*.cc-format.jsonc"
+                    },
+                    {
+                        "filenamePattern": ".cc-format.jsonc"
+                    },
+                    {
+                        "filenamePattern": ".cc-format"
+                    }
+                ],
+                "priority": "default"
             }
         ],
         "configuration": {

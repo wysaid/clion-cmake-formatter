@@ -22,6 +22,7 @@ export class ConfigEditorProvider implements vscode.CustomTextEditorProvider {
     public static readonly viewType = 'clionCMakeFormat.configEditor';
 
     private static currentPanel: vscode.WebviewPanel | undefined;
+    private isUpdatingFromWebview = false;
 
     constructor(private readonly context: vscode.ExtensionContext) { }
 
@@ -131,7 +132,8 @@ export class ConfigEditorProvider implements vscode.CustomTextEditorProvider {
 
         // Update webview when the document changes
         const changeDocumentSubscription = vscode.workspace.onDidChangeTextDocument((e) => {
-            if (e.document.uri.toString() === document.uri.toString()) {
+            // Skip updates that originated from webview to prevent circular updates
+            if (e.document.uri.toString() === document.uri.toString() && !this.isUpdatingFromWebview) {
                 const newConfig = this.parseConfig(e.document.getText());
                 webviewPanel.webview.postMessage({
                     type: 'configUpdated',
@@ -189,14 +191,21 @@ export class ConfigEditorProvider implements vscode.CustomTextEditorProvider {
         // Generate new content
         const newContent = this.generateConfigContent(config);
 
-        // Apply edit
-        const edit = new vscode.WorkspaceEdit();
-        const fullRange = new vscode.Range(
-            document.positionAt(0),
-            document.positionAt(document.getText().length)
-        );
-        edit.replace(document.uri, fullRange, newContent);
-        await vscode.workspace.applyEdit(edit);
+        // Set flag to prevent circular updates
+        this.isUpdatingFromWebview = true;
+        try {
+            // Apply edit
+            const edit = new vscode.WorkspaceEdit();
+            const fullRange = new vscode.Range(
+                document.positionAt(0),
+                document.positionAt(document.getText().length)
+            );
+            edit.replace(document.uri, fullRange, newContent);
+            await vscode.workspace.applyEdit(edit);
+        } finally {
+            // Always reset flag
+            this.isUpdatingFromWebview = false;
+        }
     }
 
     /**

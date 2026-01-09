@@ -7,6 +7,17 @@
 // Use type-only import to avoid runtime dependency in tests
 import type * as vscode from 'vscode';
 
+// Define minimal interface for webview to make testing easier
+interface WebviewLike {
+    cspSource: string;
+    asWebviewUri?: (uri: unknown) => unknown;
+}
+
+interface UriLike {
+    fsPath?: string;
+    toString?: () => string;
+}
+
 /**
  * Sample CMake code that demonstrates all formatting options
  */
@@ -131,8 +142,8 @@ const OPTION_GROUPS: OptionGroup[] = [
  * Get the webview HTML content
  */
 export function getWebviewContent(
-    webview: vscode.Webview,
-    _extensionUri: vscode.Uri,
+    webview: WebviewLike | vscode.Webview,
+    _extensionUri: UriLike | vscode.Uri,
     _isGlobal: boolean,
     _filePath?: string
 ): string {

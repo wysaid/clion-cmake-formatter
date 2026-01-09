@@ -191,11 +191,11 @@ export class ConfigEditorProvider implements vscode.CustomTextEditorProvider {
 
         // Apply edit
         const edit = new vscode.WorkspaceEdit();
-        edit.replace(
-            document.uri,
-            new vscode.Range(0, 0, document.lineCount, 0),
-            newContent
+        const fullRange = new vscode.Range(
+            document.positionAt(0),
+            document.positionAt(document.getText().length)
         );
+        edit.replace(document.uri, fullRange, newContent);
         await vscode.workspace.applyEdit(edit);
     }
 
@@ -206,11 +206,11 @@ export class ConfigEditorProvider implements vscode.CustomTextEditorProvider {
         const newContent = this.generateConfigContent({});
 
         const edit = new vscode.WorkspaceEdit();
-        edit.replace(
-            document.uri,
-            new vscode.Range(0, 0, document.lineCount, 0),
-            newContent
+        const fullRange = new vscode.Range(
+            document.positionAt(0),
+            document.positionAt(document.getText().length)
         );
+        edit.replace(document.uri, fullRange, newContent);
         await vscode.workspace.applyEdit(edit);
     }
 
@@ -223,11 +223,7 @@ export class ConfigEditorProvider implements vscode.CustomTextEditorProvider {
         const entries = Object.entries(options);
         entries.forEach(([key, value], index) => {
             const comma = index < entries.length - 1 ? ',' : '';
-            if (typeof value === 'string') {
-                lines.push(`    "${key}": "${value}"${comma}`);
-            } else {
-                lines.push(`    "${key}": ${JSON.stringify(value)}${comma}`);
-            }
+            lines.push(`    "${key}": ${JSON.stringify(value)}${comma}`);
         });
 
         lines.push('}', '');

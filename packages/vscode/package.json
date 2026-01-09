@@ -37,7 +37,10 @@
         "code quality",
         "auto-format"
     ],
-    "activationEvents": [],
+    "activationEvents": [
+        "onLanguage:cmake",
+        "onCustomEditor:clionCMakeFormat.configEditor"
+    ],
     "main": "./dist/extension.js",
     "contributes": {
         "languages": [

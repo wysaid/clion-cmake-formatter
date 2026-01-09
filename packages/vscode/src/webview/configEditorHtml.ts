@@ -1057,13 +1057,6 @@ function getScript(): string {
 
             // Basic CMake syntax highlighting
             function highlightCMake(code) {
-                // We need to apply highlighting BEFORE escaping HTML
-                // to correctly match quotes and other special characters
-
-                // First, tokenize and mark special regions
-                const tokens = [];
-                let lastIndex = 0;
-
                 // Match comments, strings, and variables with their positions
                 const patterns = [
                     { type: 'comment', regex: /#.*$/gm },
@@ -1111,6 +1104,7 @@ function getScript(): string {
                 }
 
                 // Apply keyword highlighting (avoiding already-tagged content)
+                // Split by HTML tags and only highlight text nodes
                 const keywords = [
                     'if', 'elseif', 'else', 'endif',
                     'foreach', 'endforeach',
@@ -1122,9 +1116,18 @@ function getScript(): string {
                     'target_include_directories', 'install', 'find_package'
                 ];
 
-                // Match keywords only outside of spans
-                const keywordPattern = new RegExp('(?<!<[^>]*)(\\\\b(?:' + keywords.join('|') + ')\\\\b)', 'gi');
-                result = result.replace(keywordPattern, '<span class="keyword">$1</span>');
+                // Match keywords using word boundaries
+                const keywordPattern = new RegExp('\\b(' + keywords.join('|') + ')\\b', 'gi');
+                
+                // Split by existing HTML tags to avoid double-wrapping
+                const parts = result.split(/(<span[^>]*>.*?</span>)/);
+                result = parts.map((part, i) => {
+                    // Only process non-span parts (even indices)
+                    if (i % 2 === 0) {
+                        return part.replace(keywordPattern, '<span class="keyword">$1</span>');
+                    }
+                    return part;
+                }).join('');
 
                 return result;
             }
@@ -1138,9 +1141,6 @@ function getScript(): string {
 
             // Basic JSONC syntax highlighting
             function highlightJsonc(code) {
-                const tokens = [];
-                let pos = 0;
-
                 // Patterns for JSONC
                 const patterns = [
                     { type: 'json-comment', regex: /\\/\\/.*$/gm },

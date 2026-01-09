@@ -4,7 +4,8 @@
  * Generates the HTML, CSS, and JavaScript for the visual configuration editor.
  */
 
-import * as vscode from 'vscode';
+// Use type-only import to avoid runtime dependency in tests
+import type * as vscode from 'vscode';
 
 /**
  * Sample CMake code that demonstrates all formatting options

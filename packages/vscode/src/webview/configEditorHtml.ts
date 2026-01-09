@@ -1124,7 +1124,7 @@ function getScript(): string {
 
                 // Match keywords using word boundaries
                 const keywordPattern = new RegExp('\\b(' + keywords.join('|') + ')\\b', 'gi');
-                
+
                 // Split by existing HTML tags to avoid double-wrapping
                 const parts = result.split(/(<span[^>]*>.*?</span>)/);
                 result = parts.map((part, i) => {

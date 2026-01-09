@@ -4,29 +4,10 @@
 
 import { describe, it } from 'mocha';
 import * as assert from 'assert';
+import { JSDOM } from 'jsdom';
+import { getWebviewContent, SAMPLE_CMAKE_CODE } from '../packages/vscode/src/webview/configEditorHtml';
 
-// Skip jsdom tests on Node 18 due to compatibility issues with webidl-conversions
-const nodeVersion = parseInt(process.version.slice(1).split('.')[0]);
-const isNode18 = nodeVersion === 18;
-
-let JSDOM: any;
-let getWebviewContent: any;
-let SAMPLE_CMAKE_CODE: any;
-
-// Conditional imports to avoid loading jsdom on Node 18
-if (!isNode18) {
-    try {
-        const jsdomModule = require('jsdom');
-        JSDOM = jsdomModule.JSDOM;
-        const webviewModule = require('../packages/vscode/src/webview/configEditorHtml');
-        getWebviewContent = webviewModule.getWebviewContent;
-        SAMPLE_CMAKE_CODE = webviewModule.SAMPLE_CMAKE_CODE;
-    } catch (error) {
-        console.warn('Failed to load jsdom or webview module:', error);
-    }
-}
-
-(isNode18 ? describe.skip : describe)('Config Editor', () => {
+describe('Config Editor', () => {
     describe('Webview Content', () => {
         it('should generate valid HTML', () => {
             // Create mock webview

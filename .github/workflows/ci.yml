@@ -11,11 +11,68 @@ permissions:
   contents: read
 
 jobs:
+  # Main build and test job - runs on Node.js 22.x
+  # Tests all packages including VS Code extension with jsdom
   build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install pnpm
+      uses: pnpm/action-setup@v4
+
+    - name: Use Node.js 22.x
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22.x
+        cache: 'pnpm'
+
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+
+    - name: Verify symlinks
+      run: bash scripts/verify-symlinks.sh
+
+    - name: Build packages
+      run: pnpm run build
+
+    - name: Run Linter
+      run: pnpm run lint
+
+    - name: Run Unit Tests (including jsdom tests)
+      run: pnpm run test:unit
+
+    - name: Test Core Package
+      run: |
+        echo "Testing @cc-format/core package..."
+        node -e "const core = require('./packages/core/dist/index.js'); console.log('Core exports:', Object.keys(core));"
+
+    - name: Test CLI Package
+      run: |
+        echo "Testing cc-format CLI..."
+        node packages/cli/dist/cli.js --version
+        node packages/cli/dist/cli.js --help
+        echo "set(MY_VAR value)" | node packages/cli/dist/cli.js --stdin
+
+    - name: Build VSIX
+      run: bash scripts/package-vscode.sh
+
+    - name: Upload VSIX artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: clion-cmake-format-vsix
+        path: "packages/vscode/*.vsix"
+        retention-days: 7
+
+  # CLI compatibility test - runs on multiple Node.js versions
+  # Only tests CLI functionality, not VS Code extension
+  test-cli-compatibility:
+    name: CLI compatibility (Node.js ${{ matrix.node-version }})
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [18.x, 20.x, 22.x, 23.x]
+        node-version: [18.x, 20.x, 23.x]
 
     steps:
     - uses: actions/checkout@v4
@@ -32,44 +89,21 @@ jobs:
     - name: Install dependencies
       run: pnpm install --frozen-lockfile
 
-    - name: Verify symlinks
-      run: bash scripts/verify-symlinks.sh
-
     - name: Build packages
       run: pnpm run build
 
-    - name: Run Linter
-      run: pnpm run lint
-
-    - name: Run Unit Tests
-      run: pnpm run test:unit
-
-    # Test CLI tool functionality
-    # Test core package functionality
-    - name: Test Core Package
+    - name: Test CLI functionality
       run: |
-        echo "Testing @cc-format/core package..."
-        node -e "const core = require('./packages/core/dist/index.js'); console.log('Core exports:', Object.keys(core));"
-
-    # Test CLI tool functionality
-    - name: Test CLI Package
-      run: |
-        echo "Testing cc-format CLI..."
+        echo "Testing CLI on Node.js ${{ matrix.node-version }}..."
         node packages/cli/dist/cli.js --version
         node packages/cli/dist/cli.js --help
         echo "set(MY_VAR value)" | node packages/cli/dist/cli.js --stdin
-
-    - name: Build VSIX
-      if: matrix.node-version == '22.x'
-      run: bash scripts/package-vscode.sh
-
-    - name: Upload VSIX artifact
-      if: matrix.node-version == '22.x'
-      uses: actions/upload-artifact@v4
-      with:
-        name: clion-cmake-format-vsix
-        path: "packages/vscode/*.vsix"
-        retention-days: 7
+        # Test file formatting
+        mkdir -p temp-test
+        echo "set(TEST value)" > temp-test/test.cmake
+        node packages/cli/dist/cli.js --write temp-test/test.cmake
+        cat temp-test/test.cmake
+        rm -rf temp-test
 
   # Test CLI tool on multiple platforms
   cli-cross-platform:

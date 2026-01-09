@@ -174,16 +174,16 @@ export function getWebviewContent(
                 </div>
             </div>
 
-            <div class="preview-panel">
+            <div class="preview-panel" id="previewPanel">
                 <div class="preview-tabs">
                     <button class="tab-btn active" data-tab="cmake" id="tabCMake">CMake Preview</button>
                     <button class="tab-btn" data-tab="jsonc" id="tabJsonc">JSONC Source</button>
                 </div>
                 <div class="preview-container">
-                    <div class="tab-content active" id="cmakePreview">
+                    <div class="tab-content active" id="cmakePreview" data-title="CMake Preview">
                         <pre class="code-preview"><code id="formattedCode">Loading...</code></pre>
                     </div>
-                    <div class="tab-content" id="jsoncPreview">
+                    <div class="tab-content" id="jsoncPreview" data-title="JSONC Source">
                         <pre class="code-preview jsonc"><code id="jsoncCode">Loading...</code></pre>
                     </div>
                 </div>
@@ -537,12 +537,27 @@ function getStyles(): string {
             background-color: var(--vscode-editor-background);
         }
 
+        /* Three-column layout mode */
+        .preview-panel.three-column-mode {
+            flex-direction: row;
+        }
+
         .preview-tabs {
             display: flex;
             gap: 0;
             padding: 0 var(--container-padding);
             background-color: var(--vscode-sideBar-background);
             border-bottom: 1px solid var(--vscode-panel-border);
+        }
+
+        /* Hide tabs in three-column mode */
+        .preview-panel.three-column-mode .preview-tabs {
+            display: none;
+        }
+
+        /* Hide tabs container when only one tab is visible (global settings) */
+        .preview-tabs:has(.tab-btn:only-of-type) {
+            display: none;
         }
 
         .tab-btn {
@@ -575,6 +590,13 @@ function getStyles(): string {
             position: relative;
         }
 
+        /* Three-column mode: split preview container */
+        .preview-panel.three-column-mode .preview-container {
+            display: flex;
+            flex-direction: row;
+            gap: 0;
+        }
+
         .tab-content {
             display: none;
             position: absolute;
@@ -587,6 +609,37 @@ function getStyles(): string {
         }
 
         .tab-content.active {
+            display: block;
+        }
+
+        /* Three-column mode: show all tabs side by side */
+        .preview-panel.three-column-mode .tab-content {
+            display: block;
+            position: relative;
+            flex: 1;
+            border-right: 1px solid var(--vscode-panel-border);
+        }
+
+        .preview-panel.three-column-mode .tab-content:last-child {
+            border-right: none;
+        }
+
+        /* Add titles for three-column mode */
+        .tab-content::before {
+            content: attr(data-title);
+            display: none;
+            padding: 8px var(--container-padding);
+            background-color: var(--vscode-sideBar-background);
+            border-bottom: 1px solid var(--vscode-panel-border);
+            font-size: 0.9em;
+            font-weight: 500;
+            color: var(--vscode-textLink-foreground);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .preview-panel.three-column-mode .tab-content::before {
             display: block;
         }
 
@@ -740,6 +793,8 @@ function getScript(): string {
             const tabJsonc = document.getElementById('tabJsonc');
             const cmakePreview = document.getElementById('cmakePreview');
             const jsoncPreview = document.getElementById('jsoncPreview');
+            const previewPanel = document.getElementById('previewPanel');
+            const optionsPanel = document.querySelector('.options-panel');
 
             // Store file path for switch button
             let currentFilePath = null;
@@ -772,9 +827,12 @@ function getScript(): string {
                     tabCMake.addEventListener('click', () => switchTab('cmake'));
                     tabJsonc.addEventListener('click', () => switchTab('jsonc'));
                 }
+
+                // Setup layout monitoring
+                setupLayoutMonitoring();
             }
 
-            // Switch between tabs
+            // Switch between tabs (only in tab mode)
             function switchTab(tab) {
                 if (tab === 'cmake') {
                     tabCMake.classList.add('active');
@@ -786,6 +844,40 @@ function getScript(): string {
                     tabJsonc.classList.add('active');
                     cmakePreview.classList.remove('active');
                     jsoncPreview.classList.add('active');
+                }
+            }
+
+            // Setup layout monitoring for responsive three-column mode
+            function setupLayoutMonitoring() {
+                if (!previewPanel || !optionsPanel) return;
+
+                // Use ResizeObserver to monitor size changes
+                const resizeObserver = new ResizeObserver(() => {
+                    updateLayout();
+                });
+
+                // Observe both panels
+                resizeObserver.observe(previewPanel);
+                resizeObserver.observe(optionsPanel);
+
+                // Initial layout update
+                updateLayout();
+            }
+
+            // Update layout based on available space
+            function updateLayout() {
+                if (!previewPanel || !optionsPanel) return;
+
+                const optionsWidth = optionsPanel.offsetWidth;
+                const previewWidth = previewPanel.offsetWidth;
+
+                // Switch to three-column mode if preview panel is at least 2x the options panel width
+                const shouldUseThreeColumns = previewWidth >= optionsWidth * 2;
+
+                if (shouldUseThreeColumns) {
+                    previewPanel.classList.add('three-column-mode');
+                } else {
+                    previewPanel.classList.remove('three-column-mode');
                 }
             }
 
@@ -824,6 +916,18 @@ function getScript(): string {
                     if (switchToTextBtn) {
                         switchToTextBtn.style.display = 'none';
                     }
+                    // Hide JSONC Source tab for global settings
+                    if (tabJsonc) {
+                        tabJsonc.style.display = 'none';
+                    }
+                    if (jsoncPreview) {
+                        jsoncPreview.style.display = 'none';
+                    }
+                    // Ensure CMake preview is active
+                    if (tabCMake && cmakePreview) {
+                        tabCMake.classList.add('active');
+                        cmakePreview.classList.add('active');
+                    }
                 } else {
                     configTypeBadge.textContent = 'File Config';
                     configTypeBadge.className = 'badge file';
@@ -831,6 +935,13 @@ function getScript(): string {
                     // Show switch button for file-based config
                     if (switchToTextBtn && currentFilePath) {
                         switchToTextBtn.style.display = 'flex';
+                    }
+                    // Show JSONC Source tab for file-based config
+                    if (tabJsonc) {
+                        tabJsonc.style.display = '';
+                    }
+                    if (jsoncPreview) {
+                        jsoncPreview.style.display = '';
                     }
                 }
 
@@ -855,19 +966,21 @@ function getScript(): string {
                 // Update checkboxes
                 document.querySelectorAll('.option-checkbox').forEach(el => {
                     const key = el.dataset.key;
-                    el.checked = mergedConfig[key] === true;
+                    el.checked = Boolean(mergedConfig[key]);
                 });
 
                 // Update numbers
                 document.querySelectorAll('.option-number').forEach(el => {
                     const key = el.dataset.key;
-                    el.value = mergedConfig[key] ?? defaults[key] ?? 0;
+                    const value = mergedConfig[key];
+                    el.value = value !== undefined ? value : (defaults[key] ?? 0);
                 });
 
                 // Update selects
                 document.querySelectorAll('.option-select').forEach(el => {
                     const key = el.dataset.key;
-                    el.value = mergedConfig[key] ?? defaults[key] ?? '';
+                    const value = mergedConfig[key];
+                    el.value = value !== undefined ? value : (defaults[key] ?? '');
                 });
             }
 
@@ -1096,9 +1209,8 @@ function getScript(): string {
 
             // Handle reset button
             function handleReset() {
-                if (confirm('Reset all options to their default values?')) {
-                    vscode.postMessage({ type: 'resetToDefaults' });
-                }
+                // Send reset request to extension (confirmation will be shown by VS Code)
+                vscode.postMessage({ type: 'resetToDefaults' });
             }
 
             // Handle switch to text editor button

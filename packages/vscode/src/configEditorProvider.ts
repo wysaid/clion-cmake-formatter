@@ -87,19 +87,30 @@ export class ConfigEditorProvider implements vscode.CustomTextEditorProvider {
                         break;
                     }
 
-                    case 'resetToDefaults':
-                        await this.resetToDefaults(document);
-                        webviewPanel.webview.postMessage({
-                            type: 'init',
-                            config: {},
-                            defaults: DEFAULT_OPTIONS,
-                            isGlobal: false,
-                            filePath: document.uri.fsPath,
-                            sampleCode: SAMPLE_CMAKE_CODE,
-                            formattedCode: this.formatSampleCode({}),
-                            jsoncSource: document.getText()
-                        });
+                    case 'resetToDefaults': {
+                        // Show confirmation dialog
+                        const answer = await vscode.window.showWarningMessage(
+                            'Reset all options to their default values?',
+                            { modal: true },
+                            'Reset',
+                            'Cancel'
+                        );
+
+                        if (answer === 'Reset') {
+                            await this.resetToDefaults(document);
+                            webviewPanel.webview.postMessage({
+                                type: 'init',
+                                config: {},
+                                defaults: DEFAULT_OPTIONS,
+                                isGlobal: false,
+                                filePath: document.uri.fsPath,
+                                sampleCode: SAMPLE_CMAKE_CODE,
+                                formattedCode: this.formatSampleCode({}),
+                                jsoncSource: document.getText()
+                            });
+                        }
                         break;
+                    }
 
                     case 'showError':
                         vscode.window.showErrorMessage(message.message);
@@ -357,18 +368,29 @@ export class ConfigEditorProvider implements vscode.CustomTextEditorProvider {
                         break;
                     }
 
-                    case 'resetToDefaults':
-                        await ConfigEditorProvider.resetGlobalToDefaults();
-                        panel.webview.postMessage({
-                            type: 'init',
-                            config: {},
-                            defaults: DEFAULT_OPTIONS,
-                            isGlobal: true,
-                            filePath: undefined,
-                            sampleCode: SAMPLE_CMAKE_CODE,
-                            formattedCode: formatCMake(SAMPLE_CMAKE_CODE, DEFAULT_OPTIONS)
-                        });
+                    case 'resetToDefaults': {
+                        // Show confirmation dialog for global settings
+                        const answer = await vscode.window.showWarningMessage(
+                            'Reset all global options to their default values? This will remove all cc-format settings from your VS Code configuration.',
+                            { modal: true },
+                            'Reset',
+                            'Cancel'
+                        );
+
+                        if (answer === 'Reset') {
+                            await ConfigEditorProvider.resetGlobalToDefaults();
+                            panel.webview.postMessage({
+                                type: 'init',
+                                config: {},
+                                defaults: DEFAULT_OPTIONS,
+                                isGlobal: true,
+                                filePath: undefined,
+                                sampleCode: SAMPLE_CMAKE_CODE,
+                                formattedCode: formatCMake(SAMPLE_CMAKE_CODE, DEFAULT_OPTIONS)
+                            });
+                        }
                         break;
+                    }
                 }
             },
             undefined,

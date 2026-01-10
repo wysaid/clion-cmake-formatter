@@ -310,17 +310,20 @@
 
         document.querySelectorAll('.option-checkbox').forEach((el) => {
             const key = el.dataset.key;
+            if (!isValidOptionKey(key)) return;
             el.checked = Boolean(mergedConfig[key]);
         });
 
         document.querySelectorAll('.option-number').forEach((el) => {
             const key = el.dataset.key;
+            if (!isValidOptionKey(key)) return;
             const value = mergedConfig[key];
             el.value = value !== undefined ? value : (defaults[key] ?? 0);
         });
 
         document.querySelectorAll('.option-select').forEach((el) => {
             const key = el.dataset.key;
+            if (!isValidOptionKey(key)) return;
             const value = mergedConfig[key];
             el.value = value !== undefined ? value : (defaults[key] ?? '');
         });
@@ -328,25 +331,32 @@
 
     function handleCheckboxChange(event) {
         const key = event.target.dataset.key;
+        if (!isValidOptionKey(key)) return;
         const value = event.target.checked;
         updateConfig(key, value);
     }
 
     function handleNumberChange(event) {
         const key = event.target.dataset.key;
+        if (!isValidOptionKey(key)) return;
         const value = parseInt(event.target.value, 10);
         if (!isNaN(value)) {
-            updateConfig(key, value);
+            const normalized = normalizeNumberOption(key, value, event.target);
+            updateConfig(key, normalized);
         }
     }
 
     function handleSelectChange(event) {
         const key = event.target.dataset.key;
+        if (!isValidOptionKey(key)) return;
         const value = event.target.value;
         updateConfig(key, value);
     }
 
     function updateConfig(key, value) {
+        if (!isValidOptionKey(key)) {
+            return;
+        }
         currentConfig[key] = value;
 
         vscode.postMessage({
@@ -363,6 +373,33 @@
             enterHighlightMode();
             requestPreview();
         }, 150);
+    }
+
+    function isValidOptionKey(key) {
+        if (typeof key !== 'string' || key.length === 0) {
+            return false;
+        }
+
+        // Once defaults arrive, enforce an allowlist.
+        if (defaults && typeof defaults === 'object' && Object.keys(defaults).length > 0) {
+            return Object.prototype.hasOwnProperty.call(defaults, key);
+        }
+
+        return true;
+    }
+
+    function normalizeNumberOption(key, value, inputEl) {
+        // Schema semantics: 0 means unlimited; otherwise minimum is 30.
+        if (key === 'lineLength') {
+            if (value < 0) value = 0;
+            if (value !== 0 && value < 30) {
+                value = 30;
+            }
+            if (inputEl && inputEl.value !== String(value)) {
+                inputEl.value = String(value);
+            }
+        }
+        return value;
     }
 
     function requestPreview() {

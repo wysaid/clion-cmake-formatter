@@ -22,7 +22,7 @@ export class ConfigEditorProvider implements vscode.CustomTextEditorProvider {
     public static readonly viewType = 'clionCMakeFormat.configEditor';
 
     private static currentPanel: vscode.WebviewPanel | undefined;
-    private isUpdatingFromWebview = false;
+    private readonly updatingDocs = new Set<string>();
 
     constructor(private readonly context: vscode.ExtensionContext) { }
 
@@ -34,10 +34,14 @@ export class ConfigEditorProvider implements vscode.CustomTextEditorProvider {
         webviewPanel: vscode.WebviewPanel,
         _token: vscode.CancellationToken
     ): Promise<void> {
+        const disposables: vscode.Disposable[] = [];
+
         // Setup webview options
         webviewPanel.webview.options = {
             enableScripts: true,
-            localResourceRoots: [this.context.extensionUri]
+            localResourceRoots: [
+                vscode.Uri.joinPath(this.context.extensionUri, 'resources', 'webview')
+            ]
         };
 
         // Set the webview's initial html content
@@ -164,13 +168,14 @@ export class ConfigEditorProvider implements vscode.CustomTextEditorProvider {
                 }
             },
             undefined,
-            this.context.subscriptions
+            disposables
         );
 
         // Update webview when the document changes
         const changeDocumentSubscription = vscode.workspace.onDidChangeTextDocument(async (e) => {
             // Skip updates that originated from webview to prevent circular updates
-            if (e.document.uri.toString() === document.uri.toString() && !this.isUpdatingFromWebview) {
+            const uriStr = e.document.uri.toString();
+            if (uriStr === document.uri.toString() && !this.updatingDocs.has(uriStr)) {
                 const parseResult = this.parseConfig(e.document.getText());
 
                 if (!parseResult.isValid) {
@@ -215,6 +220,13 @@ export class ConfigEditorProvider implements vscode.CustomTextEditorProvider {
 
         webviewPanel.onDidDispose(() => {
             changeDocumentSubscription.dispose();
+            for (const d of disposables) {
+                try {
+                    d.dispose();
+                } catch {
+                    // ignore
+                }
+            }
         });
     }
 
@@ -258,6 +270,9 @@ export class ConfigEditorProvider implements vscode.CustomTextEditorProvider {
         key: string,
         value: boolean | number | string
     ): Promise<void> {
+        if (!(key in DEFAULT_OPTIONS)) {
+            return;
+        }
         const text = document.getText();
         const parseResult = this.parseConfig(text);
 
@@ -275,8 +290,9 @@ export class ConfigEditorProvider implements vscode.CustomTextEditorProvider {
         // Use a full default-shaped JSONC file (like sample.cc-format.jsonc) instead of a minimal object.
         const newContent = generateSampleConfig(config);
 
-        // Set flag to prevent circular updates
-        this.isUpdatingFromWebview = true;
+        // Track this document update to prevent circular updates.
+        const uriStr = document.uri.toString();
+        this.updatingDocs.add(uriStr);
         try {
             // Apply edit
             const edit = new vscode.WorkspaceEdit();
@@ -287,8 +303,7 @@ export class ConfigEditorProvider implements vscode.CustomTextEditorProvider {
             edit.replace(document.uri, fullRange, newContent);
             await vscode.workspace.applyEdit(edit);
         } finally {
-            // Always reset flag
-            this.isUpdatingFromWebview = false;
+            this.updatingDocs.delete(uriStr);
         }
     }
 
@@ -376,7 +391,9 @@ export class ConfigEditorProvider implements vscode.CustomTextEditorProvider {
             {
                 enableScripts: true,
                 retainContextWhenHidden: true,
-                localResourceRoots: [context.extensionUri]
+                localResourceRoots: [
+                    vscode.Uri.joinPath(context.extensionUri, 'resources', 'webview')
+                ]
             }
         );
 
@@ -423,6 +440,8 @@ export class ConfigEditorProvider implements vscode.CustomTextEditorProvider {
         });
 
         // Handle messages
+        const panelDisposables: vscode.Disposable[] = [];
+
         panel.webview.onDidReceiveMessage(
             async (message) => {
                 switch (message.type) {
@@ -474,11 +493,18 @@ export class ConfigEditorProvider implements vscode.CustomTextEditorProvider {
                 }
             },
             undefined,
-            context.subscriptions
+            panelDisposables
         );
 
         panel.onDidDispose(() => {
             ConfigEditorProvider.currentPanel = undefined;
+            for (const d of panelDisposables) {
+                try {
+                    d.dispose();
+                } catch {
+                    // ignore
+                }
+            }
         });
     }
 
@@ -489,6 +515,9 @@ export class ConfigEditorProvider implements vscode.CustomTextEditorProvider {
         key: string,
         value: boolean | number | string
     ): Promise<void> {
+        if (!(key in DEFAULT_OPTIONS)) {
+            return;
+        }
         const config = vscode.workspace.getConfiguration('clionCMakeFormatter');
         await config.update(key, value, vscode.ConfigurationTarget.Global);
     }

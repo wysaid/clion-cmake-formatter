@@ -23,6 +23,7 @@ describe('webview script syntax', () => {
             'configEditor.js'
         );
 
+        assert.ok(fs.existsSync(scriptPath), `Webview script not found at: ${scriptPath}`);
         const script = fs.readFileSync(scriptPath, 'utf8');
         assert.ok(script.length > 0, 'Expected webview script to be non-empty');
 

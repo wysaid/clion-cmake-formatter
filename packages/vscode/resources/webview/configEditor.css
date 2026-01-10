@@ -304,6 +304,12 @@ body {
     color: var(--vscode-textLink-foreground);
 }
 
+.tab-btn:focus-visible {
+    outline: 1px solid var(--vscode-focusBorder);
+    outline-offset: 2px;
+    opacity: 1;
+}
+
 .preview-container {
     flex: 1;
     overflow: hidden;
@@ -528,6 +534,11 @@ body {
     background-color: var(--vscode-button-secondaryHoverBackground, #4a4d51);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.floating-switch-btn:focus-visible {
+    outline: 1px solid var(--vscode-focusBorder);
+    outline-offset: 2px;
 }
 
 .floating-switch-btn:active {

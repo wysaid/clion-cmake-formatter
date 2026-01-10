@@ -7,6 +7,7 @@
 // Use type-only import to avoid runtime dependency in tests
 import type * as vscode from 'vscode';
 import * as path from 'node:path';
+import { randomBytes } from 'node:crypto';
 
 // Define minimal interface for webview to make testing easier
 interface WebviewLike {
@@ -155,7 +156,8 @@ const OPTION_GROUPS: OptionGroup[] = [
         title: 'Blank Lines',
         options: [
             { key: 'maxBlankLines', label: 'Max Blank Lines', description: 'Maximum consecutive blank lines', type: 'number', min: 0, max: 20 },
-            { key: 'maxTrailingBlankLines', label: 'Max Trailing Blank Lines', description: 'Maximum blank lines at end of file', type: 'number', min: 0, max: 10 }
+            // Schema intentionally has no maximum; allow large values to “keep all”.
+            { key: 'maxTrailingBlankLines', label: 'Max Trailing Blank Lines', description: 'Maximum blank lines at end of file (0 = none; large = keep all)', type: 'number', min: 0, max: 9999 }
         ]
     },
     {
@@ -385,12 +387,8 @@ function generateOptionHtml(opt: OptionMeta): string {
  * Generate a nonce for CSP
  */
 function getNonce(): string {
-    let text = '';
-    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    for (let i = 0; i < 32; i++) {
-        text += possible.charAt(Math.floor(Math.random() * possible.length));
-    }
-    return text;
+    // 128-bit nonce is sufficient; use CSPRNG rather than Math.random().
+    return randomBytes(16).toString('base64');
 }
 
 /**

@@ -11,7 +11,7 @@ import {
     FormatterOptions,
     DEFAULT_OPTIONS,
     parseConfigContent,
-    generateConfigHeader
+    generateSampleConfig
 } from '@cc-format/core';
 import { getWebviewContent, SAMPLE_CMAKE_CODE } from './webview/configEditorHtml';
 
@@ -57,7 +57,7 @@ export class ConfigEditorProvider implements vscode.CustomTextEditorProvider {
                 isGlobal: false,
                 filePath: document.uri.fsPath,
                 sampleCode: SAMPLE_CMAKE_CODE,
-                formattedCode: this.formatSampleCode(cfg),
+                formattedCode: this.formatCMakeSource(SAMPLE_CMAKE_CODE, cfg),
                 jsoncSource: jsoncSrc
             });
         };
@@ -112,7 +112,10 @@ export class ConfigEditorProvider implements vscode.CustomTextEditorProvider {
                         break;
 
                     case 'requestPreview': {
-                        const formatted = this.formatSampleCode(message.config);
+                        const source = typeof message.cmakeSource === 'string' && message.cmakeSource.length > 0
+                            ? message.cmakeSource
+                            : SAMPLE_CMAKE_CODE;
+                        const formatted = this.formatCMakeSource(source, message.config);
                         const currentJsoncSource = document.getText();
                         webviewPanel.webview.postMessage({
                             type: 'updatePreview',
@@ -140,7 +143,7 @@ export class ConfigEditorProvider implements vscode.CustomTextEditorProvider {
                                 isGlobal: false,
                                 filePath: document.uri.fsPath,
                                 sampleCode: SAMPLE_CMAKE_CODE,
-                                formattedCode: this.formatSampleCode({}),
+                                formattedCode: this.formatCMakeSource(SAMPLE_CMAKE_CODE, {}),
                                 jsoncSource: newContent
                             });
                         }
@@ -193,7 +196,7 @@ export class ConfigEditorProvider implements vscode.CustomTextEditorProvider {
                             isGlobal: false,
                             filePath: document.uri.fsPath,
                             sampleCode: SAMPLE_CMAKE_CODE,
-                            formattedCode: this.formatSampleCode({}),
+                            formattedCode: this.formatCMakeSource(SAMPLE_CMAKE_CODE, {}),
                             jsoncSource: newContent
                         });
                     }
@@ -203,7 +206,7 @@ export class ConfigEditorProvider implements vscode.CustomTextEditorProvider {
                     webviewPanel.webview.postMessage({
                         type: 'configUpdated',
                         config: parseResult.config,
-                        formattedCode: this.formatSampleCode(parseResult.config),
+                        formattedCode: this.formatCMakeSource(SAMPLE_CMAKE_CODE, parseResult.config),
                         jsoncSource: e.document.getText()
                     });
                 }
@@ -237,10 +240,11 @@ export class ConfigEditorProvider implements vscode.CustomTextEditorProvider {
     /**
      * Format sample CMake code with given options
      */
-    private formatSampleCode(options: Partial<FormatterOptions>): string {
+    private formatCMakeSource(source: string, options: Partial<FormatterOptions>): string {
         try {
             const mergedOptions = { ...DEFAULT_OPTIONS, ...options };
-            return formatCMake(SAMPLE_CMAKE_CODE, mergedOptions);
+            const input = source && source.length > 0 ? source : SAMPLE_CMAKE_CODE;
+            return formatCMake(input, mergedOptions);
         } catch (error) {
             return `# Error formatting code: ${error instanceof Error ? error.message : 'Unknown error'}`;
         }
@@ -267,8 +271,9 @@ export class ConfigEditorProvider implements vscode.CustomTextEditorProvider {
         // Update only the changed key (add if not exists, update if exists)
         (config as Record<string, unknown>)[key] = value;
 
-        // Generate new content with updated config
-        const newContent = this.generateConfigContent(config);
+        // Generate new content with updated config.
+        // Use a full default-shaped JSONC file (like sample.cc-format.jsonc) instead of a minimal object.
+        const newContent = generateSampleConfig(config);
 
         // Set flag to prevent circular updates
         this.isUpdatingFromWebview = true;
@@ -292,7 +297,8 @@ export class ConfigEditorProvider implements vscode.CustomTextEditorProvider {
      * @returns The new content that was written to the file
      */
     private async resetToDefaults(document: vscode.TextDocument): Promise<string> {
-        const newContent = this.generateConfigContent({});
+        // Reset file to the initial default config content (not an empty object).
+        const newContent = generateSampleConfig({});
 
         const edit = new vscode.WorkspaceEdit();
         const fullRange = new vscode.Range(
@@ -303,22 +309,6 @@ export class ConfigEditorProvider implements vscode.CustomTextEditorProvider {
         await vscode.workspace.applyEdit(edit);
 
         return newContent;
-    }
-
-    /**
-     * Generate configuration file content
-     */
-    private generateConfigContent(options: Partial<FormatterOptions>): string {
-        const lines: string[] = [generateConfigHeader(), '{'];
-
-        const entries = Object.entries(options);
-        entries.forEach(([key, value], index) => {
-            const comma = index < entries.length - 1 ? ',' : '';
-            lines.push(`    "${key}": ${JSON.stringify(value)}${comma}`);
-        });
-
-        lines.push('}', '');
-        return lines.join('\n');
     }
 
     /**
@@ -442,11 +432,14 @@ export class ConfigEditorProvider implements vscode.CustomTextEditorProvider {
 
                     case 'requestPreview': {
                         const merged = { ...DEFAULT_OPTIONS, ...message.config };
+                        const source = typeof message.cmakeSource === 'string' && message.cmakeSource.length > 0
+                            ? message.cmakeSource
+                            : SAMPLE_CMAKE_CODE;
                         let formatted: string;
                         try {
-                            formatted = formatCMake(SAMPLE_CMAKE_CODE, merged);
+                            formatted = formatCMake(source, merged);
                         } catch {
-                            formatted = SAMPLE_CMAKE_CODE;
+                            formatted = source;
                         }
                         panel.webview.postMessage({
                             type: 'updatePreview',

@@ -310,6 +310,18 @@ body {
     position: relative;
 }
 
+.preview-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 0;
+}
+
+.btn-small {
+    padding: 4px 10px;
+    font-size: 0.85em;
+}
+
 /* Three-column mode: split preview container */
 .preview-panel.three-column-mode .preview-container {
     display: flex;
@@ -375,6 +387,47 @@ body {
     white-space: pre;
     overflow-x: auto;
     tab-size: 4;
+}
+
+.code-editor {
+    width: 100%;
+    height: auto;
+    margin: 0;
+    padding: 12px;
+    background-color: var(--vscode-textCodeBlock-background);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--vscode-panel-border);
+    font-family: var(--vscode-editor-font-family);
+    font-size: var(--vscode-editor-font-size);
+    line-height: 1.6;
+    color: var(--vscode-editor-foreground);
+    resize: none;
+    outline: none;
+    white-space: pre;
+    overflow: auto;
+    tab-size: 4;
+}
+
+/* CMake preview layout: toolbar on top, editor fills the remaining space */
+.tab-content#cmakePreview.active {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.preview-panel.three-column-mode .tab-content#cmakePreview {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.tab-content#cmakePreview .code-editor {
+    flex: 1;
+}
+
+.code-editor:focus {
+    border-color: var(--vscode-focusBorder);
+    box-shadow: 0 0 0 1px var(--vscode-focusBorder);
 }
 
 .code-preview code {

@@ -231,7 +231,12 @@ export function getWebviewContent(
                 </div>
                 <div class="preview-container">
                     <div class="tab-content active" id="cmakePreview" data-title="CMake Preview">
-                        <pre class="code-preview"><code id="formattedCode">Loading...</code></pre>
+                        <div class="preview-toolbar">
+                            <button class="btn btn-secondary btn-small hidden" id="resetDemoBtn" title="Reset demo CMake code">
+                                Reset Demo Code
+                            </button>
+                        </div>
+                        <textarea class="code-editor" id="cmakeEditor" spellcheck="false">Loading...</textarea>
                     </div>
                     <div class="tab-content" id="jsoncPreview" data-title="JSONC Source">
                         <pre class="code-preview jsonc"><code id="jsoncCode">Loading...</code></pre>

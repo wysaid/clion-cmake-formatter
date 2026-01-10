@@ -9,11 +9,18 @@
     let defaults = {};
     let isGlobal = false;
     let debounceTimer = null;
+    let cmakeEditDebounceTimer = null;
+
+    // CMake preview state
+    let demoCMakeCode = '';
+    let isUsingDemoCMakeCode = true;
+    let isApplyingCMakeUpdate = false;
 
     // DOM elements
     const configTypeBadge = document.getElementById('configTypeBadge');
     const filePathEl = document.getElementById('filePath');
-    const formattedCodeEl = document.getElementById('formattedCode');
+    const cmakeEditorEl = document.getElementById('cmakeEditor');
+    const resetDemoBtn = document.getElementById('resetDemoBtn');
     const jsoncCodeEl = document.getElementById('jsoncCode');
     const resetBtn = document.getElementById('resetBtn');
     const switchToTextBtn = document.getElementById('switchToTextBtn');
@@ -59,6 +66,14 @@
 
         // Setup layout monitoring
         setupLayoutMonitoring();
+
+        // Setup editable CMake preview
+        if (cmakeEditorEl) {
+            cmakeEditorEl.addEventListener('input', handleCMakeEditorInput);
+        }
+        if (resetDemoBtn) {
+            resetDemoBtn.addEventListener('click', handleResetDemoCode);
+        }
     }
 
     // Switch between tabs (only in tab mode)
@@ -113,8 +128,11 @@
 
         switch (message.type) {
             case 'init':
+                handleInit(message, true);
+                break;
+
             case 'configUpdated':
-                handleInit(message);
+                handleInit(message, false);
                 break;
 
             case 'updatePreview':
@@ -126,11 +144,21 @@
         }
     });
 
-    function handleInit(data) {
+    function handleInit(data, isFreshInit) {
         currentConfig = data.config || {};
         defaults = data.defaults || {};
         isGlobal = Boolean(data.isGlobal);
         currentFilePath = data.filePath || null;
+
+        if (typeof data.sampleCode === 'string' && data.sampleCode.length > 0) {
+            demoCMakeCode = data.sampleCode;
+        }
+
+        if (isFreshInit) {
+            // Start from the built-in demo code.
+            isUsingDemoCMakeCode = true;
+            setResetDemoVisible(false);
+        }
 
         if (!configTypeBadge || !filePathEl) return;
 
@@ -178,8 +206,14 @@
 
         updateFormValues();
 
-        if (data.formattedCode) {
+        if (data.formattedCode && (isFreshInit || isUsingDemoCMakeCode)) {
+            // On fresh init: show formatted demo output.
+            // On configUpdated: only apply if still using demo; don't overwrite user-edited content.
             updatePreview(data.formattedCode);
+        } else if (!isFreshInit) {
+            // If config changed externally and the user has custom code in the editor,
+            // re-format based on the current editor contents.
+            requestPreview();
         }
 
         if (data.jsoncSource !== undefined) {
@@ -247,16 +281,59 @@
 
     function requestPreview() {
         const mergedConfig = { ...defaults, ...currentConfig };
+        const cmakeSource = isUsingDemoCMakeCode
+            ? (demoCMakeCode || '')
+            : (cmakeEditorEl ? String(cmakeEditorEl.value || '') : '');
         vscode.postMessage({
             type: 'requestPreview',
             config: mergedConfig,
+            cmakeSource: cmakeSource,
         });
     }
 
     function updatePreview(code) {
-        if (!formattedCodeEl) return;
-        const highlighted = highlightCMake(code || '');
-        formattedCodeEl.innerHTML = highlighted;
+        if (!cmakeEditorEl) return;
+        isApplyingCMakeUpdate = true;
+        try {
+            cmakeEditorEl.value = String(code || '');
+        } finally {
+            isApplyingCMakeUpdate = false;
+        }
+    }
+
+    function setResetDemoVisible(visible) {
+        if (!resetDemoBtn) return;
+        if (visible) {
+            resetDemoBtn.classList.remove('hidden');
+        } else {
+            resetDemoBtn.classList.add('hidden');
+        }
+    }
+
+    function handleCMakeEditorInput() {
+        if (!cmakeEditorEl) return;
+        if (isApplyingCMakeUpdate) return;
+
+        // Once the user edits the preview, switch to user-provided mode.
+        if (isUsingDemoCMakeCode) {
+            isUsingDemoCMakeCode = false;
+            setResetDemoVisible(true);
+        }
+
+        // Debounced format request so option changes and typing both converge.
+        if (cmakeEditDebounceTimer) {
+            clearTimeout(cmakeEditDebounceTimer);
+        }
+        cmakeEditDebounceTimer = setTimeout(() => {
+            requestPreview();
+        }, 400);
+    }
+
+    function handleResetDemoCode() {
+        // Return to demo mode and re-render demo sample under current options.
+        isUsingDemoCMakeCode = true;
+        setResetDemoVisible(false);
+        requestPreview();
     }
 
     function highlightCMake(code) {

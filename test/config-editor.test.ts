@@ -5,6 +5,8 @@
 import { describe, it } from 'mocha';
 import * as assert from 'assert';
 import { JSDOM } from 'jsdom';
+import * as fs from 'fs';
+import * as path from 'path';
 import { getWebviewContent, SAMPLE_CMAKE_CODE } from '../packages/vscode/src/webview/configEditorHtml';
 
 describe('Config Editor', () => {
@@ -90,6 +92,21 @@ describe('Config Editor', () => {
             // HTML includes both tabs (they are hidden by JavaScript based on isGlobal flag)
             assert.ok(html.includes('id="tabCMake"'), 'Should include CMake tab button in HTML');
             assert.ok(html.includes('id="tabJsonc"'), 'Should include JSONC tab button in HTML');
+        });
+
+        it('should include editable CMake preview textarea and reset demo button', () => {
+            const mockWebview = {
+                cspSource: 'https://mock-csp-source',
+                asWebviewUri: (uri: any) => uri
+            } as any;
+
+            const mockUri = { fsPath: '/test/path', toString: () => 'file:///test/path' } as any;
+
+            const html = getWebviewContent(mockWebview, mockUri, false, '/test/config.jsonc');
+
+            assert.ok(html.includes('id="cmakeEditor"'), 'Should include editable CMake textarea');
+            assert.ok(html.includes('id="resetDemoBtn"'), 'Should include reset demo code button');
+            assert.ok(!html.includes('id="formattedCode"'), 'Should not include legacy formattedCode <code> element');
         });
     });
 
@@ -186,6 +203,107 @@ describe('Config Editor', () => {
             updateLayout();
             assert.ok(!previewPanel.classList.contains('three-column-mode'),
                 'Should not use three-column mode when preview is less than 2x wider');
+        });
+    });
+
+    describe('Editable CMake Preview Behavior', () => {
+        it('should send cmakeSource based on editor content after user edits and allow resetting to demo', async () => {
+            const messages: any[] = [];
+
+            const dom = new JSDOM(
+                `<!DOCTYPE html>
+                <html>
+                <body>
+                    <div id="configTypeBadge"></div>
+                    <div id="filePath"></div>
+                    <div id="previewPanel"></div>
+                    <div class="options-panel"></div>
+
+                    <button id="resetBtn"></button>
+                    <button id="switchToTextBtn"></button>
+                    <button id="tabCMake"></button>
+                    <button id="tabJsonc"></button>
+                    <div id="cmakePreview"></div>
+                    <div id="jsoncPreview"></div>
+
+                    <button id="resetDemoBtn" class="hidden"></button>
+                    <textarea id="cmakeEditor"></textarea>
+
+                    <pre><code id="jsoncCode"></code></pre>
+                </body>
+                </html>`,
+                {
+                    runScripts: 'dangerously',
+                    resources: 'usable'
+                }
+            );
+
+            const { window } = dom;
+            const { document } = window;
+
+            // Mock VS Code API
+            (window as any).acquireVsCodeApi = () => ({
+                postMessage: (msg: any) => messages.push(msg)
+            });
+
+            // Load the real webview script
+            const scriptPath = path.resolve(__dirname, '../packages/vscode/resources/webview/configEditor.js');
+            const scriptContent = fs.readFileSync(scriptPath, 'utf8');
+            const scriptEl = document.createElement('script');
+            scriptEl.textContent = scriptContent;
+            document.body.appendChild(scriptEl);
+
+            const textarea = document.getElementById('cmakeEditor') as HTMLTextAreaElement;
+            const resetDemoBtn = document.getElementById('resetDemoBtn') as HTMLButtonElement;
+            assert.ok(textarea, 'cmakeEditor textarea should exist');
+            assert.ok(resetDemoBtn, 'resetDemoBtn should exist');
+            assert.ok(resetDemoBtn.classList.contains('hidden'), 'resetDemoBtn should be hidden initially');
+
+            // Initialize webview with demo sample
+            window.dispatchEvent(
+                new window.MessageEvent('message', {
+                    data: {
+                        type: 'init',
+                        config: {},
+                        defaults: {},
+                        isGlobal: false,
+                        filePath: '/test/config.cc-format.jsonc',
+                        sampleCode: 'set(X 1)\n',
+                        formattedCode: 'set(X 1)\n',
+                        jsoncSource: '{ }'
+                    }
+                })
+            );
+
+            // User edits the CMake code
+            textarea.value = 'message(STATUS "hello")\n';
+            textarea.dispatchEvent(new window.Event('input', { bubbles: true }));
+
+            assert.ok(!resetDemoBtn.classList.contains('hidden'), 'resetDemoBtn should become visible after user edits');
+
+            // Wait for debounce to request preview
+            await new Promise<void>((resolve) => window.setTimeout(resolve, 450));
+
+            const requestMessages = messages.filter(m => m.type === 'requestPreview');
+            assert.ok(requestMessages.length >= 1, 'Should send at least one requestPreview message');
+            assert.strictEqual(
+                requestMessages[requestMessages.length - 1].cmakeSource,
+                'message(STATUS "hello")\n',
+                'Should send current editor content as cmakeSource'
+            );
+
+            // Reset back to demo mode
+            resetDemoBtn.click();
+
+            assert.ok(resetDemoBtn.classList.contains('hidden'), 'resetDemoBtn should be hidden after reset');
+
+            const requestMessagesAfterReset = messages.filter(m => m.type === 'requestPreview');
+            assert.ok(requestMessagesAfterReset.length >= 2, 'Should send another requestPreview after reset');
+            assert.strictEqual(
+                requestMessagesAfterReset[requestMessagesAfterReset.length - 1].cmakeSource,
+                'set(X 1)\n',
+                'Should send demo sample code as cmakeSource after reset'
+            );
         });
     });
 

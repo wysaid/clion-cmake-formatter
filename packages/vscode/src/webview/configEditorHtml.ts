@@ -236,7 +236,7 @@ export function getWebviewContent(
                                 Reset Demo Code
                             </button>
                         </div>
-                        <div class="code-editor-wrapper" id="cmakeEditorWrapper">
+                        <div class="code-editor-wrapper highlight-mode" id="cmakeEditorWrapper">
                             <pre class="code-preview code-highlight" id="cmakeHighlight"><code id="cmakeHighlighted">Loading...</code></pre>
                             <textarea class="code-editor" id="cmakeEditor" spellcheck="false" aria-label="CMake Preview Editor">Loading...</textarea>
                         </div>

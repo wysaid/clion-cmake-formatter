@@ -227,9 +227,13 @@ describe('Config Editor', () => {
                     <div id="cmakePreview"></div>
                     <div id="jsoncPreview"></div>
 
+                    <input type="checkbox" class="option-checkbox" data-key="useTabs" />
+
                     <button id="resetDemoBtn" class="hidden"></button>
-                    <pre id="cmakeHighlight"><code id="cmakeHighlighted"></code></pre>
-                    <textarea id="cmakeEditor"></textarea>
+                    <div id="cmakeEditorWrapper" class="code-editor-wrapper highlight-mode">
+                        <pre id="cmakeHighlight"><code id="cmakeHighlighted"></code></pre>
+                        <textarea id="cmakeEditor"></textarea>
+                    </div>
 
                     <pre><code id="jsoncCode"></code></pre>
                 </body>
@@ -283,15 +287,23 @@ describe('Config Editor', () => {
 
             assert.ok(!resetDemoBtn.classList.contains('hidden'), 'resetDemoBtn should become visible after user edits');
 
-            // Wait for debounce to request preview
-            await new Promise<void>((resolve) => window.setTimeout(resolve, 450));
+            // While typing/editing, we should NOT auto-format/overwrite the user's content.
+            await new Promise<void>((resolve) => window.setTimeout(resolve, 200));
+            const requestMessagesAfterTyping = messages.filter(m => m.type === 'requestPreview');
+            assert.strictEqual(requestMessagesAfterTyping.length, 0, 'Should not auto-requestPreview while editing');
 
+            // Changing an option should request preview and restore highlight.
+            const checkbox = document.querySelector('.option-checkbox') as HTMLInputElement;
+            checkbox.checked = true;
+            checkbox.dispatchEvent(new window.Event('change', { bubbles: true }));
+
+            await new Promise<void>((resolve) => window.setTimeout(resolve, 200));
             const requestMessages = messages.filter(m => m.type === 'requestPreview');
-            assert.ok(requestMessages.length >= 1, 'Should send at least one requestPreview message');
+            assert.ok(requestMessages.length >= 1, 'Should requestPreview after option change');
             assert.strictEqual(
                 requestMessages[requestMessages.length - 1].cmakeSource,
                 'message(STATUS "hello")\n',
-                'Should send current editor content as cmakeSource'
+                'Should send current editor content as cmakeSource after option change'
             );
 
             // Reset back to demo mode

@@ -19,6 +19,7 @@
     // DOM elements
     const configTypeBadge = document.getElementById('configTypeBadge');
     const filePathEl = document.getElementById('filePath');
+    const cmakeEditorWrapperEl = document.getElementById('cmakeEditorWrapper');
     const cmakeEditorEl = document.getElementById('cmakeEditor');
     const cmakeHighlightedEl = document.getElementById('cmakeHighlighted');
     const cmakeHighlightEl = document.getElementById('cmakeHighlight');
@@ -36,6 +37,9 @@
     // Store file path for switch button
     let currentFilePath = null;
     let currentJsoncSource = '';
+
+    // Highlight mode state
+    let isHighlightMode = true;
 
     function init() {
         // Setup event listeners for all inputs
@@ -71,11 +75,28 @@
 
         // Setup editable CMake preview
         if (cmakeEditorEl) {
+            cmakeEditorEl.addEventListener('keydown', handleCMakeEditorKeydown);
             cmakeEditorEl.addEventListener('input', handleCMakeEditorInput);
             cmakeEditorEl.addEventListener('scroll', syncCMakeHighlightScroll);
         }
         if (resetDemoBtn) {
             resetDemoBtn.addEventListener('click', handleResetDemoCode);
+        }
+    }
+
+    function setHighlightMode(enabled) {
+        isHighlightMode = Boolean(enabled);
+
+        if (!cmakeEditorWrapperEl) {
+            return;
+        }
+
+        if (isHighlightMode) {
+            cmakeEditorWrapperEl.classList.add('highlight-mode');
+            cmakeEditorWrapperEl.classList.remove('edit-mode');
+        } else {
+            cmakeEditorWrapperEl.classList.remove('highlight-mode');
+            cmakeEditorWrapperEl.classList.add('edit-mode');
         }
     }
 
@@ -87,8 +108,56 @@
 
     function syncCMakeHighlightScroll() {
         if (!cmakeEditorEl || !cmakeHighlightEl) return;
+        if (!isHighlightMode) return;
         cmakeHighlightEl.scrollTop = cmakeEditorEl.scrollTop;
         cmakeHighlightEl.scrollLeft = cmakeEditorEl.scrollLeft;
+    }
+
+    function getFirstDiffIndex(a, b) {
+        const aStr = String(a ?? '');
+        const bStr = String(b ?? '');
+        const minLen = Math.min(aStr.length, bStr.length);
+        let i = 0;
+        while (i < minLen && aStr.charCodeAt(i) === bStr.charCodeAt(i)) {
+            i++;
+        }
+        return i;
+    }
+
+    function countNewlinesUpTo(text, index) {
+        const str = String(text ?? '');
+        const end = Math.max(0, Math.min(index, str.length));
+        let count = 0;
+        for (let i = 0; i < end; i++) {
+            if (str.charCodeAt(i) === 10) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    function revealChange(oldText, newText) {
+        if (!cmakeEditorEl) return;
+        if (oldText === undefined || newText === undefined) return;
+
+        const oldStr = String(oldText);
+        const newStr = String(newText);
+        if (oldStr === newStr) return;
+
+        const diffIdx = getFirstDiffIndex(oldStr, newStr);
+        const line = countNewlinesUpTo(newStr, diffIdx);
+
+        const style = window.getComputedStyle(cmakeEditorEl);
+        const fontSize = parseFloat(style.fontSize || '14') || 14;
+        let lineHeight = parseFloat(style.lineHeight || '0');
+        if (!Number.isFinite(lineHeight) || lineHeight <= 0) {
+            // Matches CSS: line-height: 1.6
+            lineHeight = fontSize * 1.6;
+        }
+
+        const targetTop = Math.max(0, line * lineHeight - cmakeEditorEl.clientHeight * 0.3);
+        cmakeEditorEl.scrollTop = targetTop;
+        syncCMakeHighlightScroll();
     }
 
     // Switch between tabs (only in tab mode)
@@ -173,6 +242,7 @@
             // Start from the built-in demo code.
             isUsingDemoCMakeCode = true;
             setResetDemoVisible(false);
+            setHighlightMode(true);
         }
 
         if (!configTypeBadge || !filePathEl) return;
@@ -290,6 +360,11 @@
             clearTimeout(debounceTimer);
         }
         debounceTimer = setTimeout(() => {
+            // Config changes should re-enable highlight and show formatted output.
+            setHighlightMode(true);
+            if (cmakeEditorEl) {
+                updateCMakeHighlight(cmakeEditorEl.value);
+            }
             requestPreview();
         }, 150);
     }
@@ -308,13 +383,18 @@
 
     function updatePreview(code) {
         if (!cmakeEditorEl) return;
+        const oldValue = String(cmakeEditorEl.value || '');
         isApplyingCMakeUpdate = true;
         try {
             cmakeEditorEl.value = String(code || '');
+            // Formatter updates should show highlight again.
+            setHighlightMode(true);
             updateCMakeHighlight(code || '');
         } finally {
             isApplyingCMakeUpdate = false;
         }
+
+        revealChange(oldValue, String(code || ''));
     }
 
     function setResetDemoVisible(visible) {
@@ -326,9 +406,23 @@
         }
     }
 
+    function handleCMakeEditorKeydown() {
+        if (!cmakeEditorEl) return;
+        if (isApplyingCMakeUpdate) return;
+
+        // If we're showing highlight overlay, switch to edit mode before the first edit
+        // so the user sees the actual text while typing.
+        if (isHighlightMode) {
+            setHighlightMode(false);
+        }
+    }
+
     function handleCMakeEditorInput() {
         if (!cmakeEditorEl) return;
         if (isApplyingCMakeUpdate) return;
+
+        // User edits: keep it as "real content" (no formatter overwriting and no highlight).
+        setHighlightMode(false);
 
         // Update syntax highlight immediately for good feedback while typing.
         updateCMakeHighlight(cmakeEditorEl.value);
@@ -338,20 +432,21 @@
             isUsingDemoCMakeCode = false;
             setResetDemoVisible(true);
         }
-
-        // Debounced format request so option changes and typing both converge.
-        if (cmakeEditDebounceTimer) {
-            clearTimeout(cmakeEditDebounceTimer);
-        }
-        cmakeEditDebounceTimer = setTimeout(() => {
-            requestPreview();
-        }, 400);
     }
 
     function handleResetDemoCode() {
         // Return to demo mode and re-render demo sample under current options.
         isUsingDemoCMakeCode = true;
         setResetDemoVisible(false);
+
+        // Immediately restore highlight (even before formatted response comes back).
+        setHighlightMode(true);
+        if (cmakeEditorEl) {
+            cmakeEditorEl.value = String(demoCMakeCode || '');
+            updateCMakeHighlight(demoCMakeCode || '');
+            cmakeEditorEl.scrollTop = 0;
+            syncCMakeHighlightScroll();
+        }
         requestPreview();
     }
 

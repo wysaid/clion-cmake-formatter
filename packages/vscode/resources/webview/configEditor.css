@@ -433,23 +433,39 @@ body {
     background: transparent;
     overflow: auto;
     pointer-events: none;
+    display: none;
+}
+
+.code-editor-wrapper.highlight-mode .code-highlight {
+    display: block;
 }
 
 .code-editor-wrapper .code-highlight code {
     color: var(--vscode-editor-foreground);
 }
 
-/* Input layer: transparent text, visible caret */
+/* Input layer */
 .code-editor-wrapper .code-editor {
     position: absolute;
     inset: 0;
     border: none;
     border-radius: 0;
     background: transparent;
+    overflow: auto;
+}
+
+/* Highlight mode: user sees highlight layer, textarea only provides caret/selection */
+.code-editor-wrapper.highlight-mode .code-editor {
     color: transparent;
     caret-color: var(--vscode-editor-foreground);
     -webkit-text-fill-color: transparent;
-    overflow: auto;
+}
+
+/* Edit mode: hide highlight, show real text */
+.code-editor-wrapper.edit-mode .code-editor {
+    color: var(--vscode-editor-foreground);
+    -webkit-text-fill-color: var(--vscode-editor-foreground);
+    caret-color: var(--vscode-editor-foreground);
 }
 
 .code-editor-wrapper .code-editor::selection {

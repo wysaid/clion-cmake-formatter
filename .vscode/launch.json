@@ -17,7 +17,7 @@
             "outFiles": [
                 "${workspaceFolder}/packages/vscode/dist/**/*.js"
             ],
-            "preLaunchTask": "npm: compile"
+            "preLaunchTask": "npm: watch"
         },
         {
             "name": "Launch Extension (Watch Mode)",

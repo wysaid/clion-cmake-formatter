@@ -115,10 +115,28 @@
             }
         },
         {
+            "label": "Install: Workspace Dependencies",
+            "type": "shell",
+            "command": "pnpm install --prefer-offline",
+            "detail": "Install workspace dependencies (required before build)",
+            "problemMatcher": [],
+            "group": "build",
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared",
+                "clear": false,
+                "focus": false
+            }
+        },
+        {
             "label": "Build: All Packages",
             "type": "npm",
             "script": "build",
             "detail": "Build all monorepo packages (core, cli, vscode)",
+            "dependsOn": [
+                "Install: Workspace Dependencies"
+            ],
+            "dependsOrder": "sequence",
             "problemMatcher": "$tsc",
             "group": {
                 "kind": "build"

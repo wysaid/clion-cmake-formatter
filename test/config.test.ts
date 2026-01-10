@@ -139,6 +139,19 @@ describe('Configuration File Support', () => {
             assert.strictEqual(result!.indentSize, 4);
         });
 
+        it('should parse config with trailing commas (JSONC)', () => {
+            const content = `// ${PROJECT_URL}
+{
+    "indentSize": 2,
+    "useTabs": true,
+}`;
+
+            const result = parseConfigContent(content);
+            assert.ok(result !== null);
+            assert.strictEqual(result!.indentSize, 2);
+            assert.strictEqual(result!.useTabs, true);
+        });
+
         it('should handle all configuration options', () => {
             const content = `// ${PROJECT_URL}
 {

@@ -154,6 +154,72 @@ export function stripJsonComments(content: string): string {
 }
 
 /**
+ * Remove trailing commas from JSON text.
+ *
+ * This is a lightweight JSONC compatibility feature that allows common
+ * VS Code-style trailing commas, e.g.
+ *
+ *   { "a": 1, }
+ *   [ 1, 2, ]
+ *
+ * Notes:
+ * - Assumes comments have already been stripped.
+ * - Preserves commas inside strings.
+ */
+export function removeJsonTrailingCommas(content: string): string {
+    let result = '';
+    let inString = false;
+
+    for (let i = 0; i < content.length; i++) {
+        const char = content[i];
+
+        if (char === '"') {
+            // Count preceding backslashes to check if quote is escaped
+            let backslashCount = 0;
+            let j = i - 1;
+            while (j >= 0 && content[j] === '\\') {
+                backslashCount++;
+                j--;
+            }
+            if (backslashCount % 2 === 0) {
+                inString = !inString;
+            }
+            result += char;
+            continue;
+        }
+
+        if (!inString && char === ',') {
+            // Look ahead for the next non-whitespace character.
+            let k = i + 1;
+            while (k < content.length) {
+                const c = content[k];
+                if (c === ' ' || c === '\t' || c === '\n' || c === '\r') {
+                    k++;
+                    continue;
+                }
+                if (c === '}' || c === ']') {
+                    // Skip this comma (do not emit it).
+                    break;
+                }
+                // Not a trailing comma.
+                result += char;
+                break;
+            }
+
+            // If we reached end-of-file after ',', keep it (invalid JSON anyway, but don't mutate).
+            if (k >= content.length) {
+                result += char;
+            }
+            continue;
+        }
+
+        result += char;
+    }
+
+    return result;
+}
+
+/**
  * Parse the first line to extract the project URL header
  */
 function parseFirstLine(content: string): { hasValidHeader: boolean; remainingContent: string } {
@@ -198,7 +264,8 @@ export function parseConfigContent(content: string): Partial<FormatterOptions> |
     }
 
     try {
-        const jsonContent = stripJsonComments(remainingContent);
+        const jsonWithoutComments = stripJsonComments(remainingContent);
+        const jsonContent = removeJsonTrailingCommas(jsonWithoutComments);
         const parsed = JSON.parse(jsonContent);
         return validateConfigOptions(parsed);
     } catch {

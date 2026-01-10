@@ -52,8 +52,8 @@ npm run compile
 # Auto-detect CLion and validate all files in default directory
 node scripts/validate-with-clion.js
 
-# Or use npm script
-npm run test:clion
+# Or use the package script (recommended)
+pnpm run test:clion
 ```
 
 ### Specify CLion Path
@@ -146,9 +146,11 @@ For local development testing:
 
 ```bash
 # Full test cycle
-npm run compile
-npm run lint
-npm run test:unit         # Unit tests (no CLion needed)
-npm run test:integration  # Plugin vs CLion comparison (requires CLion)
-npm run test:clion       # Validate datasets with CLion (requires CLion)
+pnpm run compile
+pnpm run lint
+pnpm run test:unit         # Unit tests (no CLion needed)
+pnpm run test:integration  # Plugin vs CLion comparison (requires CLion)
+pnpm run test:clion        # Validate datasets with CLion (requires CLion)
+
+# (npm also works if you prefer, but this repo standardizes on pnpm)
 ```

@@ -57,9 +57,9 @@ add_executable(myapp ${SOURCES})
 ### With Custom Options
 
 ```typescript
-import { formatCMake, FormatOptions } from '@cc-format/core';
+import { formatCMake, FormatterOptions } from '@cc-format/core';
 
-const options: FormatOptions = {
+const options: Partial<FormatterOptions> = {
     commandCase: 'lowercase',
     indentSize: 2,
     lineLength: 100,
@@ -72,13 +72,15 @@ const formatted = formatCMake(source, options);
 
 ### Loading Configuration from File
 
+This package provides config helpers for `.cc-format.jsonc` files. The simplest
+API for reading a specific config file is `loadConfigFile(...)`.
+
 ```typescript
-import { formatCMake, loadConfig } from '@cc-format/core';
+import { loadConfigFile, formatCMake } from '@cc-format/core';
 
-// Load from .cc-format.jsonc file
-const config = await loadConfig('/path/to/project');
-
-const formatted = formatCMake(source, config);
+const cfg = loadConfigFile('/path/to/project/.cc-format.jsonc');
+const options = cfg?.options ?? {};
+const formatted = formatCMake(source, options);
 ```
 
 ## API Reference
@@ -101,46 +103,20 @@ const formatted = formatCMake('project(Test)', { commandCase: 'lowercase' });
 
 ---
 
-### `parseOptions(options: Partial<FormatOptions>): FormatOptions`
+### Configuration Helpers
 
-Validates and fills in default values for formatting options.
+The config module supports:
 
-**Parameters:**
-- `options` — Partial formatting options
+- `parseConfigContent(content: string)` — parse JSONC text (requires the project URL header)
+- `findConfigFile(documentPath: string, workspaceRoot?: string)` — search up the directory tree
+- `loadConfigFile(filePath: string)` — read + parse a config file
+- `getConfigForDocument(documentPath: string, workspaceRoot?: string, globalOptions?: Partial<FormatterOptions>)`
 
-**Returns:** Complete formatting options with defaults applied
-
-**Example:**
-```typescript
-import { parseOptions } from '@cc-format/core';
-
-const options = parseOptions({ indentSize: 2 });
-// Returns full options with indentSize: 2 and all other defaults
-```
+See `packages/core/src/config.ts` for the full API.
 
 ---
 
-### `loadConfig(workspaceRoot: string, enableProjectConfig?: boolean): FormatOptions`
-
-Loads configuration from a `.cc-format.jsonc` file in the workspace root.
-
-**Parameters:**
-- `workspaceRoot` — Path to the workspace root directory
-- `enableProjectConfig` — Whether to load project config (default: `true`)
-
-**Returns:** Formatting options loaded from config file, or defaults if not found
-
-**Example:**
-```typescript
-import { loadConfig } from '@cc-format/core';
-
-const config = loadConfig('/path/to/project');
-// Loads from /path/to/project/.cc-format.jsonc
-```
-
----
-
-### `validateContent(content: string, filePath: string, options: FormatOptions): ValidationResult`
+### `validateContent(content: string, filePath: string, options: FormatterOptions): ValidationResult`
 
 Validates whether CMake content is properly formatted.
 
@@ -165,7 +141,7 @@ if (!result.isValid) {
 
 ### Constants
 
-#### `DEFAULT_OPTIONS: FormatOptions`
+#### `DEFAULT_OPTIONS: FormatterOptions`
 
 Default formatting options that match CLion's defaults.
 
@@ -230,12 +206,12 @@ For complete configuration documentation, see the [main README](https://github.c
 
 ## Type Definitions
 
-### `FormatOptions`
+### `FormatterOptions`
 
 Complete formatting options interface:
 
 ```typescript
-interface FormatOptions {
+interface FormatterOptions {
     // Tab and Indentation
     useTabs: boolean;
     tabSize: number;

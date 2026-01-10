@@ -90,6 +90,23 @@ export function detectRuleViolations(original: string, formatted: string, option
     const originalLines = original.split('\n');
     const formattedLines = formatted.split('\n');
 
+    const getVisualLineLength = (line: string): number => {
+        if (!options.useTabs) {
+            return line.length;
+        }
+        const tabSize = Math.max(1, Math.floor(options.tabSize));
+        let col = 0;
+        for (const ch of line) {
+            if (ch === '\t') {
+                const advance = tabSize - (col % tabSize);
+                col += advance;
+            } else {
+                col += 1;
+            }
+        }
+        return col;
+    };
+
     // First pass: check for maxBlankLines violations by scanning for blank line sequences in original
     let consecutiveBlankCount = 0;
     let blankSequenceStart = -1;
@@ -212,11 +229,13 @@ export function detectRuleViolations(original: string, formatted: string, option
         }
 
         // Detect line length violations (lines that were wrapped)
-        if (options.lineLength > 0 && origLine.length > options.lineLength && fmtLine.length <= options.lineLength) {
+        const origVisualLength = getVisualLineLength(origLine);
+        const fmtVisualLength = getVisualLineLength(fmtLine);
+        if (options.lineLength > 0 && origVisualLength > options.lineLength && fmtVisualLength <= options.lineLength) {
             violations.push({
                 rule: 'lineLength',
                 line: lineNum,
-                message: `Line exceeds maximum length (${origLine.length} > ${options.lineLength})`,
+                message: `Line exceeds maximum length (${origVisualLength} > ${options.lineLength})`,
                 originalContent: origLine,
                 expectedContent: fmtLine
             });

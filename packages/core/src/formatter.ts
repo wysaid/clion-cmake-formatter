@@ -415,7 +415,7 @@ export class CMakeFormatter {
         const innerPadding = spaceInsideParen ? ' ' : '';
 
         if (node.arguments.length === 0) {
-            const line = `${indent}${commandName}${spaceBeforeParen}()`;
+            const line = `${indent}${commandName}${spaceBeforeParen}(${innerPadding})`;
             return this.addTrailingComment(line, node.trailingComment);
         }
 
@@ -478,7 +478,7 @@ export class CMakeFormatter {
         args: ArgumentInfo[],
         indent: string,
         spaceBeforeParen: string,
-        _innerPadding: string,
+        innerPadding: string,
         trailingComment?: string,
         hasFirstArgOnSameLine?: boolean,
         hasClosingParenOnSameLine?: boolean
@@ -561,7 +561,7 @@ export class CMakeFormatter {
             let line: string;
             if (isFirstGroup && hasFirstArgOnSameLine) {
                 // First group goes on same line as command name
-                line = `${indent}${name}${spaceBeforeParen}(${formattedArgs}`;
+                line = `${indent}${name}${spaceBeforeParen}(${innerPadding}${formattedArgs}`;
             } else if (isFirstGroup) {
                 // Opening paren on its own, first group is continuation
                 lines.push(`${indent}${name}${spaceBeforeParen}(`);
@@ -620,7 +620,7 @@ export class CMakeFormatter {
 
             // Add closing paren if this is the last group and it should be on same line
             if (isLastGroup && hasClosingParenOnSameLine) {
-                line = line ? (line + ')') : `${indent})`;
+                line = line ? (line + `${innerPadding})`) : `${indent})`;
             }
 
             if (line) { // Only push if line is not empty

@@ -507,6 +507,36 @@ endwhile()`;
         assert.ok(output.includes('if('));
         assert.ok(output.includes('endif()'));
     });
+
+    it('should add space inside if parentheses when enabled (single-line)', () => {
+        const input = `if(FOO)
+endif()`;
+
+        const outputWith = formatCMake(input, { spaceInsideIfParentheses: true });
+        assert.ok(outputWith.includes('if ( FOO )'), 'Should add spaces inside if( )');
+        assert.ok(outputWith.includes('endif ( )'), 'Should add spaces inside endif( )');
+
+        const outputWithout = formatCMake(input, { spaceInsideIfParentheses: false });
+        assert.ok(outputWithout.includes('if (FOO)'), 'Should not add spaces inside if( ) when disabled');
+        assert.ok(outputWithout.includes('endif ()'), 'Should not add spaces inside endif( ) when disabled');
+    });
+
+    it('should add space inside if parentheses when enabled (preserve multi-line)', () => {
+        // Multi-line control flow where the first argument starts on the same line as "if("
+        const input = `if(FOO
+  AND BAR
+)
+message("x")
+endif()`;
+
+        const outputWith = formatCMake(input, { spaceInsideIfParentheses: true });
+        const firstLineWith = outputWith.split('\n')[0];
+        assert.match(firstLineWith, /^if \( FOO\b/i, 'Should add inner space after ( for multi-line if');
+
+        const outputWithout = formatCMake(input, { spaceInsideIfParentheses: false });
+        const firstLineWithout = outputWithout.split('\n')[0];
+        assert.match(firstLineWithout, /^if \(FOO\b/i, 'Should not add inner space after ( for multi-line if when disabled');
+    });
 });
 
 describe('Line Length Tests', () => {

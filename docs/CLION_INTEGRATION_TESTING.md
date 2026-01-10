@@ -41,7 +41,7 @@ CLion must be accessible from the command line:
 ### 3. Build the Plugin
 
 ```bash
-npm run compile
+pnpm run compile
 ```
 
 ## Running the Validation Script
@@ -99,7 +99,7 @@ The validation script outputs:
 For actual comparison between the plugin's formatter and CLion's formatter, run the integration tests:
 
 ```bash
-npm run test:integration
+pnpm run test:integration
 ```
 
 This test suite:

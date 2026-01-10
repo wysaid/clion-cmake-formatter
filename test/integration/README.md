@@ -10,13 +10,13 @@ This directory contains integration tests that require external dependencies.
 
 ```bash
 # Run only integration tests (requires CLion)
-npm run test:integration
+pnpm run test:integration
 
 # Run unit tests only (no external dependencies)
-npm run test:unit
+pnpm run test:unit
 
 # Run all tests (unit + integration)
-npm run test:all
+pnpm run test:all
 ```
 
 ## Test Files
@@ -28,5 +28,5 @@ npm run test:all
 These tests are separated from regular unit tests because:
 1. They require external dependencies (CLion) that users may not have installed
 2. They take longer to run (~5-10 seconds)
-3. Users can run `npm test` without needing CLion installed
+3. Users can run `pnpm test` without needing CLion installed
 4. CI/CD pipelines can selectively run integration tests only when CLion is available

@@ -27,13 +27,13 @@ const DEFAULT_TEST_DIRECTORIES = [
 The default `test:clion` task now tests both `well-formatted` and `real-world` directories:
 
 ```bash
-npm run test:clion
+pnpm run test:clion
 ```
 
 With verbose output to see detailed differences:
 
 ```bash
-npm run test:clion -- --verbose
+pnpm run test:clion -- --verbose
 ```
 
 ### Test Only This Directory

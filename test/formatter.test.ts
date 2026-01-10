@@ -742,6 +742,56 @@ describe('Numeric Configuration Validation Tests', () => {
         assert.ok(output16.trim().split('\n').length === 3, 'Should format with maximum indentSize');
     });
 
+    it('should preserve indentation on empty lines when keepIndentOnEmptyLines is true', () => {
+        const input = 'if(WIN32)\nmessage("a")\n\nmessage("b")\nendif()\n';
+
+        const outputNoIndent = formatCMake(input, { keepIndentOnEmptyLines: false });
+        const outputIndent = formatCMake(input, { keepIndentOnEmptyLines: true });
+
+        // Inside an if() block, the blank line should be indented to the current indent level.
+        assert.ok(outputIndent.includes('\n    \n'), 'Blank line should keep indentation when enabled');
+        assert.ok(!outputNoIndent.includes('\n    \n'), 'Blank line should not keep indentation when disabled');
+    });
+
+    it('should change indentation width with indentSize', () => {
+        const input = 'if(WIN32)\nset(VAR value)\nendif()';
+
+        const output2 = formatCMake(input, { indentSize: 2 });
+        const output4 = formatCMake(input, { indentSize: 4 });
+
+        assert.ok(output2.includes('\n  set('), 'indentSize=2 should indent inner lines by 2 spaces');
+        assert.ok(output4.includes('\n    set('), 'indentSize=4 should indent inner lines by 4 spaces');
+    });
+
+    it('should use tabs for indentation when useTabs is true', () => {
+        const input = 'if(WIN32)\nset(VAR value)\nendif()';
+        const output = formatCMake(input, { useTabs: true, indentSize: 4 });
+
+        assert.ok(output.includes('\n\tset('), 'Inner lines should be indented with tabs when useTabs=true');
+    });
+
+    it('should change continuation indentation with continuationIndentSize', () => {
+        const input = 'set(MY_VAR a b c d e f g h i j k l m n o p)';
+
+        const output2 = formatCMake(input, {
+            lineLength: 20,
+            continuationIndentSize: 2,
+            alignMultiLineArguments: false,
+            alignMultiLineParentheses: false
+        });
+        const output10 = formatCMake(input, {
+            lineLength: 20,
+            continuationIndentSize: 10,
+            alignMultiLineArguments: false,
+            alignMultiLineParentheses: false
+        });
+
+        const lines2 = output2.split('\n');
+        const lines10 = output10.split('\n');
+        assert.ok(lines2.some(l => /^ {2}[a-z]\b/.test(l)), 'Should have continuation lines indented by 2 spaces');
+        assert.ok(lines10.some(l => /^ {10}[a-z]\b/.test(l)), 'Should have continuation lines indented by 10 spaces');
+    });
+
     it('should handle maxBlankLines at boundaries', () => {
         const input = 'set(VAR1 value)\n\n\n\n\n\n\nset(VAR2 value)';
         // maxBlankLines=0 should remove all blank lines

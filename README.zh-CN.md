@@ -490,7 +490,7 @@ _CLion 对 `break`/`continue` 忽略空格规则，可能会感觉不一致。_
 想要贡献或自定义扩展？查看我们的 **[贡献指南](CONTRIBUTING.md)**（英文），了解：
 
 - 🔧 开发环境设置
-- 📜 可用的 npm 脚本
+- 📜 可用的 pnpm 脚本
 - 📂 项目结构概览
 - 🐛 调试说明
 - ✅ 测试指南
@@ -501,7 +501,7 @@ _CLion 对 `break`/`continue` 忽略空格规则，可能会感觉不一致。_
 ```bash
 git clone https://github.com/wysaid/clion-cmake-format.git
 cd clion-cmake-format
-npm install && npm run compile && npm run test:unit
+pnpm install && pnpm run compile && pnpm run test:unit
 ```
 
 ---

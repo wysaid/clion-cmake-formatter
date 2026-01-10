@@ -340,6 +340,74 @@ endif()`;
         });
     });
 
+    describe('Alignment Options', () => {
+        it('should align multi-line arguments when enabled', () => {
+            const input = `add_executable(foo
+bar.cxx
+)`;
+
+            const outputWithout = formatCMake(input, {
+                alignMultiLineArguments: false,
+                alignMultiLineParentheses: false,
+            }).trimEnd();
+            const linesWithout = outputWithout.split('\n');
+            assert.ok(linesWithout[1].startsWith('        bar.cxx'), 'Default should use continuation indent (8 spaces)');
+
+            const outputWith = formatCMake(input, {
+                alignMultiLineArguments: true,
+                alignMultiLineParentheses: false,
+            }).trimEnd();
+            const linesWith = outputWith.split('\n');
+            const expectedIndent = ' '.repeat('add_executable('.length);
+            assert.ok(
+                linesWith[1].startsWith(expectedIndent + 'bar.cxx'),
+                'When enabled, should align continuation lines to the first argument column'
+            );
+        });
+
+        it('should align multi-line closing paren for command calls when enabled', () => {
+            const input = `add_executable(foo
+bar.cxx
+)`;
+
+            const outputWithout = formatCMake(input, {
+                alignMultiLineArguments: false,
+                alignMultiLineParentheses: false,
+            }).trimEnd();
+            const linesWithout = outputWithout.split('\n');
+            assert.strictEqual(linesWithout[2], ')', 'Default should put closing paren at command indent');
+
+            const outputWith = formatCMake(input, {
+                alignMultiLineArguments: false,
+                alignMultiLineParentheses: true,
+            }).trimEnd();
+            const linesWith = outputWith.split('\n');
+            const expectedParenIndent = ' '.repeat('add_executable'.length);
+            assert.strictEqual(linesWith[2], expectedParenIndent + ')', 'Closing paren should align under opening paren');
+        });
+
+        it('should align multi-line closing paren for control flow commands when enabled', () => {
+            const input = `if(TRUE
+AND FALSE
+)
+endif()`;
+
+            const outputWithout = formatCMake(input, {
+                alignControlFlowParentheses: false,
+                alignMultiLineParentheses: true,
+            }).trimEnd();
+            const linesWithout = outputWithout.split('\n');
+            assert.strictEqual(linesWithout[2], ')', 'General paren alignment should not affect control flow when disabled');
+
+            const outputWith = formatCMake(input, {
+                alignControlFlowParentheses: true,
+                alignMultiLineParentheses: false,
+            }).trimEnd();
+            const linesWith = outputWith.split('\n');
+            assert.strictEqual(linesWith[2], '   )', 'Control flow closing paren should align under opening paren of "if ("');
+        });
+    });
+
     describe('Blank Lines', () => {
         it('should preserve blank lines between commands', () => {
             const input = loadEdgeCase('blank-lines');

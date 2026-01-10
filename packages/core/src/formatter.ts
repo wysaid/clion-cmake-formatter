@@ -404,6 +404,46 @@ export class CMakeFormatter {
         return this.options.spaceInsideCommandCallParentheses;
     }
 
+    private isControlFlowCommand(commandName: string): boolean {
+        const lowerName = commandName.toLowerCase();
+        return (
+            lowerName === 'if' ||
+            lowerName === 'elseif' ||
+            lowerName === 'else' ||
+            lowerName === 'endif' ||
+            lowerName === 'foreach' ||
+            lowerName === 'endforeach' ||
+            lowerName === 'while' ||
+            lowerName === 'endwhile'
+        );
+    }
+
+    private shouldAlignMultiLineArguments(isControlFlowCommand: boolean): boolean {
+        // CLion exposes “Align when multiline” only for normal command call arguments.
+        // Control flow commands (if/foreach/while) have a separate paren-only option.
+        return !isControlFlowCommand && this.options.alignMultiLineArguments;
+    }
+
+    private shouldAlignMultiLineParentheses(isControlFlowCommand: boolean): boolean {
+        // CLion splits these options: one for control flow commands, one for general commands.
+        return isControlFlowCommand ? this.options.alignControlFlowParentheses : this.options.alignMultiLineParentheses;
+    }
+
+    private getAlignedArgsIndent(indent: string, name: string, spaceBeforeParen: string, innerPadding: string): string {
+        // Align subsequent lines to the first argument column:
+        // <indent><name><spaceBeforeParen>(<innerPadding><arg1>
+        //                                     <arg2>
+        const offset = name.length + spaceBeforeParen.length + 1 + innerPadding.length;
+        return indent + ' '.repeat(offset);
+    }
+
+    private getAlignedParenIndent(indent: string, name: string, spaceBeforeParen: string): string {
+        // Align a standalone ')' under the opening '(' column.
+        // '(' is located after: <indent><name><spaceBeforeParen>
+        const offset = name.length + spaceBeforeParen.length;
+        return indent + ' '.repeat(offset);
+    }
+
     /**
      * Format a command node
      */
@@ -413,6 +453,7 @@ export class CMakeFormatter {
         const spaceBeforeParen = this.shouldHaveSpaceBeforeParen(node.name) ? ' ' : '';
         const spaceInsideParen = this.shouldHaveSpaceInsideParen(node.name);
         const innerPadding = spaceInsideParen ? ' ' : '';
+        const isControlFlow = this.isControlFlowCommand(node.name);
 
         if (node.arguments.length === 0) {
             const line = `${indent}${commandName}${spaceBeforeParen}(${innerPadding})`;
@@ -432,7 +473,8 @@ export class CMakeFormatter {
                 innerPadding,
                 node.trailingComment,
                 node.hasFirstArgOnSameLine,
-                node.hasClosingParenOnSameLine
+                node.hasClosingParenOnSameLine,
+                isControlFlow
             );
         }
 
@@ -481,15 +523,23 @@ export class CMakeFormatter {
         innerPadding: string,
         trailingComment?: string,
         hasFirstArgOnSameLine?: boolean,
-        hasClosingParenOnSameLine?: boolean
+        hasClosingParenOnSameLine?: boolean,
+        isControlFlowCommand?: boolean
     ): string {
         const lines: string[] = [];
-        const continuationIndent = indent + this.getContinuationIndent();
+        const continuationIndentDefault = indent + this.getContinuationIndent();
+        const shouldAlignArgs = this.shouldAlignMultiLineArguments(!!isControlFlowCommand) && !!hasFirstArgOnSameLine;
+        const continuationIndent = shouldAlignArgs
+            ? this.getAlignedArgsIndent(indent, name, spaceBeforeParen, innerPadding)
+            : continuationIndentDefault;
+        const closeParenIndent = this.shouldAlignMultiLineParentheses(!!isControlFlowCommand)
+            ? this.getAlignedParenIndent(indent, name, spaceBeforeParen)
+            : indent;
         const maxBlankLines = Math.max(0, this.options.maxBlankLines);
 
         if (args.length === 0) {
             lines.push(`${indent}${name}${spaceBeforeParen}(`);
-            lines.push(`${indent})`);
+            lines.push(`${closeParenIndent})`);
             if (trailingComment) {
                 lines[lines.length - 1] += ' ' + trailingComment;
             }
@@ -620,7 +670,7 @@ export class CMakeFormatter {
 
             // Add closing paren if this is the last group and it should be on same line
             if (isLastGroup && hasClosingParenOnSameLine) {
-                line = line ? (line + `${innerPadding})`) : `${indent})`;
+                line = line ? (line + `${innerPadding})`) : `${closeParenIndent})`;
             }
 
             if (line) { // Only push if line is not empty
@@ -630,7 +680,7 @@ export class CMakeFormatter {
 
         // Add closing paren on separate line if needed
         if (!hasClosingParenOnSameLine) {
-            lines.push(`${indent})`);
+            lines.push(`${closeParenIndent})`);
         }
 
         // Add trailing comment to the last line
@@ -654,7 +704,13 @@ export class CMakeFormatter {
         trailingComment?: string
     ): string {
         const lines: string[] = [];
-        const continuationIndent = indent + this.getContinuationIndent();
+        const isControlFlow = this.isControlFlowCommand(name);
+        const continuationIndentDefault = indent + this.getContinuationIndent();
+        const continuationIndentAligned = this.getAlignedArgsIndent(indent, name, spaceBeforeParen, innerPadding);
+        let continuationIndent = continuationIndentDefault;
+        const closeParenIndent = this.shouldAlignMultiLineParentheses(isControlFlow)
+            ? this.getAlignedParenIndent(indent, name, spaceBeforeParen)
+            : indent;
         const maxBlankLines = Math.max(0, this.options.maxBlankLines);
 
         // Start with command name and opening paren, first arg on same line if fits
@@ -691,12 +747,17 @@ export class CMakeFormatter {
 
             if ((this.options.lineLength === 0 || testLine.length <= this.options.lineLength) && !hasComment) {
                 currentLine = testLine;
+                if (i === 0 && this.shouldAlignMultiLineArguments(isControlFlow)) {
+                    continuationIndent = continuationIndentAligned;
+                }
             } else {
                 // Need to wrap - only push if we have content beyond the command start
                 if (currentLine.trim() !== '' && currentLine !== commandStart) {
                     lines.push(currentLine);
                 }
-                currentLine = continuationIndent + formattedArg;
+                // If the very first arg did not fit on the first line, do not enable alignment.
+                // Otherwise keep using the active continuationIndent (possibly aligned).
+                currentLine = (i === 0 ? continuationIndentDefault : continuationIndent) + formattedArg;
             }
 
             // If this argument has an inline comment, end the line here
@@ -726,7 +787,7 @@ export class CMakeFormatter {
 
         // If we ended with a comment on the last arg, we need to add closing paren
         if (args.length > 0 && args[args.length - 1].inlineComment) {
-            lines.push(`${indent})`);
+            lines.push(`${closeParenIndent})`);
         }
 
         // Add trailing comment to the last line

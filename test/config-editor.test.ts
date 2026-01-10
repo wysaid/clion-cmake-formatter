@@ -230,10 +230,8 @@ describe('Config Editor', () => {
                     <input type="checkbox" class="option-checkbox" data-key="useTabs" />
 
                     <button id="resetDemoBtn" class="hidden"></button>
-                    <div id="cmakeEditorWrapper" class="code-editor-wrapper highlight-mode">
-                        <pre id="cmakeHighlight"><code id="cmakeHighlighted"></code></pre>
-                        <textarea id="cmakeEditor"></textarea>
-                    </div>
+                    <pre id="cmakeHighlight"><code id="cmakeHighlighted"></code></pre>
+                    <textarea id="cmakeEditor" class="hidden"></textarea>
 
                     <pre><code id="jsoncCode"></code></pre>
                 </body>
@@ -260,8 +258,10 @@ describe('Config Editor', () => {
             document.body.appendChild(scriptEl);
 
             const textarea = document.getElementById('cmakeEditor') as HTMLTextAreaElement;
+            const cmakeHighlight = document.getElementById('cmakeHighlight') as HTMLElement;
             const resetDemoBtn = document.getElementById('resetDemoBtn') as HTMLButtonElement;
             assert.ok(textarea, 'cmakeEditor textarea should exist');
+            assert.ok(cmakeHighlight, 'cmakeHighlight should exist');
             assert.ok(resetDemoBtn, 'resetDemoBtn should exist');
             assert.ok(resetDemoBtn.classList.contains('hidden'), 'resetDemoBtn should be hidden initially');
 
@@ -280,6 +280,10 @@ describe('Config Editor', () => {
                     }
                 })
             );
+
+            // Enter edit mode by clicking highlighted preview
+            cmakeHighlight.click();
+            assert.ok(!textarea.classList.contains('hidden'), 'textarea should be visible in edit mode');
 
             // User edits the CMake code
             textarea.value = 'message(STATUS "hello")\n';
@@ -305,6 +309,8 @@ describe('Config Editor', () => {
                 'message(STATUS "hello")\n',
                 'Should send current editor content as cmakeSource after option change'
             );
+
+            assert.ok(!cmakeHighlight.classList.contains('hidden'), 'highlight view should be shown after option change');
 
             // Reset back to demo mode
             resetDemoBtn.click();

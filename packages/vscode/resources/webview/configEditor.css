@@ -408,67 +408,7 @@ body {
     tab-size: 4;
 }
 
-/* Editable CMake preview with syntax highlighting overlay */
-.code-editor-wrapper {
-    position: relative;
-    flex: 1;
-    min-height: 0;
-    border-radius: var(--border-radius);
-    border: 1px solid var(--vscode-panel-border);
-    background-color: var(--vscode-textCodeBlock-background);
-    overflow: hidden;
-}
-
-.code-editor-wrapper:focus-within {
-    border-color: var(--vscode-focusBorder);
-    box-shadow: 0 0 0 1px var(--vscode-focusBorder);
-}
-
-/* Highlight layer */
-.code-editor-wrapper .code-highlight {
-    position: absolute;
-    inset: 0;
-    border: none;
-    border-radius: 0;
-    background: transparent;
-    overflow: auto;
-    pointer-events: none;
-    display: none;
-}
-
-.code-editor-wrapper.highlight-mode .code-highlight {
-    display: block;
-}
-
-.code-editor-wrapper .code-highlight code {
-    color: var(--vscode-editor-foreground);
-}
-
-/* Input layer */
-.code-editor-wrapper .code-editor {
-    position: absolute;
-    inset: 0;
-    border: none;
-    border-radius: 0;
-    background: transparent;
-    overflow: auto;
-}
-
-/* Highlight mode: user sees highlight layer, textarea only provides caret/selection */
-.code-editor-wrapper.highlight-mode .code-editor {
-    color: transparent;
-    caret-color: var(--vscode-editor-foreground);
-    -webkit-text-fill-color: transparent;
-}
-
-/* Edit mode: hide highlight, show real text */
-.code-editor-wrapper.edit-mode .code-editor {
-    color: var(--vscode-editor-foreground);
-    -webkit-text-fill-color: var(--vscode-editor-foreground);
-    caret-color: var(--vscode-editor-foreground);
-}
-
-.code-editor-wrapper .code-editor::selection {
+.code-editor::selection {
     background: var(--vscode-editor-selectionBackground, rgba(128, 128, 128, 0.35));
 }
 

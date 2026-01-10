@@ -41,7 +41,7 @@ if(  (FOO AND BAR)
     OR(BAZ)
    )
     message ( "Inside IF" )
-    
+
     # keepIndentOnEmptyLines demo: the blank line above contains indentation
 endif ( )
 
@@ -236,10 +236,8 @@ export function getWebviewContent(
                                 Reset Demo Code
                             </button>
                         </div>
-                        <div class="code-editor-wrapper highlight-mode" id="cmakeEditorWrapper">
-                            <pre class="code-preview code-highlight" id="cmakeHighlight"><code id="cmakeHighlighted">Loading...</code></pre>
-                            <textarea class="code-editor" id="cmakeEditor" spellcheck="false" aria-label="CMake Preview Editor">Loading...</textarea>
-                        </div>
+                        <pre class="code-preview code-highlight" id="cmakeHighlight"><code id="cmakeHighlighted">Loading...</code></pre>
+                        <textarea class="code-editor hidden" id="cmakeEditor" spellcheck="false" aria-label="CMake Preview Editor">Loading...</textarea>
                     </div>
                     <div class="tab-content" id="jsoncPreview" data-title="JSONC Source">
                         <pre class="code-preview jsonc"><code id="jsoncCode">Loading...</code></pre>

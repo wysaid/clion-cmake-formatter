@@ -86,7 +86,6 @@ echo 'project(Test)' | cc-format --stdin
 Create a `.cc-format.jsonc` file in your project root:
 
 ```jsonc
-// https://github.com/wysaid/clion-cmake-format
 {
     "indentSize": 4,
     "commandCase": "lowercase",
@@ -106,6 +105,7 @@ cc-format --config-path
 ```
 
 Settings priority:
+
 1. CLI options (highest)
 2. Project config (`.cc-format.jsonc` in project directory)
 3. Global config (`~/.config/cc-format/.cc-format.jsonc`)
@@ -177,10 +177,10 @@ Add to `.vscode/tasks.json`:
 .PHONY: format check-format
 
 format:
-	cc-format -w .
+ cc-format -w .
 
 check-format:
-	cc-format --check $(shell find . -name '*.cmake' -o -name 'CMakeLists.txt')
+ cc-format --check $(shell find . -name '*.cmake' -o -name 'CMakeLists.txt')
 ```
 
 ## Performance

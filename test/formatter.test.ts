@@ -576,6 +576,26 @@ endwhile()`;
         assert.ok(output.includes('endif()'));
     });
 
+    it('should not add space when spaceBeforeForeachParentheses is false', () => {
+        const input = loadFormatting('spacing', 'foreach-spacing');
+        const output = formatCMake(input, { spaceBeforeForeachParentheses: false });
+
+        // Both foreach and endforeach should NOT have space
+        assert.ok(output.includes('foreach('));
+        assert.ok(output.includes('endforeach()'));
+    });
+
+    it('should not add space when spaceBeforeWhileParentheses is false', () => {
+        const input = `while(cond)
+    do_something()
+endwhile()`;
+        const output = formatCMake(input, { spaceBeforeWhileParentheses: false });
+
+        // Both while and endwhile should NOT have space
+        assert.ok(output.includes('while('));
+        assert.ok(output.includes('endwhile()'));
+    });
+
     it('should add space inside if parentheses when enabled (single-line)', () => {
         const input = `if(FOO)
 endif()`;
@@ -604,6 +624,62 @@ endif()`;
         const outputWithout = formatCMake(input, { spaceInsideIfParentheses: false });
         const firstLineWithout = outputWithout.split('\n')[0];
         assert.match(firstLineWithout, /^if \(FOO\b/i, 'Should not add inner space after ( for multi-line if when disabled');
+    });
+
+    it('should apply command-call spacing options (before/inside parens)', () => {
+        const input = 'set(VAR value)';
+
+        const outputDefault = formatCMake(input).trim();
+        assert.strictEqual(outputDefault, 'set(VAR value)', 'Default should not add extra spaces for command calls');
+
+        const outputBefore = formatCMake(input, { spaceBeforeCommandCallParentheses: true }).trim();
+        assert.strictEqual(outputBefore, 'set (VAR value)', 'Should add space before parens for command calls');
+
+        const outputInside = formatCMake(input, { spaceInsideCommandCallParentheses: true }).trim();
+        assert.strictEqual(outputInside, 'set( VAR value )', 'Should add spaces inside parens for command calls');
+
+        const outputBoth = formatCMake(input, {
+            spaceBeforeCommandCallParentheses: true,
+            spaceInsideCommandCallParentheses: true
+        }).trim();
+        assert.strictEqual(outputBoth, 'set ( VAR value )', 'Should combine before+inside spacing for command calls');
+    });
+
+    it('should apply command-definition spacing options (before/inside parens)', () => {
+        const input = `function(my_func arg1)
+message("x")
+endfunction()`;
+
+        const outputDefault = formatCMake(input).trimEnd();
+        assert.ok(outputDefault.includes('function(my_func arg1)'), 'Default should keep function(...) without extra spaces');
+
+        const outputBefore = formatCMake(input, { spaceBeforeCommandDefinitionParentheses: true }).trimEnd();
+        assert.ok(outputBefore.includes('function (my_func arg1)'), 'Should add space before parens for function definition');
+
+        const outputInside = formatCMake(input, { spaceInsideCommandDefinitionParentheses: true }).trimEnd();
+        assert.ok(outputInside.includes('function( my_func arg1 )'), 'Should add spaces inside parens for function definition');
+
+        const outputBoth = formatCMake(input, {
+            spaceBeforeCommandDefinitionParentheses: true,
+            spaceInsideCommandDefinitionParentheses: true
+        }).trimEnd();
+        assert.ok(outputBoth.includes('function ( my_func arg1 )'), 'Should combine before+inside spacing for function definition');
+    });
+
+    it('should apply foreach/while inside-parens spacing consistently for start/end commands', () => {
+        const foreachInput = `foreach(item IN ITEMS a b)
+message("x")
+endforeach()`;
+        const foreachWith = formatCMake(foreachInput, { spaceInsideForeachParentheses: true }).trimEnd();
+        assert.ok(foreachWith.includes('foreach ( item IN ITEMS a b )'), 'foreach should have inner spaces when enabled');
+        assert.ok(foreachWith.includes('endforeach ( )'), 'endforeach should have inner spaces when enabled');
+
+        const whileInput = `while(cond)
+message("x")
+endwhile()`;
+        const whileWith = formatCMake(whileInput, { spaceInsideWhileParentheses: true }).trimEnd();
+        assert.ok(whileWith.includes('while ( cond )'), 'while should have inner spaces when enabled');
+        assert.ok(whileWith.includes('endwhile ( )'), 'endwhile should have inner spaces when enabled');
     });
 });
 
@@ -661,6 +737,47 @@ describe('Line Length Tests', () => {
         const lines = output.split('\n').filter(l => l.length > 0);
         assert.strictEqual(lines.length, 1);
     });
+
+    it('should consider tabSize for wrapping when useTabs is true', () => {
+        // With tabs, visual width depends on tabSize. Wrapping decisions should
+        // follow visual columns rather than raw string length.
+        const input = 'if(WIN32)\nset(FOO a b c d e f g)\nendif()';
+
+        const base = {
+            useTabs: true,
+            indentSize: 4,
+            lineLength: 26
+        };
+
+        const outputTab2 = formatCMake(input, { ...base, tabSize: 2 });
+        const outputTab8 = formatCMake(input, { ...base, tabSize: 8 });
+
+        const getSetBlockLines = (out: string): string[] => {
+            const lines = out.split('\n');
+            const start = lines.findIndex(l => l.trimStart().startsWith('set('));
+            if (start < 0) {
+                return [];
+            }
+            const block: string[] = [];
+            for (let i = start; i < lines.length; i++) {
+                block.push(lines[i]);
+                if (lines[i].includes(')')) {
+                    break;
+                }
+            }
+            return block;
+        };
+
+        const setBlock2 = getSetBlockLines(outputTab2);
+        const setBlock8 = getSetBlockLines(outputTab8);
+
+        // Smaller tabSize should keep the set(...) command on one line (no continuation lines).
+        assert.ok(setBlock2.length === 1, 'Smaller tabSize should keep set(...) on one line');
+
+        // Larger tabSize should cause wrapping: set block should span multiple lines and include continuation indent.
+        assert.ok(setBlock8.length > 1, 'Larger tabSize should wrap set(...) into multiple lines');
+        assert.ok(setBlock8.some(l => /^\t\t\S/.test(l)), 'Wrapped set(...) should include continuation lines with two tabs');
+    });
 });
 
 describe('Numeric Configuration Validation Tests', () => {
@@ -684,6 +801,58 @@ describe('Numeric Configuration Validation Tests', () => {
         // indentSize=16 should work
         const output16 = formatCMake(input, { indentSize: 16 });
         assert.ok(output16.trim().split('\n').length === 3, 'Should format with maximum indentSize');
+    });
+
+    it('should preserve indentation on empty lines when keepIndentOnEmptyLines is true', () => {
+        const input = 'if(WIN32)\nmessage("a")\n\nmessage("b")\nendif()\n';
+
+        const indentSize = 3;
+        const outputNoIndent = formatCMake(input, { keepIndentOnEmptyLines: false, indentSize });
+        const outputIndent = formatCMake(input, { keepIndentOnEmptyLines: true, indentSize });
+
+        // Inside an if() block, the blank line should be indented to the current indent level.
+        const expectedBlankLine = '\n' + ' '.repeat(indentSize) + '\n';
+        assert.ok(outputIndent.includes(expectedBlankLine), 'Blank line should keep indentation when enabled');
+        assert.ok(!outputNoIndent.includes(expectedBlankLine), 'Blank line should not keep indentation when disabled');
+    });
+
+    it('should change indentation width with indentSize', () => {
+        const input = 'if(WIN32)\nset(VAR value)\nendif()';
+
+        const output2 = formatCMake(input, { indentSize: 2 });
+        const output4 = formatCMake(input, { indentSize: 4 });
+
+        assert.ok(output2.includes('\n  set('), 'indentSize=2 should indent inner lines by 2 spaces');
+        assert.ok(output4.includes('\n    set('), 'indentSize=4 should indent inner lines by 4 spaces');
+    });
+
+    it('should use tabs for indentation when useTabs is true', () => {
+        const input = 'if(WIN32)\nset(VAR value)\nendif()';
+        const output = formatCMake(input, { useTabs: true, indentSize: 4 });
+
+        assert.ok(output.includes('\n\tset('), 'Inner lines should be indented with tabs when useTabs=true');
+    });
+
+    it('should change continuation indentation with continuationIndentSize', () => {
+        const input = 'set(MY_VAR a b c d e f g h i j k l m n o p)';
+
+        const output2 = formatCMake(input, {
+            lineLength: 20,
+            continuationIndentSize: 2,
+            alignMultiLineArguments: false,
+            alignMultiLineParentheses: false
+        });
+        const output10 = formatCMake(input, {
+            lineLength: 20,
+            continuationIndentSize: 10,
+            alignMultiLineArguments: false,
+            alignMultiLineParentheses: false
+        });
+
+        const lines2 = output2.split('\n');
+        const lines10 = output10.split('\n');
+        assert.ok(lines2.some(l => /^ {2}[a-z]\b/.test(l)), 'Should have continuation lines indented by 2 spaces');
+        assert.ok(lines10.some(l => /^ {10}[a-z]\b/.test(l)), 'Should have continuation lines indented by 10 spaces');
     });
 
     it('should handle maxBlankLines at boundaries', () => {

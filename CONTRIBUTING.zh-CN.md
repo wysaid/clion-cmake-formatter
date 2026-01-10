@@ -195,8 +195,8 @@ describe('Parser', () => {
 # 运行所有测试
 pnpm run test:unit
 
-# 运行特定测试文件（使用 ts-node）
-npx mocha --require ts-node/register test/parser.test.ts
+# 运行特定测试文件
+pnpm exec mocha test/parser.test.ts
 ```
 
 ## 📋 Pull Request 指南

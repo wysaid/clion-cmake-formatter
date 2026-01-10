@@ -127,13 +127,13 @@ See [well-formatted/README.md](well-formatted/README.md) for directory structure
 
 ```bash
 # Run all unit tests
-npm run test:unit
+pnpm run test:unit
 
 # Run specific test file
-npx mocha --require ts-node/register test/formatter.test.ts
+pnpm exec mocha test/formatter.test.ts
 
 # Run with verbose output
-npx mocha --require ts-node/register test/formatter.test.ts --grep "specific test name"
+pnpm exec mocha test/formatter.test.ts --grep "specific test name"
 ```
 
 ## Best Practices
@@ -162,8 +162,8 @@ When contributing new test datasets:
 1. Follow the file naming conventions
 2. Place files in the correct category
 3. Add corresponding test cases
-4. Run `npm run test:unit` to verify
-5. Run `npm run lint` for code quality
+4. Run `pnpm run test:unit` to verify
+5. Run `pnpm run lint` for code quality
 6. Document any special test requirements
 
 For more details, see [CONTRIBUTING.md](../../CONTRIBUTING.md).

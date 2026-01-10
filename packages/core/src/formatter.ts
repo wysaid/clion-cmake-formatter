@@ -65,7 +65,7 @@ export interface FormatterOptions {
     // === Blank Lines ===
     /** Maximum consecutive blank lines (default: 2) */
     maxBlankLines: number;
-    /** Maximum trailing blank lines at end of file (default: 0, max: 1) */
+    /** Maximum trailing blank lines at end of file (default: 1, ≥ 0) */
     maxTrailingBlankLines: number;
 
     // === Command Case ===
@@ -166,6 +166,40 @@ export class CMakeFormatter {
             return '\t';
         }
         return ' '.repeat(this.options.continuationIndentSize);
+    }
+
+    /**
+     * Get the visual (column) length of a line.
+     *
+     * When tabs are used, string length is not equal to visual width.
+     * CLion-style wrapping is based on visual columns, so we expand tab stops
+     * using tabSize.
+     */
+    private getVisualLineLength(line: string): number {
+        if (!this.options.useTabs) {
+            return line.length;
+        }
+
+        const rawTabSize = this.options.tabSize;
+        const tabSize = Number.isFinite(rawTabSize)
+            ? Math.max(1, Math.floor(rawTabSize))
+            : DEFAULT_OPTIONS.tabSize;
+        let col = 0;
+        for (const ch of line) {
+            if (ch === '\t') {
+                const advance = tabSize - (col % tabSize);
+                col += advance;
+            } else {
+                col += 1;
+            }
+        }
+        return col;
+    }
+
+    private isWithinLineLength(line: string): boolean {
+        const rawLineLength = this.options.lineLength;
+        const lineLength = Number.isFinite(rawLineLength) ? rawLineLength : DEFAULT_OPTIONS.lineLength;
+        return lineLength <= 0 || this.getVisualLineLength(line) <= lineLength;
     }
 
     /**
@@ -480,7 +514,7 @@ export class CMakeFormatter {
 
         // Try to format on a single line first
         const singleLine = this.formatCommandSingleLine(commandName, node.arguments, indent, spaceBeforeParen, innerPadding);
-        if (this.options.lineLength === 0 || singleLine.length <= this.options.lineLength) {
+        if (this.isWithinLineLength(singleLine)) {
             return this.addTrailingComment(singleLine, node.trailingComment);
         }
 
@@ -745,7 +779,7 @@ export class CMakeFormatter {
             const separator = isFirst || shouldOmitSeparator ? '' : ' ';
             const testLine = currentLine + separator + formattedArg;
 
-            if ((this.options.lineLength === 0 || testLine.length <= this.options.lineLength) && !hasComment) {
+            if (this.isWithinLineLength(testLine) && !hasComment) {
                 currentLine = testLine;
                 if (i === 0 && this.shouldAlignMultiLineArguments(isControlFlow)) {
                     continuationIndent = continuationIndentAligned;

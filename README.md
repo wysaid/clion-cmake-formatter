@@ -502,7 +502,7 @@ Want to contribute or customize the extension? Check out our **[Contributing Gui
 ```bash
 git clone https://github.com/wysaid/clion-cmake-format.git
 cd clion-cmake-format
-npm install && npm run compile && npm run test:unit
+pnpm install && pnpm run compile && pnpm run test:unit
 ```
 
 ---

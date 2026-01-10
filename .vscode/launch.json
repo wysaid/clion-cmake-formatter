@@ -30,7 +30,8 @@
             "sourceMaps": true,
             "outFiles": [
                 "${workspaceFolder}/packages/vscode/dist/**/*.js"
-            ]
+            ],
+            "preLaunchTask": "npm: watch"
         },
         {
             "name": "Extension Tests",
@@ -43,7 +44,7 @@
             "outFiles": [
                 "${workspaceFolder}/packages/vscode/dist/**/*.js"
             ],
-            "preLaunchTask": "npm: compile"
+            "preLaunchTask": "npm: watch"
         }
     ]
 }

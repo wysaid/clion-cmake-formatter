@@ -48,6 +48,7 @@ console.log(formatted);
 ```
 
 Output:
+
 ```cmake
 project(MyProject)
 set(SOURCES main.cpp utils.cpp)
@@ -90,12 +91,14 @@ const formatted = formatCMake(source, options);
 Formats CMake source code according to the specified options.
 
 **Parameters:**
+
 - `source` — CMake source code to format
 - `options` — Formatting options (see [Configuration Options](#configuration-options))
 
 **Returns:** Formatted CMake code as a string
 
 **Example:**
+
 ```typescript
 const formatted = formatCMake('project(Test)', { commandCase: 'lowercase' });
 // Output: "project(Test)"
@@ -107,7 +110,7 @@ const formatted = formatCMake('project(Test)', { commandCase: 'lowercase' });
 
 The config module supports:
 
-- `parseConfigContent(content: string)` — parse JSONC text (requires the project URL header)
+- `parseConfigContent(content: string)` — parse JSONC text
 - `findConfigFile(documentPath: string, workspaceRoot?: string)` — search up the directory tree
 - `loadConfigFile(filePath: string)` — read + parse a config file
 - `getConfigForDocument(documentPath: string, workspaceRoot?: string, globalOptions?: Partial<FormatterOptions>)`
@@ -121,6 +124,7 @@ See `packages/core/src/config.ts` for the full API.
 Validates whether CMake content is properly formatted.
 
 **Parameters:**
+
 - `content` — CMake source code to validate
 - `filePath` — File path (for error reporting)
 - `options` — Formatting options to validate against
@@ -128,6 +132,7 @@ Validates whether CMake content is properly formatted.
 **Returns:** Validation result with `isValid` boolean and optional `violations` array
 
 **Example:**
+
 ```typescript
 import { validateContent, DEFAULT_OPTIONS } from '@cc-format/core';
 

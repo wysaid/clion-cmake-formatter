@@ -169,7 +169,7 @@ const OPTION_GROUPS: OptionGroup[] = [
     {
         title: 'Wrapping and Alignment',
         options: [
-            { key: 'lineLength', label: 'Line Length', description: 'Maximum line length (0 = unlimited)', type: 'number', min: 0, max: 500 },
+            { key: 'lineLength', label: 'Line Length', description: 'Maximum line length (0 = unlimited; otherwise min 30)', type: 'number', min: 0, max: 500 },
             { key: 'alignMultiLineArguments', label: 'Align Multi-line Arguments', description: 'Align arguments when multi-line', type: 'boolean' },
             { key: 'alignMultiLineParentheses', label: 'Align Multi-line Parentheses', description: 'Align closing paren with opening', type: 'boolean' },
             { key: 'alignControlFlowParentheses', label: 'Align Control Flow Parens', description: 'Align control flow parentheses', type: 'boolean' }

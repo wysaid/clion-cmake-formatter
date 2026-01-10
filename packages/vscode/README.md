@@ -53,7 +53,6 @@ code --install-extension wysaid.clion-cmake-format
 Create a `.cc-format.jsonc` file in your project root:
 
 ```jsonc
-// https://github.com/wysaid/clion-cmake-format
 {
     // Indentation
     "indentSize": 4,
@@ -83,7 +82,7 @@ Create a `.cc-format.jsonc` file in your project root:
 | `tabSize` | number | 4 | Number of spaces per tab |
 | `continuationIndentSize` | number | 8 | Continuation line indent size |
 | `commandCase` | string | unchanged | Command case: `unchanged`, `lowercase`, `uppercase` |
-| `lineLength` | number | 0 | Maximum line length (0 for unlimited) |
+| `lineLength` | number | 0 | Maximum line length (0 for unlimited; min 30 for non-zero values) |
 | `maxBlankLines` | number | 2 | Maximum consecutive blank lines |
 | `alignMultiLineArguments` | boolean | false | Align multi-line arguments |
 
@@ -101,6 +100,7 @@ You can also configure the formatter in VS Code settings (`.vscode/settings.json
 ```
 
 Configuration priority (highest to lowest):
+
 1. Project config (`.cc-format.jsonc` in workspace root)
 2. VS Code workspace settings (`.vscode/settings.json`)
 3. VS Code user settings
@@ -174,6 +174,7 @@ target_link_libraries(myapp PRIVATE pthread)
 ### Format on Save not working
 
 1. Verify `editor.formatOnSave` is `true` for CMake files:
+
    ```json
    {
      "[cmake]": {
@@ -182,6 +183,7 @@ target_link_libraries(myapp PRIVATE pthread)
      }
    }
    ```
+
 2. Check that no other CMake formatter extension is conflicting
 3. Try manually formatting (`Shift+Alt+F`) to verify the extension is working
 

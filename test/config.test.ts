@@ -116,12 +116,13 @@ describe('Configuration File Support', () => {
             assert.strictEqual(result!.useTabs, true);
         });
 
-        it('should return null for config without valid header', () => {
+        it('should parse valid config without header', () => {
             const content = `{
     "indentSize": 2
 }`;
             const result = parseConfigContent(content);
-            assert.strictEqual(result, null);
+            assert.ok(result !== null);
+            assert.strictEqual(result!.indentSize, 2);
         });
 
         it('should parse config with comments', () => {
@@ -345,13 +346,14 @@ describe('Configuration File Support', () => {
             assert.strictEqual(result, null);
         });
 
-        it('should return null for invalid header', () => {
+        it('should load config file without header', () => {
             const configPath = path.join(tempDir, '.cc-format.jsonc');
             fs.writeFileSync(configPath, '{"indentSize": 8}');
 
             const result = loadConfigFile(configPath);
 
-            assert.strictEqual(result, null);
+            assert.ok(result !== null);
+            assert.strictEqual(result!.options.indentSize, 8);
         });
     });
 

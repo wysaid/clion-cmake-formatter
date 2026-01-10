@@ -220,32 +220,6 @@ export function removeJsonTrailingCommas(content: string): string {
 }
 
 /**
- * Parse the first line to extract the project URL header
- */
-function parseFirstLine(content: string): { hasValidHeader: boolean; remainingContent: string } {
-    const lines = content.split(/\r?\n/);
-    if (lines.length === 0) {
-        return { hasValidHeader: false, remainingContent: content };
-    }
-
-    const firstLine = lines[0].trim();
-
-    // Check if first line is a comment with our project URL
-    // Remove all whitespace for comparison
-    const normalizedLine = firstLine.replace(/\s+/g, '');
-    const normalizedUrl = `//${PROJECT_URL}`.replace(/\s+/g, '');
-
-    if (normalizedLine === normalizedUrl) {
-        return {
-            hasValidHeader: true,
-            remainingContent: lines.slice(1).join('\n')
-        };
-    }
-
-    return { hasValidHeader: false, remainingContent: content };
-}
-
-/**
  * Generate the configuration file header
  */
 export function generateConfigHeader(): string {
@@ -256,15 +230,16 @@ export function generateConfigHeader(): string {
  * Parse JSONC content to FormatterOptions
  */
 export function parseConfigContent(content: string): Partial<FormatterOptions> | null {
-    const { hasValidHeader, remainingContent } = parseFirstLine(content);
-
-    if (!hasValidHeader) {
-        // Configuration file must have valid header
-        return null;
-    }
-
     try {
-        const jsonWithoutComments = stripJsonComments(remainingContent);
+        // Handle UTF-8 BOM if present (can break JSON.parse).
+        const normalized = content.replace(/^\uFEFF/, '');
+
+        const jsonWithoutComments = stripJsonComments(normalized);
+        // If file is empty or contains only comments/whitespace, treat it as an empty config.
+        if (jsonWithoutComments.trim().length === 0) {
+            return {};
+        }
+
         const jsonContent = removeJsonTrailingCommas(jsonWithoutComments);
         const parsed = JSON.parse(jsonContent);
         return validateConfigOptions(parsed);

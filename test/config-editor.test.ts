@@ -291,10 +291,17 @@ describe('Config Editor', () => {
 
             assert.ok(!resetDemoBtn.classList.contains('hidden'), 'resetDemoBtn should become visible after user edits');
 
-            // While typing/editing, we should NOT auto-format/overwrite the user's content.
+            // While typing/editing, we should request a preview (debounced),
+            // but must NOT overwrite the user's editor content or force highlight mode.
             await new Promise<void>((resolve) => window.setTimeout(resolve, 200));
             const requestMessagesAfterTyping = messages.filter(m => m.type === 'requestPreview');
-            assert.strictEqual(requestMessagesAfterTyping.length, 0, 'Should not auto-requestPreview while editing');
+            assert.ok(requestMessagesAfterTyping.length >= 1, 'Should auto-requestPreview while editing (debounced)');
+            assert.strictEqual(
+                textarea.value,
+                'message(STATUS "hello")\n',
+                'Should not overwrite editor content while editing'
+            );
+            assert.ok(textarea && !textarea.classList.contains('hidden'), 'textarea should remain visible in edit mode');
 
             // Changing an option should request preview and restore highlight.
             const checkbox = document.querySelector('.option-checkbox') as HTMLInputElement;
@@ -532,17 +539,18 @@ describe('Config Editor', () => {
             assert.deepStrictEqual(parsed, {}, 'Empty config should return empty object');
         });
 
-        it('should handle missing header as invalid', () => {
+        it('should handle missing header as valid', () => {
             const { parseConfigContent } = require('../packages/core/src/config');
 
             // Config without header
             const invalidConfigContent = '{}';
 
-            // Parse should fail
+            // Parse should succeed
             const parsed = parseConfigContent(invalidConfigContent);
 
-            // Should return null (invalid)
-            assert.strictEqual(parsed, null, 'Config without header should be invalid (null)');
+            // Should return an empty object (valid, but no custom options)
+            assert.ok(parsed !== null, 'Config without header should be valid (not null)');
+            assert.deepStrictEqual(parsed, {}, 'Config without header should return empty object');
         });
 
         it('should handle corrupted JSON as invalid', () => {

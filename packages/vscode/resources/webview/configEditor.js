@@ -419,15 +419,23 @@
         const oldValue = String(cmakeEditorEl.value || '');
         isApplyingCMakeUpdate = true;
         try {
-            cmakeEditorEl.value = String(code || '');
-            // Formatter updates should show highlight again.
-            enterHighlightMode();
+            // If the user is actively editing, keep their editor text intact.
+            // (Their editor text acts as the current input source, while the highlight shows the formatted result.)
+            if (!isEditMode) {
+                cmakeEditorEl.value = String(code || '');
+                // Formatter updates should show highlight again.
+                enterHighlightMode();
+            }
             updateCMakeHighlight(code || '');
         } finally {
             isApplyingCMakeUpdate = false;
         }
 
-        revealChange(oldValue, String(code || ''));
+        // Only perform reveal diff scrolling when we are not in edit mode.
+        // In edit mode, the textarea is user-controlled and should not jump.
+        if (!isEditMode) {
+            revealChange(oldValue, String(code || ''));
+        }
     }
 
     function setResetDemoVisible(visible) {
@@ -454,6 +462,15 @@
             isUsingDemoCMakeCode = false;
             setResetDemoVisible(true);
         }
+
+        // Re-format the user-provided CMake source after a short debounce.
+        // This keeps the preview responsive without flooding the extension host.
+        if (cmakeEditDebounceTimer) {
+            clearTimeout(cmakeEditDebounceTimer);
+        }
+        cmakeEditDebounceTimer = setTimeout(() => {
+            requestPreview();
+        }, 200);
     }
 
     function handleResetDemoCode() {

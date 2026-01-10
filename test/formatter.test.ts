@@ -576,6 +576,26 @@ endwhile()`;
         assert.ok(output.includes('endif()'));
     });
 
+    it('should not add space when spaceBeforeForeachParentheses is false', () => {
+        const input = loadFormatting('spacing', 'foreach-spacing');
+        const output = formatCMake(input, { spaceBeforeForeachParentheses: false });
+
+        // Both foreach and endforeach should NOT have space
+        assert.ok(output.includes('foreach('));
+        assert.ok(output.includes('endforeach()'));
+    });
+
+    it('should not add space when spaceBeforeWhileParentheses is false', () => {
+        const input = `while(cond)
+    do_something()
+endwhile()`;
+        const output = formatCMake(input, { spaceBeforeWhileParentheses: false });
+
+        // Both while and endwhile should NOT have space
+        assert.ok(output.includes('while('));
+        assert.ok(output.includes('endwhile()'));
+    });
+
     it('should add space inside if parentheses when enabled (single-line)', () => {
         const input = `if(FOO)
 endif()`;

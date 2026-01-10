@@ -605,6 +605,62 @@ endif()`;
         const firstLineWithout = outputWithout.split('\n')[0];
         assert.match(firstLineWithout, /^if \(FOO\b/i, 'Should not add inner space after ( for multi-line if when disabled');
     });
+
+    it('should apply command-call spacing options (before/inside parens)', () => {
+        const input = 'set(VAR value)';
+
+        const outputDefault = formatCMake(input).trim();
+        assert.strictEqual(outputDefault, 'set(VAR value)', 'Default should not add extra spaces for command calls');
+
+        const outputBefore = formatCMake(input, { spaceBeforeCommandCallParentheses: true }).trim();
+        assert.strictEqual(outputBefore, 'set (VAR value)', 'Should add space before parens for command calls');
+
+        const outputInside = formatCMake(input, { spaceInsideCommandCallParentheses: true }).trim();
+        assert.strictEqual(outputInside, 'set( VAR value )', 'Should add spaces inside parens for command calls');
+
+        const outputBoth = formatCMake(input, {
+            spaceBeforeCommandCallParentheses: true,
+            spaceInsideCommandCallParentheses: true
+        }).trim();
+        assert.strictEqual(outputBoth, 'set ( VAR value )', 'Should combine before+inside spacing for command calls');
+    });
+
+    it('should apply command-definition spacing options (before/inside parens)', () => {
+        const input = `function(my_func arg1)
+message("x")
+endfunction()`;
+
+        const outputDefault = formatCMake(input).trimEnd();
+        assert.ok(outputDefault.includes('function(my_func arg1)'), 'Default should keep function(...) without extra spaces');
+
+        const outputBefore = formatCMake(input, { spaceBeforeCommandDefinitionParentheses: true }).trimEnd();
+        assert.ok(outputBefore.includes('function (my_func arg1)'), 'Should add space before parens for function definition');
+
+        const outputInside = formatCMake(input, { spaceInsideCommandDefinitionParentheses: true }).trimEnd();
+        assert.ok(outputInside.includes('function( my_func arg1 )'), 'Should add spaces inside parens for function definition');
+
+        const outputBoth = formatCMake(input, {
+            spaceBeforeCommandDefinitionParentheses: true,
+            spaceInsideCommandDefinitionParentheses: true
+        }).trimEnd();
+        assert.ok(outputBoth.includes('function ( my_func arg1 )'), 'Should combine before+inside spacing for function definition');
+    });
+
+    it('should apply foreach/while inside-parens spacing consistently for start/end commands', () => {
+        const foreachInput = `foreach(item IN ITEMS a b)
+message("x")
+endforeach()`;
+        const foreachWith = formatCMake(foreachInput, { spaceInsideForeachParentheses: true }).trimEnd();
+        assert.ok(foreachWith.includes('foreach ( item IN ITEMS a b )'), 'foreach should have inner spaces when enabled');
+        assert.ok(foreachWith.includes('endforeach ( )'), 'endforeach should have inner spaces when enabled');
+
+        const whileInput = `while(cond)
+message("x")
+endwhile()`;
+        const whileWith = formatCMake(whileInput, { spaceInsideWhileParentheses: true }).trimEnd();
+        assert.ok(whileWith.includes('while ( cond )'), 'while should have inner spaces when enabled');
+        assert.ok(whileWith.includes('endwhile ( )'), 'endwhile should have inner spaces when enabled');
+    });
 });
 
 describe('Line Length Tests', () => {

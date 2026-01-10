@@ -94,7 +94,10 @@ export function detectRuleViolations(original: string, formatted: string, option
         if (!options.useTabs) {
             return line.length;
         }
-        const tabSize = Math.max(1, Math.floor(options.tabSize));
+        const rawTabSize = options.tabSize;
+        const tabSize = Number.isFinite(rawTabSize)
+            ? Math.max(1, Math.floor(rawTabSize))
+            : FORMATTER_DEFAULT_OPTIONS.tabSize;
         let col = 0;
         for (const ch of line) {
             if (ch === '\t') {
@@ -231,11 +234,13 @@ export function detectRuleViolations(original: string, formatted: string, option
         // Detect line length violations (lines that were wrapped)
         const origVisualLength = getVisualLineLength(origLine);
         const fmtVisualLength = getVisualLineLength(fmtLine);
-        if (options.lineLength > 0 && origVisualLength > options.lineLength && fmtVisualLength <= options.lineLength) {
+        const rawLineLength = options.lineLength;
+        const lineLength = Number.isFinite(rawLineLength) ? rawLineLength : FORMATTER_DEFAULT_OPTIONS.lineLength;
+        if (lineLength > 0 && origVisualLength > lineLength && fmtVisualLength <= lineLength) {
             violations.push({
                 rule: 'lineLength',
                 line: lineNum,
-                message: `Line exceeds maximum length (${origVisualLength} > ${options.lineLength})`,
+                message: `Line exceeds maximum length (${origVisualLength} > ${lineLength})`,
                 originalContent: origLine,
                 expectedContent: fmtLine
             });

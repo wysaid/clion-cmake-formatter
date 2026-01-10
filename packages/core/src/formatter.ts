@@ -180,7 +180,10 @@ export class CMakeFormatter {
             return line.length;
         }
 
-        const tabSize = Math.max(1, Math.floor(this.options.tabSize));
+        const rawTabSize = this.options.tabSize;
+        const tabSize = Number.isFinite(rawTabSize)
+            ? Math.max(1, Math.floor(rawTabSize))
+            : DEFAULT_OPTIONS.tabSize;
         let col = 0;
         for (const ch of line) {
             if (ch === '\t') {
@@ -194,7 +197,9 @@ export class CMakeFormatter {
     }
 
     private isWithinLineLength(line: string): boolean {
-        return this.options.lineLength === 0 || this.getVisualLineLength(line) <= this.options.lineLength;
+        const rawLineLength = this.options.lineLength;
+        const lineLength = Number.isFinite(rawLineLength) ? rawLineLength : DEFAULT_OPTIONS.lineLength;
+        return lineLength <= 0 || this.getVisualLineLength(line) <= lineLength;
     }
 
     /**

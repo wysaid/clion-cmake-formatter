@@ -28,5 +28,5 @@ pnpm run test:all
 These tests are separated from regular unit tests because:
 1. They require external dependencies (CLion) that users may not have installed
 2. They take longer to run (~5-10 seconds)
-3. Users can run `pnpm test` without needing CLion installed
+3. Users can run `pnpm test` (same as `pnpm run test:unit`) without needing CLion installed
 4. CI/CD pipelines can selectively run integration tests only when CLion is available

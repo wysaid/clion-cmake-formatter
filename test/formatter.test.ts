@@ -752,9 +752,31 @@ describe('Line Length Tests', () => {
         const outputTab2 = formatCMake(input, { ...base, tabSize: 2 });
         const outputTab8 = formatCMake(input, { ...base, tabSize: 8 });
 
-        // Wrapped multi-line commands should have continuation lines starting with two tabs.
-        assert.ok(!outputTab2.includes('\n\t\t'), 'Smaller tabSize should keep the inner command on one line');
-        assert.ok(outputTab8.includes('\n\t\t'), 'Larger tabSize should cause wrapping due to larger visual indent');
+        const getSetBlockLines = (out: string): string[] => {
+            const lines = out.split('\n');
+            const start = lines.findIndex(l => l.trimStart().startsWith('set('));
+            if (start < 0) {
+                return [];
+            }
+            const block: string[] = [];
+            for (let i = start; i < lines.length; i++) {
+                block.push(lines[i]);
+                if (lines[i].includes(')')) {
+                    break;
+                }
+            }
+            return block;
+        };
+
+        const setBlock2 = getSetBlockLines(outputTab2);
+        const setBlock8 = getSetBlockLines(outputTab8);
+
+        // Smaller tabSize should keep the set(...) command on one line (no continuation lines).
+        assert.ok(setBlock2.length === 1, 'Smaller tabSize should keep set(...) on one line');
+
+        // Larger tabSize should cause wrapping: set block should span multiple lines and include continuation indent.
+        assert.ok(setBlock8.length > 1, 'Larger tabSize should wrap set(...) into multiple lines');
+        assert.ok(setBlock8.some(l => /^\t\t\S/.test(l)), 'Wrapped set(...) should include continuation lines with two tabs');
     });
 });
 
@@ -784,12 +806,14 @@ describe('Numeric Configuration Validation Tests', () => {
     it('should preserve indentation on empty lines when keepIndentOnEmptyLines is true', () => {
         const input = 'if(WIN32)\nmessage("a")\n\nmessage("b")\nendif()\n';
 
-        const outputNoIndent = formatCMake(input, { keepIndentOnEmptyLines: false });
-        const outputIndent = formatCMake(input, { keepIndentOnEmptyLines: true });
+        const indentSize = 3;
+        const outputNoIndent = formatCMake(input, { keepIndentOnEmptyLines: false, indentSize });
+        const outputIndent = formatCMake(input, { keepIndentOnEmptyLines: true, indentSize });
 
         // Inside an if() block, the blank line should be indented to the current indent level.
-        assert.ok(outputIndent.includes('\n    \n'), 'Blank line should keep indentation when enabled');
-        assert.ok(!outputNoIndent.includes('\n    \n'), 'Blank line should not keep indentation when disabled');
+        const expectedBlankLine = '\n' + ' '.repeat(indentSize) + '\n';
+        assert.ok(outputIndent.includes(expectedBlankLine), 'Blank line should keep indentation when enabled');
+        assert.ok(!outputNoIndent.includes(expectedBlankLine), 'Blank line should not keep indentation when disabled');
     });
 
     it('should change indentation width with indentSize', () => {

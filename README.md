@@ -263,7 +263,7 @@ Customize formatting behavior via:
 | `commandCase` | `"unchanged"` | Command case: `unchanged` / `lowercase` / `uppercase`<br>⚠️ Module commands (e.g., `FetchContent_Declare`, `ExternalProject_Add`) always preserve their case |
 | `lineLength` | `0` | Max line length (0 = unlimited, min 30 if set) |
 | `maxBlankLines` | `2` | Maximum consecutive blank lines (0-20) |
-| `maxTrailingBlankLines` | `0` | Maximum blank lines at end of file (0-1) |
+| `maxTrailingBlankLines` | `1` | Maximum blank lines at end of file (>= 0, set a large number to keep all) |
 | `spaceBeforeIfParentheses` | `true` | Space before `if ()` / `elseif ()` / `endif ()` |
 | `spaceBeforeForeachParentheses` | `true` | Space before `foreach ()` / `endforeach ()` |
 | `alignMultiLineArguments` | `false` | Align arguments vertically |
@@ -299,7 +299,7 @@ Create `.cc-format.jsonc` in your project root:
 
     // Blank Lines
     "maxBlankLines": 2,
-    "maxTrailingBlankLines": 0,
+    "maxTrailingBlankLines": 1,
 
     // Command Case: "unchanged", "lowercase", or "uppercase"
     "commandCase": "unchanged",

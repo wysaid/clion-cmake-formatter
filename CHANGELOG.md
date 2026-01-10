@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-01-11
+
+### Added
+
+- **Visual Config Editor (dual-pane redesign)** — Reworked the VS Code visual editor with a modern dual-pane layout, tabbed CMake preview / JSONC source, and improved global settings mode.
+
+### Fixed
+
+- **Webview hardening** — Improved CSP nonce generation, narrowed webview resource roots, validated/allowlisted option keys, and prevented cross-document update suppression.
+- **Developer ergonomics on Windows** — Updated lint/test glob quoting to be Windows-friendly.
+
 ## [1.4.2] - 2026-01-08
 
 ### Fixed

@@ -298,7 +298,7 @@ endif ()
 
     // Blank Lines
     "maxBlankLines": 2,
-    "maxTrailingBlankLines": 0,
+    "maxTrailingBlankLines": 1,
 
     // Command Case: "unchanged", "lowercase", or "uppercase"
     "commandCase": "unchanged",

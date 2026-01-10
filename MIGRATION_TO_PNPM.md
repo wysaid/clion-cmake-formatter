@@ -45,7 +45,7 @@ All scripts now use `pnpm` instead of `npm`:
 ```
 
 ✅ **Development**: Always uses local package (no version conflicts)
-✅ **Publishing**: Automatically converts to `^1.4.2` during `pnpm publish`
+✅ **Publishing**: Automatically converts to `^1.5.0` during `pnpm publish`
 ✅ **Simple**: No extra scripts needed!
 
 ### **Disk Space Savings**

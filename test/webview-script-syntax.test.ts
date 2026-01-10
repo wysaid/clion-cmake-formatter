@@ -1,6 +1,6 @@
 import * as assert from 'assert';
-
-import { getWebviewContent } from '../packages/vscode/src/webview/configEditorHtml';
+import * as fs from 'fs';
+import * as path from 'path';
 
 /**
  * This test guards against accidental JavaScript syntax errors in the generated
@@ -13,36 +13,26 @@ import { getWebviewContent } from '../packages/vscode/src/webview/configEditorHt
  */
 describe('webview script syntax', () => {
     it('generated webview script compiles (no SyntaxError)', () => {
-        const html = getWebviewContent(
-            {
-                cspSource: 'vscode-webview://test'
-            } as any,
-            {} as any,
-            false
+        const scriptPath = path.join(
+            __dirname,
+            '..',
+            'packages',
+            'vscode',
+            'resources',
+            'webview',
+            'configEditor.js'
         );
 
-        // Extract inline <script> blocks and compile them without executing.
-        const scripts: string[] = [];
-        const scriptRe = /<script\b[^>]*>([\s\S]*?)<\/script>/gi;
-        let m: RegExpExecArray | null;
-        while ((m = scriptRe.exec(html))) {
-            const body = (m[1] ?? '').trim();
-            if (body.length > 0) {
-                scripts.push(body);
-            }
-        }
+        const script = fs.readFileSync(scriptPath, 'utf8');
+        assert.ok(script.length > 0, 'Expected webview script to be non-empty');
 
-        assert.ok(scripts.length > 0, 'Expected at least one inline <script> block');
-
-        for (let i = 0; i < scripts.length; i++) {
-            try {
-                // Compile only. If there is a syntax error, this throws.
-                // eslint-disable-next-line no-new-func
-                new Function(scripts[i]);
-            } catch (e) {
-                const msg = e instanceof Error ? `${e.name}: ${e.message}` : String(e);
-                assert.fail(`Script block #${i} failed to compile: ${msg}`);
-            }
+        try {
+            // Compile only. If there is a syntax error, this throws.
+            // eslint-disable-next-line no-new-func
+            new Function(script);
+        } catch (e) {
+            const msg = e instanceof Error ? `${e.name}: ${e.message}` : String(e);
+            assert.fail(`Webview script failed to compile: ${msg}`);
         }
     });
 });

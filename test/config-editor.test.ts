@@ -200,8 +200,11 @@ describe('Config Editor', () => {
             // Simulate updateFormValues
             const mergedConfig = { ...defaults, ...currentConfig };
 
-            document.querySelectorAll('input[type="checkbox"]').forEach((el: any) => {
-                const key = el.dataset.key;
+            document.querySelectorAll<HTMLInputElement>('input[type="checkbox"]').forEach(el => {
+                const key = el.dataset.key as keyof typeof defaults | undefined;
+                if (!key) {
+                    return;
+                }
                 el.checked = Boolean(mergedConfig[key]);
             });
 
@@ -232,10 +235,13 @@ describe('Config Editor', () => {
             // Simulate updateFormValues
             const mergedConfig = { ...defaults, ...currentConfig };
 
-            document.querySelectorAll('input[type="number"]').forEach((el: any) => {
-                const key = el.dataset.key;
+            document.querySelectorAll<HTMLInputElement>('input[type="number"]').forEach(el => {
+                const key = el.dataset.key as keyof typeof defaults | undefined;
+                if (!key) {
+                    return;
+                }
                 const value = mergedConfig[key];
-                el.value = value !== undefined ? value : (defaults[key] ?? 0);
+                el.value = value !== undefined ? String(value) : String(defaults[key] ?? 0);
             });
 
             // Verify values

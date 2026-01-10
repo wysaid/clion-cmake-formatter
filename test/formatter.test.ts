@@ -737,6 +737,25 @@ describe('Line Length Tests', () => {
         const lines = output.split('\n').filter(l => l.length > 0);
         assert.strictEqual(lines.length, 1);
     });
+
+    it('should consider tabSize for wrapping when useTabs is true', () => {
+        // With tabs, visual width depends on tabSize. Wrapping decisions should
+        // follow visual columns rather than raw string length.
+        const input = 'if(WIN32)\nset(FOO a b c d e f g)\nendif()';
+
+        const base = {
+            useTabs: true,
+            indentSize: 4,
+            lineLength: 26
+        };
+
+        const outputTab2 = formatCMake(input, { ...base, tabSize: 2 });
+        const outputTab8 = formatCMake(input, { ...base, tabSize: 8 });
+
+        // Wrapped multi-line commands should have continuation lines starting with two tabs.
+        assert.ok(!outputTab2.includes('\n\t\t'), 'Smaller tabSize should keep the inner command on one line');
+        assert.ok(outputTab8.includes('\n\t\t'), 'Larger tabSize should cause wrapping due to larger visual indent');
+    });
 });
 
 describe('Numeric Configuration Validation Tests', () => {

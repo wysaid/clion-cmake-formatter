@@ -1064,16 +1064,23 @@ function getScript(): string {
             // Basic CMake syntax highlighting
             function highlightCMake(code) {
                 // Match comments, strings, and variables with their positions
+                const commentRegex = /#.*$/gm;
+                const stringRegex = /"(?:[^"\\\\]|\\\\.)*"/g;
+                // Match variables like $ {VAR} (without creating a TS template interpolation sequence).
+                // Note: this code is embedded in a TS template string; avoid a literal "$" followed by "{".
+                const variableRegex = /[$][{][^}]+[}]/g;
+
                 const patterns = [
-                    { type: 'comment', regex: /#.*$/gm },
-                    { type: 'string', regex: /"(?:[^"\\\\]|\\\\.)*"/g },
-                    { type: 'variable', regex: /\\$\\{[^}]+\\}/g }
+                    { type: 'comment', regex: commentRegex },
+                    { type: 'string', regex: stringRegex },
+                    { type: 'variable', regex: variableRegex }
                 ];
 
                 // Collect all matches with their positions
                 const matches = [];
                 patterns.forEach(({ type, regex }) => {
                     let match;
+                    // Clone regex to avoid lastIndex issues
                     const r = new RegExp(regex.source, regex.flags);
                     while ((match = r.exec(code)) !== null) {
                         matches.push({
@@ -1125,8 +1132,9 @@ function getScript(): string {
                 // Match keywords using word boundaries
                 const keywordPattern = new RegExp('\\b(' + keywords.join('|') + ')\\b', 'gi');
 
-                // Split by existing HTML tags to avoid double-wrapping
-                const parts = result.split(/(<span[^>]*>.*?</span>)/);
+                // Split by existing HTML tags to avoid double-wrapping.
+                // Use RegExp constructor to avoid pitfalls of regex literals containing </span>.
+                const parts = result.split(new RegExp('(<span[^>]*>.*?</span>)'));
                 result = parts.map((part, i) => {
                     // Only process non-span parts (even indices)
                     if (i % 2 === 0) {
@@ -1148,16 +1156,21 @@ function getScript(): string {
             // Basic JSONC syntax highlighting
             function highlightJsonc(code) {
                 // Patterns for JSONC
+                const lineCommentRegex = /\\/\\/.*$/gm;
+                const blockCommentRegex = /\\/\\*[\\s\\S]*?\\*\\//g;
+                const stringRegex = /"(?:[^"\\\\]|\\\\.)*"/g;
+
                 const patterns = [
-                    { type: 'json-comment', regex: /\\/\\/.*$/gm },
-                    { type: 'json-comment', regex: /\\/\\*[\\s\\S]*?\\*\\//g },
-                    { type: 'json-string', regex: /"(?:[^"\\\\]|\\\\.)*"/g }
+                    { type: 'json-comment', regex: lineCommentRegex },
+                    { type: 'json-comment', regex: blockCommentRegex },
+                    { type: 'json-string', regex: stringRegex }
                 ];
 
                 // Collect all matches
                 const matches = [];
                 patterns.forEach(({ type, regex }) => {
                     let match;
+                    // Clone regex to avoid lastIndex issues
                     const r = new RegExp(regex.source, regex.flags);
                     while ((match = r.exec(code)) !== null) {
                         matches.push({

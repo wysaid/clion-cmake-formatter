@@ -349,4 +349,60 @@ describe('Config Editor', () => {
             assert.strictEqual(messages[0].type, 'resetToDefaults', 'Message type should be resetToDefaults');
         });
     });
+
+    describe('Empty Config File Handling', () => {
+        it('should handle empty config file (only header and {}) correctly', () => {
+            const { parseConfigContent, generateConfigHeader } = require('../packages/core/src/config');
+
+            // Simulate a reset-to-defaults config file (header + empty object)
+            const emptyConfigContent = `${generateConfigHeader()}\n{}`;
+
+            // Parse should succeed
+            const parsed = parseConfigContent(emptyConfigContent);
+
+            // Should return an empty object (valid, but no custom options)
+            assert.ok(parsed !== null, 'Empty config should be valid (not null)');
+            assert.deepStrictEqual(parsed, {}, 'Empty config should return empty object');
+        });
+
+        it('should handle empty config file with whitespace correctly', () => {
+            const { parseConfigContent, generateConfigHeader } = require('../packages/core/src/config');
+
+            // Simulate a reset-to-defaults config file with whitespace
+            const emptyConfigContent = `${generateConfigHeader()}\n{\n}\n`;
+
+            // Parse should succeed
+            const parsed = parseConfigContent(emptyConfigContent);
+
+            // Should return an empty object (valid, but no custom options)
+            assert.ok(parsed !== null, 'Empty config with whitespace should be valid');
+            assert.deepStrictEqual(parsed, {}, 'Empty config should return empty object');
+        });
+
+        it('should handle missing header as invalid', () => {
+            const { parseConfigContent } = require('../packages/core/src/config');
+
+            // Config without header
+            const invalidConfigContent = '{}';
+
+            // Parse should fail
+            const parsed = parseConfigContent(invalidConfigContent);
+
+            // Should return null (invalid)
+            assert.strictEqual(parsed, null, 'Config without header should be invalid (null)');
+        });
+
+        it('should handle corrupted JSON as invalid', () => {
+            const { parseConfigContent, generateConfigHeader } = require('../packages/core/src/config');
+
+            // Config with header but invalid JSON
+            const invalidConfigContent = `${generateConfigHeader()}\n{invalid json}`;
+
+            // Parse should fail
+            const parsed = parseConfigContent(invalidConfigContent);
+
+            // Should return null (invalid)
+            assert.strictEqual(parsed, null, 'Config with invalid JSON should be invalid (null)');
+        });
+    });
 });

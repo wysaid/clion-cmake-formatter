@@ -48,26 +48,60 @@ export class ConfigEditorProvider implements vscode.CustomTextEditorProvider {
             document.uri.fsPath
         );
 
+        // Helper function to send init message to webview
+        const sendInitMessage = (cfg: Partial<FormatterOptions>, jsoncSrc: string) => {
+            webviewPanel.webview.postMessage({
+                type: 'init',
+                config: cfg,
+                defaults: DEFAULT_OPTIONS,
+                isGlobal: false,
+                filePath: document.uri.fsPath,
+                sampleCode: SAMPLE_CMAKE_CODE,
+                formattedCode: this.formatSampleCode(cfg),
+                jsoncSource: jsoncSrc
+            });
+        };
+
         // Parse current config
-        const config = this.parseConfig(document.getText());
+        let parseResult = this.parseConfig(document.getText());
+        let initMessageSent = false;
 
-        // Format sample code with current config
-        const formattedCode = this.formatSampleCode(config);
+        // Check if config file is corrupted
+        if (!parseResult.isValid) {
+            // Show error dialog
+            const answer = await vscode.window.showErrorMessage(
+                'Configuration file is corrupted or invalid. Would you like to edit it manually or reset to default values?',
+                { modal: true },
+                'Edit Manually',
+                'Reset to Defaults',
+                'Cancel'
+            );
 
-        // Get JSONC source for preview
-        const jsoncSource = document.getText();
+            if (answer === 'Edit Manually') {
+                // Switch to text editor
+                await vscode.commands.executeCommand('vscode.openWith', document.uri, 'default');
+                return;
+            } else if (answer === 'Reset to Defaults') {
+                // Reset to defaults and get the new content
+                const newContent = await this.resetToDefaults(document);
+                // Send init message with empty config and the newly generated content
+                sendInitMessage({}, newContent);
+                initMessageSent = true;
+                // Update parseResult for the rest of initialization
+                parseResult = { config: {}, isValid: true };
+            } else {
+                // User cancelled, close the editor
+                webviewPanel.dispose();
+                return;
+            }
+        }
 
-        // Send initial data to webview
-        webviewPanel.webview.postMessage({
-            type: 'init',
-            config: config,
-            defaults: DEFAULT_OPTIONS,
-            isGlobal: false,
-            filePath: document.uri.fsPath,
-            sampleCode: SAMPLE_CMAKE_CODE,
-            formattedCode: formattedCode,
-            jsoncSource: jsoncSource
-        });
+        // Send init message if not already sent (from Reset to Defaults)
+        if (!initMessageSent) {
+            const config = parseResult.config;
+            const jsoncSource = document.getText();
+            sendInitMessage(config, jsoncSource);
+        }
 
         // Handle messages from the webview
         webviewPanel.webview.onDidReceiveMessage(
@@ -98,7 +132,7 @@ export class ConfigEditorProvider implements vscode.CustomTextEditorProvider {
                         );
 
                         if (answer === 'Reset') {
-                            await this.resetToDefaults(document);
+                            const newContent = await this.resetToDefaults(document);
                             webviewPanel.webview.postMessage({
                                 type: 'init',
                                 config: {},
@@ -107,7 +141,7 @@ export class ConfigEditorProvider implements vscode.CustomTextEditorProvider {
                                 filePath: document.uri.fsPath,
                                 sampleCode: SAMPLE_CMAKE_CODE,
                                 formattedCode: this.formatSampleCode({}),
-                                jsoncSource: document.getText()
+                                jsoncSource: newContent
                             });
                         }
                         break;
@@ -131,16 +165,48 @@ export class ConfigEditorProvider implements vscode.CustomTextEditorProvider {
         );
 
         // Update webview when the document changes
-        const changeDocumentSubscription = vscode.workspace.onDidChangeTextDocument((e) => {
+        const changeDocumentSubscription = vscode.workspace.onDidChangeTextDocument(async (e) => {
             // Skip updates that originated from webview to prevent circular updates
             if (e.document.uri.toString() === document.uri.toString() && !this.isUpdatingFromWebview) {
-                const newConfig = this.parseConfig(e.document.getText());
-                webviewPanel.webview.postMessage({
-                    type: 'configUpdated',
-                    config: newConfig,
-                    formattedCode: this.formatSampleCode(newConfig),
-                    jsoncSource: e.document.getText()
-                });
+                const parseResult = this.parseConfig(e.document.getText());
+
+                if (!parseResult.isValid) {
+                    // File is corrupted, show error dialog
+                    const answer = await vscode.window.showErrorMessage(
+                        'Configuration file is corrupted or invalid. Would you like to edit it manually or reset to default values?',
+                        'Edit Manually',
+                        'Reset to Defaults',
+                        'Ignore'
+                    );
+
+                    if (answer === 'Edit Manually') {
+                        // Switch to text editor
+                        await vscode.commands.executeCommand('vscode.openWith', document.uri, 'default');
+                    } else if (answer === 'Reset to Defaults') {
+                        // Reset to defaults and get the new content
+                        const newContent = await this.resetToDefaults(document);
+                        // Send updated config to webview with the newly generated content
+                        webviewPanel.webview.postMessage({
+                            type: 'init',
+                            config: {},
+                            defaults: DEFAULT_OPTIONS,
+                            isGlobal: false,
+                            filePath: document.uri.fsPath,
+                            sampleCode: SAMPLE_CMAKE_CODE,
+                            formattedCode: this.formatSampleCode({}),
+                            jsoncSource: newContent
+                        });
+                    }
+                    // If user chooses 'Ignore', do nothing and keep the editor open
+                } else {
+                    // File is valid, update webview
+                    webviewPanel.webview.postMessage({
+                        type: 'configUpdated',
+                        config: parseResult.config,
+                        formattedCode: this.formatSampleCode(parseResult.config),
+                        jsoncSource: e.document.getText()
+                    });
+                }
             }
         });
 
@@ -151,14 +217,20 @@ export class ConfigEditorProvider implements vscode.CustomTextEditorProvider {
 
     /**
      * Parse configuration from document text
+     * @returns An object containing the config and a validity flag
      */
-    private parseConfig(text: string): Partial<FormatterOptions> {
+    private parseConfig(text: string): { config: Partial<FormatterOptions>; isValid: boolean } {
         try {
             const config = parseConfigContent(text);
-            return config || {};
+            // parseConfigContent returns null if file is corrupted (missing header or invalid JSON)
+            // Empty object {} is a valid config (reset to defaults)
+            if (config === null) {
+                return { config: {}, isValid: false };
+            }
+            return { config, isValid: true };
         } catch {
-            // Return empty config if parsing fails
-            return {};
+            // Return invalid if parsing fails
+            return { config: {}, isValid: false };
         }
     }
 
@@ -183,12 +255,19 @@ export class ConfigEditorProvider implements vscode.CustomTextEditorProvider {
         value: boolean | number | string
     ): Promise<void> {
         const text = document.getText();
-        const config = this.parseConfig(text);
+        const parseResult = this.parseConfig(text);
 
-        // Update the config
+        // If file is corrupted, don't update
+        if (!parseResult.isValid) {
+            return;
+        }
+
+        const config = parseResult.config;
+
+        // Update only the changed key (add if not exists, update if exists)
         (config as Record<string, unknown>)[key] = value;
 
-        // Generate new content
+        // Generate new content with updated config
         const newContent = this.generateConfigContent(config);
 
         // Set flag to prevent circular updates
@@ -210,8 +289,9 @@ export class ConfigEditorProvider implements vscode.CustomTextEditorProvider {
 
     /**
      * Reset config file to defaults
+     * @returns The new content that was written to the file
      */
-    private async resetToDefaults(document: vscode.TextDocument): Promise<void> {
+    private async resetToDefaults(document: vscode.TextDocument): Promise<string> {
         const newContent = this.generateConfigContent({});
 
         const edit = new vscode.WorkspaceEdit();
@@ -221,6 +301,8 @@ export class ConfigEditorProvider implements vscode.CustomTextEditorProvider {
         );
         edit.replace(document.uri, fullRange, newContent);
         await vscode.workspace.applyEdit(edit);
+
+        return newContent;
     }
 
     /**

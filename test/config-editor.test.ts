@@ -46,9 +46,18 @@ describe('Config Editor', () => {
 
         it('should include sample CMake code constant', () => {
             assert.ok(SAMPLE_CMAKE_CODE.length > 0, 'Sample CMake code should not be empty');
-            assert.ok(SAMPLE_CMAKE_CODE.includes('if ('), 'Should include control flow examples');
-            assert.ok(SAMPLE_CMAKE_CODE.includes('function('), 'Should include function examples');
-            assert.ok(SAMPLE_CMAKE_CODE.includes('set('), 'Should include command examples');
+
+            // Basic feature coverage (be lenient about spaces)
+            assert.match(SAMPLE_CMAKE_CODE, /\bif\s*\(/i, 'Should include control flow examples');
+            assert.match(SAMPLE_CMAKE_CODE, /\bfunction\s*\(/i, 'Should include function examples');
+            assert.match(SAMPLE_CMAKE_CODE, /\bset\s*\(/i, 'Should include command examples');
+
+            // Extra coverage for the visual editor options
+            assert.match(SAMPLE_CMAKE_CODE, /\bcmake_minimum_required\s*\(/i, 'Should include top-level command examples');
+            assert.match(SAMPLE_CMAKE_CODE, /\badd_executable\s*\(/i, 'Should include multi-line argument examples');
+            assert.ok(SAMPLE_CMAKE_CODE.includes('\n\n\n'), 'Should include multiple consecutive blank lines');
+            assert.ok(SAMPLE_CMAKE_CODE.includes('${item}') || SAMPLE_CMAKE_CODE.includes('${CMAKE_SOURCE_DIR}'),
+                'Should include variable placeholder examples');
         });
 
         it('should include both tabs for file-based config', () => {

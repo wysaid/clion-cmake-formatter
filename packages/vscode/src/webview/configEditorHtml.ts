@@ -23,41 +23,77 @@ interface UriLike {
  * Sample CMake code that demonstrates all formatting options
  */
 export const SAMPLE_CMAKE_CODE = `# Control flow examples
-if (bar)
-    message("Bar!")
-elseif (foo)
-    message("boo!")
-else (foobar)
-    message("Foobar!")
-endif (bar)
+cmake_minimum_required ( VERSION 3.25 )
 
-foreach (VARIABLE \${VARIABLES})
-    message(\${VARIABLE})
-endforeach ()
+# commandCase demo: intentionally mixed-case commands
+PrOjEcT( DemoProject  LANGUAGES  C  CXX )
 
-while (foo)
-    message("bar")
-endwhile (foo)
+set ( CMAKE_CXX_STANDARD 20 )
 
-# Command definitions
-macro(foo)
-    message("bar")
-endmacro(foo)
+# Blank lines demo (intentionally more than maxBlankLines)
 
-function(foo)
-    message("bar")
-endfunction(foo)
 
-# Multi-line command example
-set(SOURCES
-    src/main.cpp
-    src/utils.cpp
+
+# Control flow demo:
+# - spaceBeforeIfParentheses / spaceInsideIfParentheses
+# - alignControlFlowParentheses (nested parens + newlines)
+if(  (FOO AND BAR)
+    OR(BAZ)
+   )
+    message ( "Inside IF" )
+    
+    # keepIndentOnEmptyLines demo: the blank line above contains indentation
+endif ( )
+
+foreach( item  IN  ITEMS  a  b  c )
+    message( "item=\${item}" )
+endforeach( )
+
+while ( 0 )
+    message("never runs")
+endwhile(0)
+
+# Command definitions:
+# - spaceBeforeCommandDefinitionParentheses / spaceInsideCommandDefinitionParentheses
+macro ( MyMacro  arg1  arg2 )
+    message( "macro: \${arg1} \${arg2}" )
+endmacro ( MyMacro )
+
+function(MyFunction  x  y)
+    message ("function: \${x} \${y}")
+endfunction( MyFunction )
+
+# Multi-line arguments + wrapping + continuation indent demo:
+# - lineLength (when small)
+# - continuationIndentSize
+# - alignMultiLineArguments / alignMultiLineParentheses (when implemented)
+add_executable( MyApp
+    src/main.cpp  src/utils.cpp
     src/parser.cpp
+    src/very_long_source_file_name_that_forces_wrapping_when_lineLength_is_small.cpp
 )
 
-# Regular command calls
-add_executable(myapp \${SOURCES})
-target_link_libraries(myapp PRIVATE mylib)
+target_link_libraries ( MyApp
+    PRIVATE
+        MyLib::Core
+        MyLib::Extra
+        AnotherVeryLongLibraryTargetNameThatWillWrap
+)
+
+# Regular command calls:
+# - spaceBeforeCommandCallParentheses / spaceInsideCommandCallParentheses
+set( DEFINES
+    "-DFOO=1"
+    "-DBAR=some value with spaces"
+    "-DQUX=\${CMAKE_SOURCE_DIR}/path/with/many/components/that/may/wrap"
+)
+
+# Long single-line list to trigger wrapping when lineLength is set
+set(VERY_LONG_LIST a b c d e f g h i j k l m n o p q r s t u v w x y z)
+
+# Trailing blank lines demo (intentionally more than maxTrailingBlankLines)
+
+
 `;
 
 /**

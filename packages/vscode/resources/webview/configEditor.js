@@ -20,6 +20,8 @@
     const configTypeBadge = document.getElementById('configTypeBadge');
     const filePathEl = document.getElementById('filePath');
     const cmakeEditorEl = document.getElementById('cmakeEditor');
+    const cmakeHighlightedEl = document.getElementById('cmakeHighlighted');
+    const cmakeHighlightEl = document.getElementById('cmakeHighlight');
     const resetDemoBtn = document.getElementById('resetDemoBtn');
     const jsoncCodeEl = document.getElementById('jsoncCode');
     const resetBtn = document.getElementById('resetBtn');
@@ -70,10 +72,23 @@
         // Setup editable CMake preview
         if (cmakeEditorEl) {
             cmakeEditorEl.addEventListener('input', handleCMakeEditorInput);
+            cmakeEditorEl.addEventListener('scroll', syncCMakeHighlightScroll);
         }
         if (resetDemoBtn) {
             resetDemoBtn.addEventListener('click', handleResetDemoCode);
         }
+    }
+
+    function updateCMakeHighlight(code) {
+        if (!cmakeHighlightedEl) return;
+        cmakeHighlightedEl.innerHTML = highlightCMake(String(code ?? ''));
+        syncCMakeHighlightScroll();
+    }
+
+    function syncCMakeHighlightScroll() {
+        if (!cmakeEditorEl || !cmakeHighlightEl) return;
+        cmakeHighlightEl.scrollTop = cmakeEditorEl.scrollTop;
+        cmakeHighlightEl.scrollLeft = cmakeEditorEl.scrollLeft;
     }
 
     // Switch between tabs (only in tab mode)
@@ -296,6 +311,7 @@
         isApplyingCMakeUpdate = true;
         try {
             cmakeEditorEl.value = String(code || '');
+            updateCMakeHighlight(code || '');
         } finally {
             isApplyingCMakeUpdate = false;
         }
@@ -313,6 +329,9 @@
     function handleCMakeEditorInput() {
         if (!cmakeEditorEl) return;
         if (isApplyingCMakeUpdate) return;
+
+        // Update syntax highlight immediately for good feedback while typing.
+        updateCMakeHighlight(cmakeEditorEl.value);
 
         // Once the user edits the preview, switch to user-provided mode.
         if (isUsingDemoCMakeCode) {

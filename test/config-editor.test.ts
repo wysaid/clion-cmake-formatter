@@ -105,6 +105,7 @@ describe('Config Editor', () => {
             const html = getWebviewContent(mockWebview, mockUri, false, '/test/config.jsonc');
 
             assert.ok(html.includes('id="cmakeEditor"'), 'Should include editable CMake textarea');
+            assert.ok(html.includes('id="cmakeHighlighted"'), 'Should include CMake highlight overlay code element');
             assert.ok(html.includes('id="resetDemoBtn"'), 'Should include reset demo code button');
             assert.ok(!html.includes('id="formattedCode"'), 'Should not include legacy formattedCode <code> element');
         });
@@ -227,6 +228,7 @@ describe('Config Editor', () => {
                     <div id="jsoncPreview"></div>
 
                     <button id="resetDemoBtn" class="hidden"></button>
+                    <pre id="cmakeHighlight"><code id="cmakeHighlighted"></code></pre>
                     <textarea id="cmakeEditor"></textarea>
 
                     <pre><code id="jsoncCode"></code></pre>

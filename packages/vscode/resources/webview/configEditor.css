@@ -408,6 +408,54 @@ body {
     tab-size: 4;
 }
 
+/* Editable CMake preview with syntax highlighting overlay */
+.code-editor-wrapper {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--vscode-panel-border);
+    background-color: var(--vscode-textCodeBlock-background);
+    overflow: hidden;
+}
+
+.code-editor-wrapper:focus-within {
+    border-color: var(--vscode-focusBorder);
+    box-shadow: 0 0 0 1px var(--vscode-focusBorder);
+}
+
+/* Highlight layer */
+.code-editor-wrapper .code-highlight {
+    position: absolute;
+    inset: 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    overflow: auto;
+    pointer-events: none;
+}
+
+.code-editor-wrapper .code-highlight code {
+    color: var(--vscode-editor-foreground);
+}
+
+/* Input layer: transparent text, visible caret */
+.code-editor-wrapper .code-editor {
+    position: absolute;
+    inset: 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    color: transparent;
+    caret-color: var(--vscode-editor-foreground);
+    -webkit-text-fill-color: transparent;
+    overflow: auto;
+}
+
+.code-editor-wrapper .code-editor::selection {
+    background: var(--vscode-editor-selectionBackground, rgba(128, 128, 128, 0.35));
+}
+
 /* CMake preview layout: toolbar on top, editor fills the remaining space */
 .tab-content#cmakePreview.active {
     display: flex;
@@ -426,8 +474,7 @@ body {
 }
 
 .code-editor:focus {
-    border-color: var(--vscode-focusBorder);
-    box-shadow: 0 0 0 1px var(--vscode-focusBorder);
+    /* Focus ring is handled by .code-editor-wrapper:focus-within */
 }
 
 .code-preview code {

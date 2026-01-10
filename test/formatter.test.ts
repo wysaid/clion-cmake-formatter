@@ -340,6 +340,74 @@ endif()`;
         });
     });
 
+    describe('Alignment Options', () => {
+        it('should align multi-line arguments when enabled', () => {
+            const input = `add_executable(foo
+bar.cxx
+)`;
+
+            const outputWithout = formatCMake(input, {
+                alignMultiLineArguments: false,
+                alignMultiLineParentheses: false,
+            }).trimEnd();
+            const linesWithout = outputWithout.split('\n');
+            assert.ok(linesWithout[1].startsWith('        bar.cxx'), 'Default should use continuation indent (8 spaces)');
+
+            const outputWith = formatCMake(input, {
+                alignMultiLineArguments: true,
+                alignMultiLineParentheses: false,
+            }).trimEnd();
+            const linesWith = outputWith.split('\n');
+            const expectedIndent = ' '.repeat('add_executable('.length);
+            assert.ok(
+                linesWith[1].startsWith(expectedIndent + 'bar.cxx'),
+                'When enabled, should align continuation lines to the first argument column'
+            );
+        });
+
+        it('should align multi-line closing paren for command calls when enabled', () => {
+            const input = `add_executable(foo
+bar.cxx
+)`;
+
+            const outputWithout = formatCMake(input, {
+                alignMultiLineArguments: false,
+                alignMultiLineParentheses: false,
+            }).trimEnd();
+            const linesWithout = outputWithout.split('\n');
+            assert.strictEqual(linesWithout[2], ')', 'Default should put closing paren at command indent');
+
+            const outputWith = formatCMake(input, {
+                alignMultiLineArguments: false,
+                alignMultiLineParentheses: true,
+            }).trimEnd();
+            const linesWith = outputWith.split('\n');
+            const expectedParenIndent = ' '.repeat('add_executable'.length);
+            assert.strictEqual(linesWith[2], expectedParenIndent + ')', 'Closing paren should align under opening paren');
+        });
+
+        it('should align multi-line closing paren for control flow commands when enabled', () => {
+            const input = `if(TRUE
+AND FALSE
+)
+endif()`;
+
+            const outputWithout = formatCMake(input, {
+                alignControlFlowParentheses: false,
+                alignMultiLineParentheses: true,
+            }).trimEnd();
+            const linesWithout = outputWithout.split('\n');
+            assert.strictEqual(linesWithout[2], ')', 'General paren alignment should not affect control flow when disabled');
+
+            const outputWith = formatCMake(input, {
+                alignControlFlowParentheses: true,
+                alignMultiLineParentheses: false,
+            }).trimEnd();
+            const linesWith = outputWith.split('\n');
+            assert.strictEqual(linesWith[2], '   )', 'Control flow closing paren should align under opening paren of "if ("');
+        });
+    });
+
     describe('Blank Lines', () => {
         it('should preserve blank lines between commands', () => {
             const input = loadEdgeCase('blank-lines');
@@ -506,6 +574,36 @@ endwhile()`;
         // Both if and endif should NOT have space
         assert.ok(output.includes('if('));
         assert.ok(output.includes('endif()'));
+    });
+
+    it('should add space inside if parentheses when enabled (single-line)', () => {
+        const input = `if(FOO)
+endif()`;
+
+        const outputWith = formatCMake(input, { spaceInsideIfParentheses: true });
+        assert.ok(outputWith.includes('if ( FOO )'), 'Should add spaces inside if( )');
+        assert.ok(outputWith.includes('endif ( )'), 'Should add spaces inside endif( )');
+
+        const outputWithout = formatCMake(input, { spaceInsideIfParentheses: false });
+        assert.ok(outputWithout.includes('if (FOO)'), 'Should not add spaces inside if( ) when disabled');
+        assert.ok(outputWithout.includes('endif ()'), 'Should not add spaces inside endif( ) when disabled');
+    });
+
+    it('should add space inside if parentheses when enabled (preserve multi-line)', () => {
+        // Multi-line control flow where the first argument starts on the same line as "if("
+        const input = `if(FOO
+  AND BAR
+)
+message("x")
+endif()`;
+
+        const outputWith = formatCMake(input, { spaceInsideIfParentheses: true });
+        const firstLineWith = outputWith.split('\n')[0];
+        assert.match(firstLineWith, /^if \( FOO\b/i, 'Should add inner space after ( for multi-line if');
+
+        const outputWithout = formatCMake(input, { spaceInsideIfParentheses: false });
+        const firstLineWithout = outputWithout.split('\n')[0];
+        assert.match(firstLineWithout, /^if \(FOO\b/i, 'Should not add inner space after ( for multi-line if when disabled');
     });
 });
 

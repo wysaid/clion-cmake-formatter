@@ -1,11 +1,23 @@
 # Changelog
 
-All notable changes to the CLion CMake Format extension will be documented in this file.
+All notable changes to the CLion CMake Format project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.5.0] - 2026-01-11
+
+### Added
+
+- **[vscode] Visual Config Editor (dual-pane redesign)** — Reworked the VS Code visual editor with a modern dual-pane layout, tabbed CMake preview / JSONC source, and improved global settings mode.
+
+### Fixed
+
+- **[vscode] Webview hardening** — Improved CSP nonce generation, narrowed webview resource roots, validated/allowlisted option keys, and prevented cross-document update suppression.
+- **[core] Formatting + config parsing** — Improved multiline alignment semantics to better match CLion, and added JSONC trailing comma support for `.cc-format.jsonc`.
+- **[repo] Developer ergonomics on Windows** — Updated lint/test glob quoting to be Windows-friendly.
 
 ## [1.4.2] - 2026-01-08
 
@@ -96,8 +108,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **VS Code extension README** — Enhanced troubleshooting and configuration guidance
 - **Test datasets README** — Detailed contribution guidelines and best practices
 - **Chinese documentation** — Synchronized all Chinese docs with English versions
-- **MIGRATION.md** — Guide for upgrading from v1.4.0 to v1.4.1
-- **MONOREPO.md** — Monorepo structure and development workflow documentation
 
 ### Breaking Changes
 
@@ -116,8 +126,6 @@ npm install -g cc-format
 # Or use in your project
 npm install @cc-format/core
 ```
-
-See `MIGRATION.md` for detailed upgrade instructions.
 
 ### Test Coverage
 

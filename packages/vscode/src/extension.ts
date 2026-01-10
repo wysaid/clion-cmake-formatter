@@ -17,6 +17,7 @@ import {
     generateSampleConfig,
     DEFAULT_OPTIONS
 } from '@cc-format/core';
+import { ConfigEditorProvider } from './configEditorProvider';
 
 // Track which validation warnings have been shown to avoid repetition
 const shownWarnings = new Set<string>();
@@ -410,6 +411,49 @@ export function activate(context: vscode.ExtensionContext): void {
         formatCommand,
         createConfigCommand
     );
+
+    // Register the custom editor provider for .cc-format.jsonc files
+    const configEditorProvider = new ConfigEditorProvider(context);
+    const configEditorDisposable = vscode.window.registerCustomEditorProvider(
+        ConfigEditorProvider.viewType,
+        configEditorProvider,
+        {
+            webviewOptions: {
+                retainContextWhenHidden: true
+            },
+            supportsMultipleEditorsPerDocument: false
+        }
+    );
+    context.subscriptions.push(configEditorDisposable);
+
+    // Register command to open visual config editor
+    const openVisualEditorCommand = vscode.commands.registerCommand(
+        'clion-cmake-format.openVisualEditor',
+        async () => {
+            await ConfigEditorProvider.openEditor(context, false);
+        }
+    );
+    context.subscriptions.push(openVisualEditorCommand);
+
+    // Register command to open global settings
+    const openGlobalSettingsCommand = vscode.commands.registerCommand(
+        'clion-cmake-format.openGlobalSettings',
+        async () => {
+            await ConfigEditorProvider.openEditor(context, true);
+        }
+    );
+    context.subscriptions.push(openGlobalSettingsCommand);
+
+    // Register command to switch to text editor (from visual editor)
+    const switchToTextEditorCommand = vscode.commands.registerCommand(
+        'clion-cmake-format.switchToTextEditor',
+        async (uri?: vscode.Uri) => {
+            if (uri) {
+                await vscode.commands.executeCommand('vscode.openWith', uri, 'default');
+            }
+        }
+    );
+    context.subscriptions.push(switchToTextEditorCommand);
 
     // Log activation
     console.log('CLion CMake Format extension is now active');

@@ -18,3 +18,4 @@
 !dist/**/*.js
 !dist/**/*.d.ts
 !resources/cc-format.schema.json
+!resources/webview/**

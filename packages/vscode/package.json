@@ -2,7 +2,7 @@
     "name": "clion-cmake-format",
     "displayName": "%displayName%",
     "description": "%description%",
-    "version": "1.4.2",
+    "version": "1.5.0",
     "publisher": "wysaid",
     "license": "MIT",
     "icon": "logo.png",
@@ -38,7 +38,8 @@
         "auto-format"
     ],
     "activationEvents": [
-        "onLanguage:cmake"
+        "onLanguage:cmake",
+        "onCustomEditor:clionCMakeFormat.configEditor"
     ],
     "main": "./dist/extension.js",
     "contributes": {
@@ -70,6 +71,36 @@
             {
                 "command": "clion-cmake-format.createConfig",
                 "title": "%command.createConfig%"
+            },
+            {
+                "command": "clion-cmake-format.openVisualEditor",
+                "title": "%command.openVisualEditor%"
+            },
+            {
+                "command": "clion-cmake-format.openGlobalSettings",
+                "title": "%command.openGlobalSettings%"
+            },
+            {
+                "command": "clion-cmake-format.switchToTextEditor",
+                "title": "%command.switchToTextEditor%"
+            }
+        ],
+        "customEditors": [
+            {
+                "viewType": "clionCMakeFormat.configEditor",
+                "displayName": "%customEditor.displayName%",
+                "selector": [
+                    {
+                        "filenamePattern": "*.cc-format.jsonc"
+                    },
+                    {
+                        "filenamePattern": ".cc-format.jsonc"
+                    },
+                    {
+                        "filenamePattern": ".cc-format"
+                    }
+                ],
+                "priority": "default"
             }
         ],
         "configuration": {

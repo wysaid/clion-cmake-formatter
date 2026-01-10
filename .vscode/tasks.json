@@ -23,7 +23,14 @@
             "script": "watch",
             "detail": "Watch and compile TypeScript on changes",
             "isBackground": true,
-            "problemMatcher": "$tsc-watch",
+            "problemMatcher": {
+                "base": "$tsc",
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "^\\s*\\[webpack-cli\\] Compiler starting",
+                    "endsPattern": "^\\s*\\[webpack-cli\\] Compiler finished"
+                }
+            },
             "group": "build",
             "presentation": {
                 "reveal": "silent",
@@ -115,10 +122,28 @@
             }
         },
         {
+            "label": "Install: Workspace Dependencies",
+            "type": "shell",
+            "command": "pnpm install --prefer-offline",
+            "detail": "Install workspace dependencies (required before build)",
+            "problemMatcher": [],
+            "group": "build",
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared",
+                "clear": false,
+                "focus": false
+            }
+        },
+        {
             "label": "Build: All Packages",
             "type": "npm",
             "script": "build",
             "detail": "Build all monorepo packages (core, cli, vscode)",
+            "dependsOn": [
+                "Install: Workspace Dependencies"
+            ],
+            "dependsOrder": "sequence",
             "problemMatcher": "$tsc",
             "group": {
                 "kind": "build"

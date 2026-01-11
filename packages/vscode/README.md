@@ -27,6 +27,12 @@ This extension uses the same core formatting engine ([@cc-format/core](https://w
 - **📁 Project Config Support** - Use `.cc-format.jsonc` files to share formatting rules with your team
 - **🚀 Fast & Reliable** - Instant formatting with idempotent results
 
+### 🖼️ Visual Configuration Editor
+
+Edit `.cc-format.jsonc` with a friendly visual editor inside VS Code.
+
+[![Visual configuration editor screenshot](https://raw.githubusercontent.com/wysaid/clion-cmake-format/main/images/config-editor.png)](https://raw.githubusercontent.com/wysaid/clion-cmake-format/main/images/config-editor.png)
+
 ### Project Links
 
 - 🌐 **GitHub Repository** — [wysaid/clion-cmake-format](https://github.com/wysaid/clion-cmake-format)

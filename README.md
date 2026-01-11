@@ -55,6 +55,12 @@ No Python installation. No pip packages. No configuration hell. Just install and
 
 Use `.cc-format.jsonc` files to share formatting rules across your team. Supports automatic file watching — changes apply instantly.
 
+### 🖼️ Visual Configuration Editor
+
+Edit `.cc-format.jsonc` with a friendly visual editor inside VS Code.
+
+[![Visual configuration editor screenshot](images/config-editor.png)](images/config-editor.png)
+
 ### ✅ Battle-Tested Quality
 
 - **126+ unit tests** ensuring rock-solid reliability

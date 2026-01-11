@@ -54,6 +54,12 @@
 
 使用 `.cc-format.jsonc` 文件在团队间共享格式化规则。支持自动文件监听 — 更改立即生效。
 
+### 🖼️ 可视化配置编辑器
+
+在 VS Code 内使用友好的可视化界面编辑 `.cc-format.jsonc`。
+
+[![可视化配置编辑器截图](images/config-editor.png)](images/config-editor.png)
+
 ### ✅ 经过充分测试
 
 - **126+ 单元测试** 确保坚如磐石的可靠性

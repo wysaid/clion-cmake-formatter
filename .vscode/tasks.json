@@ -124,7 +124,7 @@
         {
             "label": "Install: Workspace Dependencies",
             "type": "shell",
-            "command": "pnpm install --prefer-offline",
+            "command": "if ! command -v pnpm > /dev/null 2>&1; then echo 'Installing pnpm...'; npm install -g pnpm; fi && pnpm install --prefer-offline",
             "detail": "Install workspace dependencies (required before build)",
             "problemMatcher": [],
             "group": "build",
